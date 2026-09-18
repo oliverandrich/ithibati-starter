@@ -1,0 +1,10 @@
+Authentication templates and browser test helpers are adapted from the invitation_only
+example in Ithibati 0.3.0 (https://github.com/oliverandrich/ithibati), MIT licensed.
+Phoenix fixture and generated conventions derive from Phoenix 1.8.14, MIT licensed.
+See THIRD_PARTY_LICENSES.md for the applicable notices.
+
+Locale resolution is adapted from Oliver Andrich’s ChapishoWeb.Locale,
+reused here under MIT with the author’s explicit permission.
+
+The Phoenix scaffold fixture also includes topbar 3.0.0 by Buu Nguyen, MIT licensed.
+Its original copyright header is retained; see THIRD_PARTY_LICENSES.md.

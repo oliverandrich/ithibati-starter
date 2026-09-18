@@ -1,0 +1,23 @@
+[tools]
+elixir = "1.20.4-otp-29"
+erlang = "29.0.6"
+zizmor = "1.30.0"
+
+[tasks.check]
+env.MIX_ENV = "test"
+run = ["zizmor .github/", "mix precommit", "MIX_ENV=dev mix docs --warnings-as-errors"]
+[tasks.test]
+env.MIX_ENV = "test"
+run = "mix test"
+[tasks.format]
+run = "mix format"
+[tasks.credo]
+run = ["mix compile --warnings-as-errors", "mix credo --strict"]
+[tasks.audit]
+run = ["mix deps.audit", "mix hex.audit"]
+[tasks.beans]
+run = "beans list --no-status completed --no-status scrapped"
+
+[tasks.integration]
+description = "Generate and check both starter profiles with PostgreSQL and Chrome"
+run = "bash scripts/integration.sh"
