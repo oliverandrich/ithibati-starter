@@ -173,6 +173,29 @@ Add **`--without-beans`** to either profile to omit local tracking. Beans itself
 installed separately and is not needed to compile, test or run the app. Neither RTK
 nor personal AI skills are required by generated applications.
 
+## Usernames, email and mail delivery
+
+**This starter defaults to usernames, invitation-only registration and manually
+shared invitation links.** That is the starter's chosen policy, not a restriction
+of Ithibati.
+
+Ithibati lets an application choose its identifier, including an email address.
+Since 0.4.0 it also provides optional invitation-mail delivery through
+`Ithibati.InvitationMail`, using application-owned content and mailer callbacks.
+See the upstream [email-registration example](https://github.com/oliverandrich/ithibati/tree/v0.4.0/examples/email_registration)
+for an email-address identifier, emailed registration links and a development
+mailbox preview. Authentication still uses passkeys, with recovery codes as fallback.
+
+These are separate choices: delivering an invitation by email does not require
+using email as the account identifier, and choosing an email identifier does not
+itself enable delivery or verify mailbox ownership. The application's registration
+policy decides who may request an invitation.
+
+**The starter currently generates the username-based flow only.** It has no
+`--with-mail` switch yet. An email-enabled application can build on Ithibati's
+APIs and example; it also needs its own mailer configuration, sender address and
+appropriate delivery limits.
+
 ## Generated pages
 
 | Route | Purpose |
