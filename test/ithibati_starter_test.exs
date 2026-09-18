@@ -130,7 +130,9 @@ defmodule IthibatiStarterTest do
   for opts <- [[], [without_ithibati: true, without_beans: true]] do
     @profile_opts opts
     test "Lucide replaces Heroicons in profile #{inspect(opts)}" do
-      installed = project() |> IthibatiStarter.install(@profile_opts) |> apply_igniter!()
+      planned = project() |> IthibatiStarter.install(@profile_opts)
+      assert_has_task(planned, "deps.unlock", ["daisyui", "heroicons"])
+      installed = apply_igniter!(planned)
       files = installed.assigns.test_files
       assert files["mix.exs"] =~ "{:lucide_icons, \"~> 2.4.0\"}"
       refute files["mix.exs"] =~ ":heroicons"

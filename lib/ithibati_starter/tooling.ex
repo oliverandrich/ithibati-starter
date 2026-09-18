@@ -24,6 +24,7 @@ defmodule IthibatiStarter.Tooling do
     |> IgniterConfig.dont_move_file_pattern(~r/^(lib|test)\//)
     |> Deps.remove_dep(:daisyui)
     |> Deps.remove_dep(:heroicons)
+    |> Igniter.add_task("deps.unlock", ["daisyui", "heroicons"])
     |> Igniter.rm("assets/vendor/heroicons.js")
     |> Files.copy_tree("tooling", bindings, on_exists: :overwrite)
     |> MixProject.update(:project, [:elixir], fn _ -> {:ok, {:code, inspect("~> 1.20")}} end)
