@@ -280,6 +280,10 @@ trusted proxies or edge limits for your deployment, especially with multiple nod
 The healthcheck proves HTTP liveness, not database readiness. Migrations and cleanup
 never run automatically during application boot.
 
+Generated applications share `mise dev`, `mise reset`, `mise migrate` and
+`mise release`. Reset explicitly recreates the development database; release
+builds provide `bin/migrate` and `bin/server` for the target machine.
+
 ## Contributing
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for a copyable setup, command reference,

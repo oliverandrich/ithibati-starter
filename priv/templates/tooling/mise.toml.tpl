@@ -5,12 +5,17 @@ zizmor = "1.30.0"
 
 [tasks.setup]
 description = "Install dependencies, create the development database and build assets"
+env.MIX_ENV = "dev"
 run = "mix setup"
 
 [tasks.dev]
+description = "Start the development server in the foreground"
+env.MIX_ENV = "dev"
 run = "mix phx.server"
 
 [tasks.debugserver]
+description = "Start the development server with IEx"
+env.MIX_ENV = "dev"
 raw = true
 run = "iex -S mix phx.server"
 
@@ -34,4 +39,16 @@ description = "Audit dependency advisories and retired packages separately"
 run = ["mix deps.audit", "mix hex.audit"]
 
 [tasks.migrate]
+description = "Apply pending development database migrations"
+env.MIX_ENV = "dev"
 run = "mix ecto.migrate"
+
+[tasks.reset]
+description = "Drop and recreate the development database, migrate and seed it"
+env.MIX_ENV = "dev"
+run = "mix ecto.reset"
+
+[tasks.release]
+description = "Build a production release for the current OS and architecture"
+env.MIX_ENV = "prod"
+run = ["mix deps.get --only prod", "mix assets.setup", "mix compile --warnings-as-errors", "mix assets.deploy", "mix release --overwrite"]

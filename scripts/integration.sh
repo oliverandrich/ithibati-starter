@@ -7,6 +7,10 @@ trap 'rm -rf "$fixture_root"' EXIT
 unset MIX_ENV
 export MIX_TEST_PARTITION="_starter_$$"
 export PORT="${PORT:-43129}"
+export PGHOST="${PGHOST:-127.0.0.1}"
+export PGPORT="${PGPORT:-5432}"
+export PGUSER="${PGUSER:-postgres}"
+export PGPASSWORD="${PGPASSWORD:-postgres}"
 
 # Keep archive installation isolated from the developer's installed generators.
 archive_source="${MIX_ARCHIVES:-$HOME/.mix/archives}"
@@ -43,6 +47,55 @@ for profile in auth mail; do
       test ! -e .beans.yml
       test -e "test/${app}_web/invitation_mail_test.exs"
     fi
-    MIX_ENV=prod mix compile --warnings-as-errors
+    mise release
+    release="$target/_build/prod/rel/$app"
+    for command in server migrate; do
+      if [[ ! -x "$release/bin/$command" ]]; then
+        echo "Missing executable release command: $release/bin/$command" >&2
+        exit 1
+      fi
+    done
+    (
+      database="${app}_release_$$"
+      server_pid=""
+      createdb "$database"
+      cleanup_release() {
+        if [[ -n "$server_pid" ]]; then
+          kill "$server_pid" 2>/dev/null || true
+          wait "$server_pid" 2>/dev/null || true
+        fi
+        dropdb "$database"
+      }
+      trap cleanup_release EXIT
+      export PGDATABASE="$database"
+      DATABASE_URL=$(elixir -e '
+        encode = &URI.encode(&1, fn c -> URI.char_unreserved?(c) end)
+        user = encode.(System.fetch_env!("PGUSER"))
+        password = encode.(System.fetch_env!("PGPASSWORD"))
+        IO.write("ecto://#{user}:#{password}@#{System.fetch_env!("PGHOST")}:#{System.fetch_env!("PGPORT")}/#{System.fetch_env!("PGDATABASE")}")
+      ')
+      export DATABASE_URL
+      SECRET_KEY_BASE=$(elixir -e 'IO.write(Base.encode64(:crypto.strong_rand_bytes(64)))')
+      export SECRET_KEY_BASE
+      export PHX_HOST=localhost
+      if [[ "$profile" == mail ]]; then
+        # Runtime configuration is required even for migrations. This smoke test
+        # never sends mail and must not inherit real SMTP credentials.
+        export SMTP_HOST=localhost SMTP_PORT=9
+        export SMTP_USERNAME=smoke SMTP_PASSWORD=smoke MAIL_FROM=smoke@example.invalid
+      fi
+      "$release/bin/migrate"
+      "$release/bin/migrate"
+      # Run from outside the release directory to verify the launchers resolve it themselves.
+      cd "$fixture_root"
+      "$release/bin/server" >"$target/release.log" 2>&1 &
+      server_pid=$!
+      if ! curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 \
+        --max-time 2 -H 'x-forwarded-proto: https' \
+        "http://localhost:$PORT/health" | grep -F '"status":"ok"'; then
+        cat "$target/release.log" >&2
+        exit 1
+      fi
+    )
   )
 done

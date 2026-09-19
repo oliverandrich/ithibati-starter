@@ -27,6 +27,7 @@ defmodule IthibatiStarter.Tooling do
     |> Igniter.add_task("deps.unlock", ["daisyui", "heroicons"])
     |> Igniter.rm("assets/vendor/heroicons.js")
     |> Files.copy_tree("tooling", bindings, on_exists: :overwrite)
+    |> Igniter.add_task("cmd", ["chmod +x rel/overlays/bin/server rel/overlays/bin/migrate"])
     |> MixProject.update(:project, [:elixir], fn _ -> {:ok, {:code, inspect("~> 1.20")}} end)
     |> MixProject.update(:cli, [:preferred_envs, :precommit], fn _ -> {:ok, {:code, :test}} end)
     |> MixProject.update(:project, [:aliases, :precommit], fn _ -> {:ok, {:code, gate()}} end)

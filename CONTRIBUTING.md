@@ -27,7 +27,7 @@ running database or browser. The integration suite does; see below.
 | `mise run test` | Installer tests only |
 | `mise run format` | Format Elixir source explicitly |
 | `mise run credo` | Compile and run strict Credo |
-| `mise run integration` | Generate and check both real Phoenix profiles, including browser tests and production compilation |
+| `mise run integration` | Generate and check both real Phoenix profiles, including browser tests and production release builds and HTTP smoke checks |
 | `mise run audit` | Dependency advisories and retired Hex packages, separate from the check gate |
 | `mise exec -- mix hex.build` | Build a local package without publishing it |
 
@@ -83,12 +83,14 @@ when testing locally. Missing browser tooling must fail the suite rather than
 silently skip coverage.
 
 The script installs the pinned generators and the local archive in an isolated
-archive directory, then uses `mix ithibati.new` to create disposable default and mail-enabled
-applications, runs each application's full gate, checks that reapplying the same
-profile is a no-op, and compiles both for production. It chooses a test database
-partition and cleans up its temporary project directory. Database cleanup remains
-the responsibility of the local test environment. Never use a development or
-production database for these checks.
+archive directory, then uses `mix ithibati.new` to create disposable default and
+mail-enabled applications. It runs each application's full gate, checks that
+reapplying the same profile is a no-op, builds both production releases, runs
+their migrations twice against disposable databases and starts each over HTTP.
+It chooses a test database partition and cleans up its temporary project
+directory and release smoke databases. Cleanup of the partitioned test databases
+remains the responsibility of the local test environment. Never use a development
+or production database for these checks.
 
 The auth tests exercise real WebAuthn ceremonies using Chrome virtual
 authenticators; no hardware passkey is required. The test endpoint defaults to

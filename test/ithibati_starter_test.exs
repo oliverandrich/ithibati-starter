@@ -52,6 +52,48 @@ defmodule IthibatiStarterTest do
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
   end
 
+  for opts <- [[], [with_mail: true]] do
+    @command_opts opts
+    @tag :command_contract
+    test "mise exposes development, reset and release commands for #{inspect(opts)}" do
+      result = project() |> IthibatiStarter.install(@command_opts)
+
+      assert_creates(result, "mise.toml", fn text ->
+        assert text =~ "[tasks.reset]"
+        assert text =~ ~s(run = "mix ecto.reset")
+        assert text =~ "[tasks.release]"
+        assert text =~ ~s(env.MIX_ENV = "prod")
+        assert text =~ "mix assets.deploy"
+        assert text =~ "mix release --overwrite"
+      end)
+    end
+
+    @tag :command_contract
+    test "release launchers start the server and migrate from any directory for #{inspect(opts)}" do
+      result = project() |> IthibatiStarter.install(@command_opts) |> apply_igniter!()
+      files = result.assigns.test_files
+
+      directory =
+        Path.join(System.tmp_dir!(), "starter release #{System.unique_integer([:positive])}")
+
+      File.mkdir_p!(directory)
+      on_exit(fn -> File.rm_rf!(directory) end)
+      app = Path.join(directory, "sample")
+      File.write!(app, "#!/bin/sh\nprintf '%s\\n' \"$PHX_SERVER\" \"$@\"\nexit 17\n")
+      File.chmod!(app, 0o755)
+
+      for {name, expected} <- [
+            {"server", "true\nstart\n"},
+            {"migrate", "\neval\nSample.Release.migrate()\n"}
+          ] do
+        source = Map.fetch!(files, "rel/overlays/bin/#{name}")
+        path = Path.join(directory, name)
+        File.write!(path, source)
+        assert {^expected, 17} = System.cmd("sh", [path], cd: "/", env: [{"PHX_SERVER", nil}])
+      end
+    end
+  end
+
   test "mail is opt-in and Ithibati can no longer be omitted" do
     info = Install.info([], nil)
     assert info.schema[:with_mail] == :boolean
