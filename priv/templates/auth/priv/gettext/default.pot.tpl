@@ -520,3 +520,63 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Use a recovery code instead"
 msgstr ""
+
+#: lib/__APP__/invitation_email.ex:10
+#, elixir-autogen, elixir-format
+msgid "Create your passkey to join %{site}."
+msgstr ""
+
+#: lib/__APP___web/controllers/invitation_controller.ex:23
+#, elixir-autogen, elixir-format
+msgid "Invitation email sent."
+msgstr ""
+
+#: lib/__APP___web/controllers/invitation_controller.ex:29
+#, elixir-autogen, elixir-format
+msgid "Please check the username and try again."
+msgstr ""
+
+#: lib/__APP___web/controllers/invitation_controller.ex:26
+#, elixir-autogen, elixir-format
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:86
+#, elixir-autogen, elixir-format
+msgid "Send an invitation by email"
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:91
+#, elixir-autogen, elixir-format
+msgid "Send invitation"
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:87
+#, elixir-autogen, elixir-format
+msgid "The email address is only used for delivery. Your guest signs in with a passkey."
+msgstr ""
+
+#: lib/__APP___web/controllers/invitation_controller.ex:32
+#, elixir-autogen, elixir-format
+msgid "The email could not be sent. Please try again later or share a link manually."
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:90
+#, elixir-autogen, elixir-format
+msgid "Their email address"
+msgstr ""
+
+#: lib/__APP___web/controllers/invitation_controller.ex:15
+#, elixir-autogen, elixir-format
+msgid "Too many invitations. Please try again later."
+msgstr ""
+
+#: lib/__APP__/invitation_email.ex:11
+#, elixir-autogen, elixir-format
+msgid "Username: %{username}"
+msgstr ""
+
+#: lib/__APP__/invitation_email.ex:9
+#, elixir-autogen, elixir-format
+msgid "Your invitation to %{site}"
+msgstr ""

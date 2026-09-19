@@ -14,7 +14,8 @@ defmodule IthibatiStarter.MixProject do
           "deps.unlock --check-unused",
           "format --check-formatted",
           "credo --strict",
-          "test"
+          "test",
+          "cmd --cd installer mix do compile --warnings-as-errors + test + archive.build"
         ]
       ],
       description: "Opinionated Phoenix starter with invitation-only Ithibati authentication",

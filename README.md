@@ -68,8 +68,8 @@ Powered by **Ithibati 0.4.0**, with username-based accounts and passkeys:
 | Beans, optional | Local, Git-ignored work tracking |
 
 `mise run check` compiles, checks formatting and unused locks, runs Credo and xref,
-scans with Sobelow, builds assets and runs tests. The auth profile also checks the
-Ithibati setup. Dependency advisories run separately through `mise run audit`.
+scans with Sobelow, builds assets and runs tests. It also checks the Ithibati setup.
+Dependency advisories run separately through `mise run audit`.
 
 ### Operations, without choosing your hosting
 
@@ -86,22 +86,22 @@ when you need scheduling; the starter installs no scheduler.
 ## Get started
 
 You'll need **mise**, **Elixir 1.20.4 / OTP 29.0.6** and **PostgreSQL 18**.
-Chrome and a matching Chromedriver are required for the auth profile's browser tests.
+Chrome and a matching Chromedriver are required for the browser tests.
 Node.js is not required: Mix manages Tailwind and esbuild.
 
-Install the pinned Phoenix and Igniter generators:
+Install the pinned generators and the starter archive once:
 
 ```sh
 mix archive.install hex phx_new 1.8.14
 mix archive.install hex igniter_new 0.5.34
+mix archive.install github oliverandrich/ithibati-starter --sparse installer
 ```
 
-Create the app and install the starter from GitHub:
+Create a Phoenix app with the starter:
 
 ```sh
-mix phx.new my_app --no-mailer --no-install
+mix ithibati.new my_app
 cd my_app
-mix igniter.install ithibati_starter@github:oliverandrich/ithibati-starter@main --only dev
 ```
 
 Start developing:
@@ -118,11 +118,16 @@ Open **http://localhost:4000** and claim your instance. The generated
 `mise run setup` explicitly creates and migrates the development database; the
 installer itself does not.
 
-The GitHub command follows `main`. For reproducible generation, replace `main`
-with a reviewed commit SHA. Installation does not require a Hex release.
+The archive lives in this repository under `installer/`; it is separate from the
+Ithibati authentication package. `mix ithibati.new` automatically selects Phoenix
+and installs the starter as a development-only dependency.
+
+The default starter source follows `main`. For reproducible generation, use
+`--starter ithibati_starter@github:oliverandrich/ithibati-starter@COMMIT_SHA`.
+Installation does not require a Hex release.
 
 <details>
-<summary>Generate Phoenix and install the starter in one command</summary>
+<summary>Use Igniter directly</summary>
 
 After installing the generators above:
 
@@ -141,33 +146,56 @@ Then enter `my_app` and run the mise setup steps above.
 <details>
 <summary>Install from a local starter checkout</summary>
 
-Inside a fresh Phoenix application:
+Build the archive from the checkout's `installer/` directory:
 
 ```sh
-mix igniter.install ithibati_starter@path:/absolute/path/to/ithibati-starter --only dev
+mix archive.build
+mix archive.install ithibati_new-0.1.0.ez
 ```
+
+Then, from the directory where the new project should live:
+
+```sh
+mix ithibati.new my_app \
+  --starter ithibati_starter@path:/absolute/path/to/ithibati-starter
+```
+
+Add `--with-mail` for email invitations.
 
 </details>
 
 ## Choose your profile
 
-| Feature | Default | `--without-ithibati` |
+Ithibati is always included. Choose whether invitations should also be delivered by email:
+
+| Feature | Default | `--with-mail` |
 | --- | :---: | :---: |
 | Phoenix tooling, checks and CI | ✓ | ✓ |
-| Vanilla Tailwind and Lucide components | ✓ | ✓ |
-| Browser locale detection | ✓ | ✓ |
-| Healthcheck and release helpers | ✓ | ✓ |
-| Username accounts, passkeys and invitations | ✓ | — |
-| Account security screens and auth rate limits | ✓ | — |
-| Auth cleanup and browser authentication tests | ✓ | — |
+| Vanilla Tailwind, Lucide and browser locale detection | ✓ | ✓ |
+| Username accounts, passkeys and account security | ✓ | ✓ |
+| Manual invitation links | ✓ | ✓ |
+| Email invitation form and German/English emails | — | ✓ |
+| Swoosh, local mailbox preview and SMTP configuration | — | ✓ |
+| Healthcheck, release helpers and auth cleanup | ✓ | ✓ |
 | Local Beans configuration | Optional | Optional |
 
-For the tooling profile, add the flag when installing into a fresh app:
+Enable invitation mail when creating a project:
 
 ```sh
-mix igniter.install ithibati_starter@github:oliverandrich/ithibati-starter@main \
-  --only dev --without-ithibati
+mix ithibati.new my_app --with-mail
 ```
+
+Or use Igniter directly; the starter adopts and configures the Phoenix mailer:
+
+```sh
+mix igniter.new my_app \
+  --with phx.new \
+  --install ithibati_starter@github:oliverandrich/ithibati-starter@main \
+  --only dev --with-mail
+```
+
+An app originally generated with `--no-mailer` is also supported: `--with-mail`
+creates the missing mailer.
 
 Add **`--without-beans`** to either profile to omit local tracking. Beans itself is
 installed separately and is not needed to compile, test or run the app. Neither RTK
@@ -191,10 +219,21 @@ using email as the account identifier, and choosing an email identifier does not
 itself enable delivery or verify mailbox ownership. The application's registration
 policy decides who may request an invitation.
 
-**The starter currently generates the username-based flow only.** It has no
-`--with-mail` switch yet. An email-enabled application can build on Ithibati's
-APIs and example; it also needs its own mailer configuration, sender address and
-appropriate delivery limits.
+**`--with-mail` keeps username accounts.** It adds a separate recipient address to
+the invitation form, without storing it on the account. The manual-link form remains
+available. Email content follows the inviter's browser language (English/German).
+
+Development messages appear at **`/dev/mailbox`** and tests use the Swoosh test
+adapter; neither sends external mail. Production uses authenticated SMTP with
+STARTTLS and certificate verification. Configure `MAIL_FROM`, `SMTP_HOST`,
+`SMTP_USERNAME`, `SMTP_PASSWORD` and optionally `SMTP_PORT` (default `587`), plus
+`PHX_HOST` for trusted invitation URLs. The generated `CONTRIBUTING.md` documents
+configuration and delivery limits. Other providers can replace the Swoosh adapter.
+
+Delivery is synchronous, limited to 10 attempts per member and 3 per recipient per
+hour per node. There are no automatic retries or background jobs. Transport errors
+leave the invitation valid and show an error; transport acceptance is not proof of
+receipt. Email-as-identifier remains an application-level customization.
 
 ## Generated pages
 
@@ -209,7 +248,8 @@ appropriate delivery limits.
 | `/account/passkeys` | Passkey management and sign out on all devices |
 | `/account/recovery-codes` | Remaining code count and confirmed regeneration |
 | `/account/verify` | Identity confirmation for sensitive changes |
-| `/health` | Liveness probe, also included without Ithibati |
+| `/health` | Liveness probe |
+| `/dev/mailbox` | Development mail preview, only with `--with-mail` |
 
 Customize `Layouts.auth/1` and `Layouts.member/1` to change the shared appearance.
 Auth components use the project's module name as their wordmark.
@@ -217,8 +257,8 @@ Auth components use the project's module name as their wordmark.
 ## Deliberate defaults
 
 **A starting point, not an admin product.** Every authenticated member can invite
-someone. There are no administrator roles, invitation-management dashboard, mail
-delivery, billing, teams or background-job framework. Add the policies your app needs.
+someone. There are no administrator roles, invitation-management dashboard, billing,
+teams or background-job framework. Add the policies your app needs.
 
 **Fresh applications only.** The tested scaffold is a non-umbrella Phoenix 1.8.14
 application with PostgreSQL, HTML, LiveView, Tailwind and esbuild. Authentication uses

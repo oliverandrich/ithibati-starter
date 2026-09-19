@@ -29,7 +29,7 @@ defmodule IthibatiStarter.Tooling do
     |> Files.copy_tree("tooling", bindings, on_exists: :overwrite)
     |> MixProject.update(:project, [:elixir], fn _ -> {:ok, {:code, inspect("~> 1.20")}} end)
     |> MixProject.update(:cli, [:preferred_envs, :precommit], fn _ -> {:ok, {:code, :test}} end)
-    |> MixProject.update(:project, [:aliases, :precommit], fn _ -> {:ok, {:code, gate(opts)}} end)
+    |> MixProject.update(:project, [:aliases, :precommit], fn _ -> {:ok, {:code, gate()}} end)
     |> Config.configure("config.exs", :tailwind, [:version], "4.3.3")
     |> Config.configure("config.exs", String.to_atom(bindings.app), [:locales], ["en", "de"])
     |> Config.configure(
@@ -37,16 +37,6 @@ defmodule IthibatiStarter.Tooling do
       String.to_atom(bindings.app),
       [Module.concat([bindings.module <> "Web", Gettext]), :default_locale],
       "en"
-    )
-    |> Files.replace(
-      "lib/#{bindings.app}_web/router.ex",
-      "plug :fetch_live_flash",
-      "plug :fetch_live_flash\n    plug #{bindings.module}Web.Locale"
-    )
-    |> Files.replace(
-      "lib/#{bindings.app}_web/router.ex",
-      "  pipeline :browser do",
-      "  scope \"/\", #{bindings.module}Web do\n    get \"/health\", HealthController, :show\n  end\n\n  pipeline :browser do"
     )
     |> database_env()
     |> Files.replace("lib/#{bindings.app}_web/endpoint.ex", "  if code_reloading? do", """
@@ -56,16 +46,6 @@ defmodule IthibatiStarter.Tooling do
 
       if code_reloading? do
     """)
-    |> Files.replace("lib/#{bindings.app}_web/router.ex", "plug :put_secure_browser_headers", """
-    plug :put_secure_browser_headers, %{
-      "content-security-policy" => "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'"
-    }
-    """)
-    |> Files.replace(
-      "lib/#{bindings.app}_web/router.ex",
-      "  scope \"/\", #{bindings.module}Web do\n    pipe_through :browser\n\n    get \"/\", PageController, :home\n  end",
-      "  live_session :default, on_mount: [{#{bindings.module}Web.Locale, :set}] do\n    scope \"/\", #{bindings.module}Web do\n      pipe_through :browser\n      get \"/\", PageController, :home\n    end\n  end"
-    )
     |> tidy_scaffold(bindings)
     |> maybe_beans(bindings, opts)
     |> Files.append(".gitignore", "\n/mise.local.toml\n/screenshots/\n")
@@ -73,20 +53,20 @@ defmodule IthibatiStarter.Tooling do
     |> Deps.set_dep_option(:ithibati_starter, :runtime, false)
   end
 
-  defp gate(opts) do
+  defp gate do
     [
       "compile --warnings-as-errors",
       "deps.unlock --check-unused",
       "format --check-formatted",
       "credo --strict",
       "xref graph --label compile-connected --fail-above 0",
-      "sobelow --exit"
-    ] ++
-      if(opts[:without_ithibati],
-        do: [],
-        else: ["ecto.create --quiet", "ecto.migrate --quiet", "ithibati.doctor"]
-      ) ++
-      ["assets.build", "test"]
+      "sobelow --exit",
+      "ecto.create --quiet",
+      "ecto.migrate --quiet",
+      "ithibati.doctor",
+      "assets.build",
+      "test"
+    ]
   end
 
   defp database_env(igniter) do

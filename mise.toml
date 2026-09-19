@@ -8,7 +8,7 @@ env.MIX_ENV = "test"
 run = ["zizmor .github/", "mix precommit", "MIX_ENV=dev mix docs --warnings-as-errors"]
 [tasks.test]
 env.MIX_ENV = "test"
-run = "mix test"
+run = ["mix test", "mix cmd --cd installer mix test"]
 [tasks.format]
 run = "mix format"
 [tasks.credo]

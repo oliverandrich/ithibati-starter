@@ -1,6 +1,6 @@
 defmodule __MODULE__Web.InsideLive do
   @moduledoc """
-  Behind `{:require_account, to: "/login"}`, and the only place invitations are written.
+  Manual invitation links behind `{:require_account, to: "/login"}`.
 
   Nothing here checks who is asking: by the time `mount/3` runs, the gate has either assigned an
   account or sent the visitor away. What an account may *do* — whether everyone can invite, or only

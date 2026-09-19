@@ -9,13 +9,16 @@ defmodule IthibatiStarter do
   alias Igniter.Project.Module, as: ProjectModule
   alias IthibatiStarter.Auth
   alias IthibatiStarter.Files
+  alias IthibatiStarter.Mail
   alias IthibatiStarter.Tooling
 
   @marker ".ithibati-starter"
 
-  @doc "Plans an installation. Options: `:without_ithibati` and `:without_beans`."
+  @doc "Plans an installation. Options: `:with_mail` and `:without_beans`."
   def install(igniter, opts \\ []) do
-    profile = "0.1.0\nauth=#{!opts[:without_ithibati]}\nbeans=#{!opts[:without_beans]}\n"
+    profile =
+      "0.1.0\nauth=true\nbeans=#{!opts[:without_beans]}\n" <>
+        if(opts[:with_mail], do: "mail=true\n", else: "")
 
     if Igniter.exists?(igniter, @marker) do
       {igniter, current} = Files.read(igniter, @marker)
@@ -45,8 +48,7 @@ defmodule IthibatiStarter do
       {igniter, router_source} = Files.read(igniter, router)
 
       cond do
-        canonical(router_source) !=
-            canonical(Files.template("fragments/phoenix_router", bindings)) ->
+        not fresh_router?(router_source, bindings, opts) ->
           Igniter.add_issue(
             igniter,
             "The router differs from the fresh Phoenix 1.8.14 scaffold; refusing to replace it."
@@ -68,13 +70,14 @@ defmodule IthibatiStarter do
             "Refusing to replace existing tooling; use a fresh Phoenix project."
           )
 
-        !opts[:without_ithibati] and String.contains?(config, "binary_id: true") ->
+        String.contains?(config, "binary_id: true") ->
           Igniter.add_issue(igniter, "The auth profile does not support binary_id yet.")
 
         String.contains?(repo, "Ecto.Adapters.Postgres") ->
           igniter
           |> Tooling.install(bindings, opts)
-          |> maybe_auth(bindings, opts)
+          |> Auth.install(bindings)
+          |> maybe_mail(bindings, opts)
           |> Igniter.create_new_file(@marker, profile)
           |> Igniter.add_task("format", [])
           |> Igniter.add_notice(
@@ -95,9 +98,23 @@ defmodule IthibatiStarter do
     end
   end
 
+  defp fresh_router?(source, bindings, opts) do
+    base = Files.template("fragments/phoenix_router", bindings)
+
+    with_mailer =
+      String.replace(
+        base,
+        "metrics: #{bindings.module}Web.Telemetry",
+        "metrics: #{bindings.module}Web.Telemetry\n      forward \"/mailbox\", Plug.Swoosh.MailboxPreview"
+      )
+
+    canonical(source) == canonical(base) or
+      (opts[:with_mail] == true and canonical(source) == canonical(with_mailer))
+  end
+
   defp canonical(source), do: source |> Code.string_to_quoted!() |> Macro.to_string()
 
-  defp maybe_auth(igniter, bindings, opts) do
-    if opts[:without_ithibati], do: igniter, else: Auth.install(igniter, bindings)
+  defp maybe_mail(igniter, bindings, opts) do
+    if opts[:with_mail], do: Mail.install(igniter, bindings), else: igniter
   end
 end

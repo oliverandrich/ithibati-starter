@@ -1,8 +1,9 @@
 defmodule IthibatiStarterTest do
   use ExUnit.Case, async: true
   import Igniter.Test
+  alias Mix.Tasks.IthibatiStarter.Install
 
-  defp project do
+  defp project(with_mailer \\ false) do
     files =
       "test/fixtures/phoenix/**/*.txt"
       |> Path.wildcard(match_dot: true)
@@ -14,6 +15,23 @@ defmodule IthibatiStarterTest do
         ".formatter.exs",
         "[locals_without_parens: [embed_templates: 1, plug: 1, plug: 2], inputs: [\"**/*.{ex,exs}\"]]"
       )
+
+    files =
+      if with_mailer do
+        "test/fixtures/phoenix_mailer/**/*.txt"
+        |> Path.wildcard()
+        |> Enum.reduce(files, fn path, acc ->
+          Map.put(
+            acc,
+            path
+            |> Path.relative_to("test/fixtures/phoenix_mailer")
+            |> String.trim_trailing(".txt"),
+            File.read!(path)
+          )
+        end)
+      else
+        files
+      end
 
     test_project(app_name: :sample, files: files)
   end
@@ -34,16 +52,58 @@ defmodule IthibatiStarterTest do
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
   end
 
-  test "tooling-only profile omits auth dependencies, routes, migrations and browser tests" do
-    result = project() |> IthibatiStarter.install(without_ithibati: true, without_beans: true)
-    assert_creates(result, "mise.toml", fn text -> assert text =~ "mix precommit" end)
-    assert diff(result, only: "mix.exs") =~ "credo"
-    refute_creates(result, "lib/sample/accounts/user.ex")
-    refute_creates(result, "test/features/invitation_test.exs")
-    refute diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
-    refute diff(result) =~ "{:ithibati,"
-    refute diff(result) =~ "{:wallaby,"
+  test "mail is opt-in and Ithibati can no longer be omitted" do
+    info = Install.info([], nil)
+    assert info.schema[:with_mail] == :boolean
+    refute Keyword.has_key?(info.schema, :without_ithibati)
+    result = project() |> IthibatiStarter.install(without_beans: true)
+    refute_creates(result, "lib/sample/mailer.ex")
+    refute diff(result) =~ "{:swoosh,"
+    assert_creates(result, "lib/sample/accounts/user.ex")
     refute diff(result) =~ "beans list"
+  end
+
+  test "mail profile generates delivery, preview, configuration and tests" do
+    result = project() |> IthibatiStarter.install(with_mail: true)
+    assert_creates(result, "lib/sample/mailer.ex")
+    assert_creates(result, "lib/sample/invitations.ex")
+    assert_creates(result, "lib/sample_web/controllers/invitation_controller.ex")
+    assert_creates(result, "test/sample_web/invitation_mail_test.exs")
+    assert diff(result, only: "mix.exs") =~ ":swoosh"
+    assert diff(result, only: "config/dev.exs") =~ "Swoosh.Adapters.Local"
+    assert diff(result, only: "config/test.exs") =~ "Swoosh.Adapters.Test"
+    assert diff(result, only: "config/runtime.exs") =~ "SMTP_HOST"
+    assert diff(result, only: "lib/sample_web/router.ex") =~ "MailboxPreview"
+    result |> apply_igniter!() |> IthibatiStarter.install(with_mail: true) |> assert_unchanged()
+  end
+
+  test "mail profile adopts the Phoenix mailer and replaces its production API client" do
+    original = project(true)
+    installed = original |> IthibatiStarter.install(with_mail: true) |> apply_igniter!()
+    files = installed.assigns.test_files
+    assert files["lib/sample/mailer.ex"] == original.assigns.test_files["lib/sample/mailer.ex"]
+    assert files["lib/sample/invitations.ex"] =~ "InvitationMail.deliver"
+    assert files["config/prod.exs"] =~ "api_client: false"
+    refute files["config/prod.exs"] =~ "Swoosh.ApiClient.Req"
+
+    assert length(Regex.scan(~r/Plug.Swoosh.MailboxPreview/, files["lib/sample_web/router.ex"])) ==
+             1
+
+    assert length(Regex.scan(~r/\{:swoosh,/, files["mix.exs"])) == 1
+    installed |> IthibatiStarter.install(with_mail: true) |> assert_unchanged()
+  end
+
+  test "a customized router with a Phoenix mailbox is still refused" do
+    project(true)
+    |> IthibatiStarter.Files.replace(
+      "lib/sample_web/router.ex",
+      "PageController, :home",
+      "PageController, :custom"
+    )
+    |> apply_igniter!()
+    |> IthibatiStarter.install(with_mail: true)
+    |> assert_has_issue(&String.contains?(&1, "router"))
+    |> assert_unchanged()
   end
 
   test "reapplying the same profile preserves user edits and produces no changes" do
@@ -52,11 +112,11 @@ defmodule IthibatiStarterTest do
     assert_unchanged(result)
   end
 
-  test "flags cannot silently remove an installed authentication system" do
+  test "mail profile cannot silently replace an installed profile" do
     project()
     |> IthibatiStarter.install()
     |> apply_igniter!()
-    |> IthibatiStarter.install(without_ithibati: true)
+    |> IthibatiStarter.install(with_mail: true)
     |> assert_has_issue(&String.contains?(&1, "profile"))
   end
 
@@ -127,7 +187,7 @@ defmodule IthibatiStarterTest do
     end)
   end
 
-  for opts <- [[], [without_ithibati: true, without_beans: true]] do
+  for opts <- [[], [with_mail: true, without_beans: true]] do
     @profile_opts opts
     test "Lucide replaces Heroicons in profile #{inspect(opts)}" do
       planned = project() |> IthibatiStarter.install(@profile_opts)
@@ -168,7 +228,7 @@ defmodule IthibatiStarterTest do
     end
   end
 
-  for opts <- [[], [without_ithibati: true]] do
+  for opts <- [[], [with_mail: true]] do
     @locale_opts opts
     test "locale support is wired into profile #{inspect(opts)}" do
       result = project() |> IthibatiStarter.install(@locale_opts)

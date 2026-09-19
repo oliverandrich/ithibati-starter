@@ -513,3 +513,63 @@ msgstr "Verwende einen Passkey oder Wiederherstellungscode deines aktuellen Kont
 #, elixir-autogen, elixir-format
 msgid "Use a recovery code instead"
 msgstr "Stattdessen einen Wiederherstellungscode verwenden"
+
+#: lib/__APP__/invitation_email.ex:10
+#, elixir-autogen, elixir-format
+msgid "Create your passkey to join %{site}."
+msgstr "Erstelle deinen Passkey, um %{site} beizutreten."
+
+#: lib/__APP___web/controllers/invitation_controller.ex:23
+#, elixir-autogen, elixir-format
+msgid "Invitation email sent."
+msgstr "Einladung per E-Mail versendet."
+
+#: lib/__APP___web/controllers/invitation_controller.ex:29
+#, elixir-autogen, elixir-format
+msgid "Please check the username and try again."
+msgstr "Bitte prüfe den Benutzernamen und versuche es erneut."
+
+#: lib/__APP___web/controllers/invitation_controller.ex:26
+#, elixir-autogen, elixir-format
+msgid "Please enter a valid email address."
+msgstr "Bitte gib eine gültige E-Mail-Adresse ein."
+
+#: lib/__APP___web/live/inside_live.ex:86
+#, elixir-autogen, elixir-format
+msgid "Send an invitation by email"
+msgstr "Einladung per E-Mail senden"
+
+#: lib/__APP___web/live/inside_live.ex:91
+#, elixir-autogen, elixir-format
+msgid "Send invitation"
+msgstr "Einladung senden"
+
+#: lib/__APP___web/live/inside_live.ex:87
+#, elixir-autogen, elixir-format
+msgid "The email address is only used for delivery. Your guest signs in with a passkey."
+msgstr "Die E-Mail-Adresse wird nur für den Versand verwendet. Dein Gast meldet sich mit einem Passkey an."
+
+#: lib/__APP___web/controllers/invitation_controller.ex:32
+#, elixir-autogen, elixir-format
+msgid "The email could not be sent. Please try again later or share a link manually."
+msgstr "Die E-Mail konnte nicht versendet werden. Versuche es später erneut oder teile den Link manuell."
+
+#: lib/__APP___web/live/inside_live.ex:90
+#, elixir-autogen, elixir-format
+msgid "Their email address"
+msgstr "E-Mail-Adresse deines Gastes"
+
+#: lib/__APP___web/controllers/invitation_controller.ex:15
+#, elixir-autogen, elixir-format
+msgid "Too many invitations. Please try again later."
+msgstr "Zu viele Einladungen. Bitte versuche es später erneut."
+
+#: lib/__APP__/invitation_email.ex:11
+#, elixir-autogen, elixir-format
+msgid "Username: %{username}"
+msgstr "Benutzername: %{username}"
+
+#: lib/__APP__/invitation_email.ex:9
+#, elixir-autogen, elixir-format
+msgid "Your invitation to %{site}"
+msgstr "Deine Einladung zu %{site}"

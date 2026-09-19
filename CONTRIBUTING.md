@@ -31,6 +31,11 @@ running database or browser. The integration suite does; see below.
 | `mise run audit` | Dependency advisories and retired Hex packages, separate from the check gate |
 | `mise exec -- mix hex.build` | Build a local package without publishing it |
 
+The archive shares the root mise runtimes, Credo rules, formatting, CI, audits and
+Beans tracking. It has no dependencies of its own. `mise run check` additionally
+compiles it, runs its tests and builds the archive; `mise run test` runs both suites.
+This keeps the installable archive small without a separate tooling stack.
+
 The check gate does not format files or rewrite the dependency lock. Run the
 formatting command yourself after editing Elixir source.
 
@@ -38,9 +43,11 @@ formatting command yourself after editing Elixir source.
 
 | Path | Contents |
 | --- | --- |
+| `installer/` | Dependency-free Mix archive providing `mix ithibati.new` |
 | `lib/ithibati_starter/` | Installer transformations and template rendering |
 | `lib/mix/tasks/` | Public installer task |
 | `priv/templates/tooling/` | Files shared by both profiles |
+| `priv/templates/mail/` | Optional invitation mailer, delivery and tests |
 | `priv/templates/auth/` | Ithibati application code and generated auth tests |
 | `priv/templates/fragments/` | Router, layout and documentation fragments |
 | `test/fixtures/phoenix/` | The supported Phoenix scaffold, stored as `.txt` fixtures |
@@ -75,7 +82,8 @@ GitHub Actions it comes from the runner environment. Keep it in sync with Chrome
 when testing locally. Missing browser tooling must fail the suite rather than
 silently skip coverage.
 
-The script installs the pinned generators, creates disposable auth and tooling
+The script installs the pinned generators and the local archive in an isolated
+archive directory, then uses `mix ithibati.new` to create disposable default and mail-enabled
 applications, runs each application's full gate, checks that reapplying the same
 profile is a no-op, and compiles both for production. It chooses a test database
 partition and cleans up its temporary project directory. Database cleanup remains
