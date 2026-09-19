@@ -10,8 +10,16 @@ defmodule IthibatiNewTest do
              "ithibati_starter@github:oliverandrich/ithibati-starter@main",
              "--only",
              "dev",
-             "--with-args=--no-mailer"
+             "--with-args=--no-mailer",
+             "--yes"
            ]
+  end
+
+  test "accepts installation prompts by default for both profiles" do
+    for options <- [[], ["--with-mail"]] do
+      assert "--yes" in IthibatiNew.arguments(["my_app" | options])
+      refute "--yes" in IthibatiNew.arguments(["my_app", "--no-yes" | options])
+    end
   end
 
   test "mail uses the default Phoenix mailer without contradictory flags" do

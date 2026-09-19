@@ -120,7 +120,9 @@ installer itself does not.
 
 The archive lives in this repository under `installer/`; it is separate from the
 Ithibati authentication package. `mix ithibati.new` automatically selects Phoenix
-and installs the starter as a development-only dependency.
+and installs the starter as a development-only dependency. Installation prompts,
+including Igniter's large-diff preview prompt, are accepted automatically. Pass
+`--no-yes` to restore interactive confirmation.
 
 The default starter source follows `main`. For reproducible generation, use
 `--starter ithibati_starter@github:oliverandrich/ithibati-starter@COMMIT_SHA`.

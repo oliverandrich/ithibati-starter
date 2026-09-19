@@ -18,7 +18,7 @@ defmodule IthibatiNew do
           path
 
         _ ->
-          Mix.raise("Usage: mix ithibati.new PATH [--with-mail] [--without-beans] [--yes]")
+          Mix.raise("Usage: mix ithibati.new PATH [--with-mail] [--without-beans] [--no-yes]")
       end
 
     [
@@ -32,6 +32,6 @@ defmodule IthibatiNew do
     ] ++
       if(opts[:with_mail], do: ["--with-mail"], else: ["--with-args=--no-mailer"]) ++
       if(opts[:without_beans], do: ["--without-beans"], else: []) ++
-      if(opts[:yes], do: ["--yes"], else: [])
+      if(Keyword.get(opts, :yes, true), do: ["--yes"], else: [])
   end
 end

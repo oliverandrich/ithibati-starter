@@ -11,7 +11,8 @@ defmodule Mix.Tasks.Ithibati.New do
 
     * `--with-mail` adds invitation delivery using the Phoenix mailer.
     * `--without-beans` omits local Beans configuration.
-    * `--yes` accepts the generator's installation prompts.
+    * `--yes` accepts the generator's installation prompts (the default).
+    * `--no-yes` restores interactive installation and diff prompts.
     * `--starter SOURCE` selects a local or pinned Igniter package specification;
       defaults to `ithibati_starter@github:oliverandrich/ithibati-starter@main`.
 
