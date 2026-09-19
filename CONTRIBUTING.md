@@ -49,7 +49,8 @@ formatting command yourself after editing Elixir source.
 | `priv/templates/tooling/` | Files shared by both profiles |
 | `priv/templates/mail/` | Optional invitation mailer, delivery and tests |
 | `priv/templates/auth/` | Ithibati application code and generated auth tests |
-| `priv/templates/fragments/` | Router, layout and documentation fragments |
+| `priv/templates/fragments/` | Router, layout and configuration fragments |
+| `docs/` | Starter usage and configuration documentation |
 | `test/fixtures/phoenix/` | The supported Phoenix scaffold, stored as `.txt` fixtures |
 | `test/ithibati_starter_test.exs` | Installer behavior and profile tests |
 | `scripts/integration.sh` | End-to-end generation and validation of both profiles |
@@ -118,6 +119,17 @@ port **43129** in the integration script. Override `PORT` if it is occupied.
 Documentation-only changes do not need new tests. If a meaningful red phase cannot
 be demonstrated, explain the limitation rather than claiming TDD was followed.
 See [AGENTS.md](https://github.com/oliverandrich/ithibati-starter/blob/main/AGENTS.md) for repository working conventions.
+
+## Documentation layout
+
+The starter and generated applications use the same division: README for an
+overview and quick start, CONTRIBUTING for development, AGENTS for agent rules,
+and `docs/` for actual usage, configuration, operations and architecture guides.
+Keep explanations in one place and update links when moving them.
+
+Generated application guides live in each profile's `docs/` template directory.
+Authentication is always documented; mail documentation and its links are added
+only for `--with-mail`. Keep both profiles covered by the installer tests.
 
 ## Local work tracking
 

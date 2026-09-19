@@ -1,5 +1,4 @@
-
-## Invitation-only authentication
+# Authentication
 
 Ithibati is pinned to 0.4.0. On an empty database the first visitor can claim the
 instance with a username and passkey. Complete this on a trusted local/private
@@ -11,15 +10,6 @@ delivery; share links through your chosen channel.
 Sessions are revocable and cookies are encrypted because they temporarily carry
 recovery codes. Recovery codes are displayed once after registration. Adapt the
 account policy to the application.
-`mix ithibati.doctor` is part of the test-environment gate after schema setup.
-
-Browser tests are mandatory: install Chrome and a matching Chromedriver. On CI,
-CHROMEWEBDRIVER points at the runner's driver directory. Locally configure a matching
-`chromedriver` in ignored `mise.local.toml`, or set CHROMEWEBDRIVER. Check both
-versions after browser updates. `mise run check` builds assets before browser tests;
-for direct `mise run test`, build them with `mix assets.build` first. Tests start
-an endpoint on port 4102; override PORT to isolate concurrent suites. Missing browser
-infrastructure fails instead of silently skipping coverage.
 
 The public auth screens are `/login` (passkey), `/recover` (recovery code), and
 `/setup` (first account only). Signed-in visitors go to `/`. The project name and

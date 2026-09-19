@@ -85,6 +85,5 @@ defmodule IthibatiStarter.Auth do
     Application.put_env(:wallaby, :base_url, #{b.module}Web.Endpoint.url())
     {:ok, _} = Application.ensure_all_started(:wallaby)
     """)
-    |> Files.append("CONTRIBUTING.md", Files.template("fragments/auth_docs", b))
   end
 end

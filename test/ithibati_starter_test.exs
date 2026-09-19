@@ -36,6 +36,52 @@ defmodule IthibatiStarterTest do
     test_project(app_name: :sample, files: files)
   end
 
+  for opts <- [[], [with_mail: true, without_beans: true]] do
+    @documentation_opts opts
+    @tag :documentation
+    test "documentation separates contribution workflow from application guides for #{inspect(opts)}" do
+      result = project() |> IthibatiStarter.install(@documentation_opts) |> apply_igniter!()
+      files = result.assigns.test_files
+
+      assert files["docs/operations.md"] =~ "bin/migrate"
+      assert files["docs/authentication.md"] =~ "Sample.AuthCleanup.run()"
+      assert files["docs/localization.md"] =~ "Accept-Language"
+      assert files["CONTRIBUTING.md"] =~ "Chrome"
+      refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
+      refute files["CONTRIBUTING.md"] =~ "## Health, releases"
+      assert files["README.md"] =~ "docs/operations.md"
+      assert files["AGENTS.md"] =~ "Documentation structure"
+      refute Map.has_key?(files, "docs/development.md")
+
+      if @documentation_opts[:with_mail] do
+        assert files["docs/mail.md"] =~ "SMTP_HOST"
+        assert files["README.md"] =~ "docs/mail.md"
+        assert files["docs/authentication.md"] =~ "(mail.md)"
+        refute files["CONTRIBUTING.md"] =~ "SMTP_HOST"
+      else
+        refute Map.has_key?(files, "docs/mail.md")
+        refute files["README.md"] =~ "docs/mail.md"
+      end
+
+      for {path, content} <- files,
+          String.ends_with?(path, ".md"),
+          [_, link] <- Regex.scan(~r/\[[^\]]+\]\(([^)]+)\)/, content),
+          URI.parse(link).scheme == nil,
+          not String.starts_with?(link, "#") do
+        target =
+          link
+          |> String.split("#")
+          |> hd()
+          |> Path.expand(Path.dirname("/" <> path))
+          |> Path.relative_to("/")
+
+        assert Map.has_key?(files, target), "#{path} links to missing #{target}"
+      end
+
+      result |> IthibatiStarter.install(@documentation_opts) |> assert_unchanged()
+    end
+  end
+
   test "default profile installs pinned invitation authentication and tooling" do
     result = project() |> IthibatiStarter.install()
     assert_has_task(result, "format", [])
@@ -102,7 +148,8 @@ defmodule IthibatiStarterTest do
     refute_creates(result, "lib/sample/mailer.ex")
     refute diff(result) =~ "{:swoosh,"
     assert_creates(result, "lib/sample/accounts/user.ex")
-    refute diff(result) =~ "beans list"
+    refute_creates(result, ".beans.yml")
+    refute diff(result, only: "mise.toml") =~ "beans list"
   end
 
   test "mail profile generates delivery, preview, configuration and tests" do

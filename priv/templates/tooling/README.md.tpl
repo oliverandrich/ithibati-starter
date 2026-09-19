@@ -13,4 +13,9 @@ Use `mise reset` to explicitly recreate the development database (deletes its da
 `mise migrate` for pending development migrations, and `mise release` to build the
 production package. In that package, run `bin/migrate` once, then `bin/server`.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for configuration and checks.
+## Documentation
+
+- [Contributing](CONTRIBUTING.md): development setup, mise commands and tests.
+- [Operations](docs/operations.md): configuration, releases and migrations.
+- [Authentication](docs/authentication.md): accounts, invitations and security.
+- [Localization](docs/localization.md): language selection and translations.

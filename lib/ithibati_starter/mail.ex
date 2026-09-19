@@ -29,7 +29,19 @@ defmodule IthibatiStarter.Mail do
       "    </Layouts.member>",
       Files.template("fragments/mail_form", b) <> "\n    </Layouts.member>"
     )
-    |> Files.append("CONTRIBUTING.md", Files.template("fragments/mail_docs", b))
+    |> Files.append(
+      "README.md",
+      "\n- [Mail](docs/mail.md): invitation delivery and SMTP configuration.\n"
+    )
+    |> Files.replace(
+      "docs/authentication.md",
+      "There is no administrator role or mail\ndelivery; share links through your chosen channel.",
+      "There is no administrator role. Share links manually or use [invitation mail](mail.md)."
+    )
+    |> Files.append(
+      "docs/operations.md",
+      "\nWith invitation mail enabled, migration and startup also require the\n[SMTP environment variables](mail.md).\n"
+    )
   end
 
   defp router(b) do

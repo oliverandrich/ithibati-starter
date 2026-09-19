@@ -1,4 +1,4 @@
-# Development
+# Contributing
 
 ## Get started
 
@@ -28,7 +28,7 @@ export PGPASSWORD=postgres
 
 Tests use a separate `__APP___test` database, optionally suffixed with
 `MIX_TEST_PARTITION`. Never point tests at development or production data.
-Production uses `DATABASE_URL` and `SECRET_KEY_BASE`; see the release section below.
+Production uses `DATABASE_URL` and `SECRET_KEY_BASE`; see [Operations](docs/operations.md).
 
 ## Command reference
 
@@ -63,20 +63,19 @@ of `mise run …`. Development tasks explicitly use `MIX_ENV=dev`; release build
 use `prod`. `mise reset` deletes the development database and runs its migrations
 and seeds again. It is an explicit local action, never part of startup or checks.
 
-## Locales and translations
+## Browser tests
 
-Generated projects resolve the language from `Accept-Language` on every HTTP
-request, falling back to `en`. Supported defaults are `en` and `de`. There is no
-stored account preference. A changed browser language takes effect on the next
-HTTP request/full page load; an already connected LiveView keeps its current
-language until then. The session only transports the latest HTTP choice to
-LiveView and never overrides a new request header.
+Browser tests are mandatory: install Chrome and a matching Chromedriver. On CI,
+CHROMEWEBDRIVER points at the runner's driver directory. Locally configure a matching
+`chromedriver` in ignored `mise.local.toml`, or set CHROMEWEBDRIVER. Check both
+versions after browser updates. `mise run check` builds assets before browser tests;
+for direct `mise run test`, build them with `mix assets.build` first. Tests start
+an endpoint on port 4102; override PORT to isolate concurrent suites. Missing browser
+infrastructure fails instead of silently skipping coverage.
 
-Header parsing follows the first supported base language in tag order, as in
-Chapisho; q-value weighting is not implemented. Configure `:locales` on the
-application and `:default_locale` on its Gettext backend. New `live_session`
-blocks should include the application's `{Locale, :set}` hook after account loading.
-`Locale.accept_locale/1` also works before a session has been fetched.
+`mix ithibati.doctor` is part of the test-environment gate after schema setup.
+
+## Translations
 
 With Ithibati, all auth/member screens, ceremony errors, clipboard messages and
 validation errors have English/German support. English is the source language;
@@ -84,38 +83,13 @@ German catalogs live under `priv/gettext/de/LC_MESSAGES`. Use
 `mix gettext.extract --merge` after adding `gettext` calls, then fill in the PO
 translations. Clipboard messages are translated on the server, not duplicated in JS.
 
-## Health, releases and migrations
+## Making changes
 
-`GET /health` is a public liveness endpoint returning `{"status":"ok"}`. It does
-not query the database, set cookies, expose configuration or require authentication.
-It proves the HTTP application can answer, not that every dependency is ready.
+Use focused regression tests for behavior changes and run `mise check` before
+submitting. Follow the TDD and Conventional Commit rules in [AGENTS.md](AGENTS.md).
 
-Build with the project's pinned Elixir/OTP versions on a system compatible with
-the deployment target:
+## Further reading
 
-```sh
-mise run release
-```
-
-The release is in `_build/prod/rel/__APP__`. Set `DATABASE_URL`, `SECRET_KEY_BASE`,
-`PHX_HOST` and `PORT` for the deployment. Run migration once as an explicit deploy
-step, then start the application:
-
-```sh
-bin/migrate
-bin/server
-```
-
-The migration command starts the repo without the HTTP server. It is safe to run
-again when all migrations are already applied. It does not create the database.
-Provide a database and take backups through your deployment's normal workflow.
-The application does not migrate automatically during boot.
-
-For an explicitly reviewed rollback, replace the example version below with the
-oldest migration version to undo (the boundary version is also rolled back):
-
-```sh
-bin/__APP__ eval '__MODULE__.Release.rollback(__MODULE__.Repo, 20260918000000)'
-```
-
-No deployment service, container image or job scheduler is imposed by the starter.
+- [Operations](docs/operations.md): configuration, releases and migrations.
+- [Authentication](docs/authentication.md): accounts, invitations and security.
+- [Localization](docs/localization.md): language selection and translations.

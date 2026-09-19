@@ -1,5 +1,4 @@
-
-## Invitation email
+# Mail
 
 Generated with `--with-mail`. Accounts still use usernames and passkeys; the email
 address is a delivery destination, not stored on the account or invitation.

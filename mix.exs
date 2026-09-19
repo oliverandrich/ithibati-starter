@@ -25,10 +25,10 @@ defmodule IthibatiStarter.MixProject do
           "Ithibati" => "https://github.com/oliverandrich/ithibati"
         },
         files:
-          ~w(lib priv mix.exs README.md CONTRIBUTING.md LICENSE NOTICE THIRD_PARTY_LICENSES.md),
+          ~w(lib priv docs mix.exs README.md CONTRIBUTING.md LICENSE NOTICE THIRD_PARTY_LICENSES.md),
         licenses: ["MIT"]
       ],
-      docs: [main: "readme", extras: ["README.md", "CONTRIBUTING.md"]]
+      docs: [main: "readme", extras: ["README.md", "CONTRIBUTING.md", "docs/usage.md"]]
     ]
   end
 
