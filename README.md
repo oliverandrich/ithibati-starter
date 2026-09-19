@@ -23,8 +23,8 @@ it without the starter as a runtime dependency.
 
 Powered by **Ithibati 0.4.0**, with username-based accounts and passkeys:
 
-- **Claim the site:** the first visitor creates the first account; subsequent
-  registrations require an invitation.
+- **Claim the site:** an operator-issued setup code authorizes the first account;
+  subsequent registrations require an invitation.
 - **Invitations:** signed-in members can create personal, expiring, single-use
   links for a chosen username.
 - **Separate sign-in and recovery screens:** use a passkey, or a recovery code
@@ -38,8 +38,8 @@ Powered by **Ithibati 0.4.0**, with username-based accounts and passkeys:
   valid for five minutes.
 - **Revocable sessions:** sign out here or on every device, including connected
   LiveViews. Session cookies are encrypted.
-- **Auth rate limits:** 10 recovery requests and 120 other ceremony requests per
-  peer IP per minute, per running instance, with HTTP 429 and `Retry-After`.
+- **Auth rate limits:** 10 setup-code submissions, 10 recovery requests and 120
+  other ceremony requests per peer IP per minute, per running instance.
 - **Request protection:** CSRF checks, a baseline Content Security Policy and
   request-log filtering for tokens, recovery codes and WebAuthn credentials.
 
@@ -110,10 +110,11 @@ Start developing:
 mise trust
 mise install
 mise run setup
+mise run setup-code
 mise run dev
 ```
 
-Open **http://localhost:4000** and claim your instance. The generated
+Open **http://localhost:4000**, enter the printed code and claim your instance. The generated
 `CONTRIBUTING.md` covers development and checks; `docs/operations.md` covers deployment.
 `mise run setup` explicitly creates and migrates the development database; the
 installer itself does not.

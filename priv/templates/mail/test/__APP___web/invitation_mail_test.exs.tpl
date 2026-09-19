@@ -12,7 +12,7 @@ defmodule __MODULE__Web.InvitationMailTest do
 
   setup do
     attrs = %{key_id: :crypto.strong_rand_bytes(16), public_key: :crypto.strong_rand_bytes(64)}
-    {:ok, signed} = Auth.register(Plug.Test.init_test_session(build_conn(), %{}), attrs, "ada", %{})
+    {:ok, signed} = Auth.register(build_conn() |> Plug.Test.init_test_session(%{}) |> __MODULE__.SetupSupport.authorize_conn(), attrs, "ada", %{})
     %{conn: Plug.Test.init_test_session(build_conn(), get_session(signed)), account: Repo.get_by!(User, username: "ada")}
   end
 

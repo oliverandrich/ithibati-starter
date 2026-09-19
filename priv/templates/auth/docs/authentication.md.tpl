@@ -1,8 +1,10 @@
 # Authentication
 
-Ithibati is pinned to 0.4.0. On an empty database the first visitor can claim the
-instance with a username and passkey. Complete this on a trusted local/private
-connection before exposing a new deployment. Later registrations require a valid
+Ithibati is pinned to 0.4.0. On an empty database, an operator-issued code must
+unlock `/setup` before the first account can register a username and passkey. Issue
+the code after migration as described in [Operations](operations.md); enter it over
+HTTPS. The code is printed only by that command, stored only as a digest, and
+consumed with the first account claim. Later registrations require a valid
 invitation; every authenticated member can create links on `/`. Links are
 shown once, expire, and are accepted once. There is no administrator role or mail
 delivery; share links through your chosen channel.
@@ -35,7 +37,10 @@ and German.
 `AuthRateLimit` allows 10 recovery requests and 120 other ceremony requests per
 peer IP in a 60-second fixed window. Responses use HTTP 429, `Retry-After`, and a
 translated ceremony message. Configure `:auth_rate_limits` on the application as
-`[recovery: {10, 60}, ceremony: {120, 60}]` (positive counts and seconds).
+`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}]` (positive counts and seconds).
+The setup-code form allows 10 submissions per peer IP and issued code per minute by default.
+Replacing a code resets that budget. The form redirects with `Retry-After` and a
+translated message when the budget is exhausted.
 
 The supervised in-memory counters are atomic and bounded to 10,000 keys per node;
 a restart resets them. They use `conn.remote_ip` and do not trust arbitrary

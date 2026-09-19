@@ -6,12 +6,13 @@ defmodule __MODULE__Web.HardeningTest do
   alias Ithibati.Web.Gate
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
+  alias __MODULE__.SetupSupport
   alias __MODULE__Web.Auth
 
   defp signed do
     {:ok, conn} =
       Auth.register(
-        init_test_session(build_conn(), %{}),
+        build_conn() |> init_test_session(%{}) |> SetupSupport.authorize_conn(),
         %{key_id: :crypto.strong_rand_bytes(16), public_key: :crypto.strong_rand_bytes(64)},
         "ada",
         %{}

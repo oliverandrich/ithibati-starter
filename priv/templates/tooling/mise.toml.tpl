@@ -8,6 +8,11 @@ description = "Install dependencies, create the development database and build a
 env.MIX_ENV = "dev"
 run = "mix setup"
 
+[tasks.setup-code]
+description = "Issue or replace the first-account setup code"
+env.MIX_ENV = "dev"
+run = "env -u PHX_SERVER mix run -e '__MODULE__.InitialSetup.print_code!()'"
+
 [tasks.dev]
 description = "Start the development server in the foreground"
 env.MIX_ENV = "dev"

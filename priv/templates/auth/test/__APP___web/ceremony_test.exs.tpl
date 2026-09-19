@@ -9,7 +9,7 @@ defmodule __MODULE__Web.CeremonyTest do
   use __MODULE__Web.ConnCase
 
   defp signed_conn do
-    conn = get(build_conn(), "/setup")
+    conn = build_conn() |> Plug.Test.init_test_session(%{}) |> __MODULE__.SetupSupport.authorize_conn() |> get("/setup")
     [_, token] = Regex.run(~r/name="csrf-token" content="([^"]+)"/, html_response(conn, 200))
 
     {recycle(conn), token}

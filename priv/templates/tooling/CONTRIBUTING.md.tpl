@@ -8,11 +8,13 @@ Install **mise** and **PostgreSQL 18**, then prepare and start the application:
 mise trust
 mise install
 mise run setup
+mise run setup-code
 mise run dev
 ```
 
 Open **http://localhost:4000**. `mise run setup` explicitly creates, migrates and
-seeds the development database, then builds assets.
+seeds the development database, then builds assets. Enter the printed setup code
+to claim the first account.
 
 ## Configure the database
 
@@ -40,6 +42,7 @@ Production uses `DATABASE_URL` and `SECRET_KEY_BASE`; see [Operations](docs/oper
 | `mise run credo` | Compile then strict Credo |
 | `mise run audit` | Dependency advisories and retired Hex packages |
 | `mise run migrate` | Explicit development migrations |
+| `mise run setup-code` | Issue or replace the first-account setup code |
 | `mise run dev` | Start the development server in the foreground |
 | `mise run reset` | Drop and recreate the development database, migrate and seed |
 | `mise run debugserver` | IEx Phoenix server |
@@ -58,7 +61,7 @@ Read AGENTS.md for TDD and commit review rules. Generated code belongs to this
 application. Re-running the same starter/profile does nothing; it does not upgrade
 or overwrite your edits. Review dependency updates through normal PRs.
 
-`mise dev`, `mise reset`, `mise migrate` and `mise release` are the short forms
+`mise dev`, `mise reset`, `mise migrate`, `mise setup-code` and `mise release` are the short forms
 of `mise run …`. Development tasks explicitly use `MIX_ENV=dev`; release builds
 use `prod`. `mise reset` deletes the development database and runs its migrations
 and seeds again. It is an explicit local action, never part of startup or checks.

@@ -10,11 +10,13 @@ defmodule __MODULE__Web.SignInLive do
   use __MODULE__Web, :live_view
 
   alias Ithibati.Identity.Instance
+  alias __MODULE__.InitialSetup
   alias __MODULE__Web.CeremonyMessages
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, username: "", error: nil)}
+  def mount(_params, session, socket) do
+    setup_authorized? = socket.assigns.live_action == :setup and InitialSetup.authorized_session?(session)
+    {:ok, assign(socket, username: "", error: nil, setup_authorized?: setup_authorized?)}
   end
 
   @impl true
@@ -77,7 +79,12 @@ defmodule __MODULE__Web.SignInLive do
         </p>
       </div>
 
-      <form :if={@live_action == :setup} id="claim-form" phx-change="validate" phx-submit="register">
+      <.form :if={@live_action == :setup and not @setup_authorized?} for={%{}} id="setup-code-form" action={~p"/setup/authorize"}>
+        <.input type="password" name="setup_code" value="" label={gettext("Setup code")} autocomplete="off" required />
+        <Layouts.auth_button>{gettext("Unlock setup")}</Layouts.auth_button>
+      </.form>
+
+      <form :if={@live_action == :setup and @setup_authorized?} id="claim-form" phx-change="validate" phx-submit="register">
         <.input name="username" value={@username} label={gettext("Username")} autocomplete="username" required pattern={Layouts.username_pattern()} title={gettext("Letters, digits and underscores, up to thirty")} placeholder={gettext("your_username")} />
         <Layouts.auth_button>{gettext("Create your passkey")}</Layouts.auth_button>
       </form>
@@ -102,6 +109,6 @@ defmodule __MODULE__Web.SignInLive do
   defp title(:recover), do: gettext("Use a recovery code")
 
   defp subtitle(:login), do: nil
-  defp subtitle(:setup), do: gettext("Choose your username and create a passkey to set up your account.")
+  defp subtitle(:setup), do: gettext("Enter the operator setup code, then choose your username and create a passkey.")
   defp subtitle(:recover), do: gettext("Enter one of the codes you saved when you set up your account. Each code works once.")
 end

@@ -7,7 +7,7 @@ defmodule __MODULE__Web.InvitationMailFeatureTest do
   feature "a guest accepts an invitation sent from the email form", %{session: session} do
     virtual_authenticator(session)
     session
-    |> open("/")
+    |> unlock_setup()
     |> fill_in(css("input[name=username]"), with: "ada")
     |> click(button("Create your passkey"))
     |> landed_on("/recovery-codes")

@@ -25,6 +25,7 @@ defmodule IthibatiStarter.Auth do
       "secret",
       "token",
       "code",
+      "setup_code",
       "credential"
     ])
     |> Config.configure("config.exs", :ithibati, [:repo], repo)

@@ -18,6 +18,7 @@ defmodule __MODULE__Web.FeatureCase do
   import Wallaby.Browser
 
   alias Wallaby.Query
+  alias __MODULE__.InitialSetup
 
   using do
     quote do
@@ -47,6 +48,17 @@ defmodule __MODULE__Web.FeatureCase do
   """
   def open(session, path) do
     session |> visit(path) |> connected()
+  end
+
+  @doc "Issue the operator code and enter it in the real setup form."
+  def unlock_setup(session) do
+    {:ok, code} = InitialSetup.issue_code()
+
+    session
+    |> open("/setup")
+    |> fill_in(Query.css("input[name=setup_code]"), with: code)
+    |> click(Query.css("#setup-code-form button"))
+    |> assert_has(Query.css("#claim-form"))
   end
 
   @doc """

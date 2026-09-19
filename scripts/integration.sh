@@ -40,6 +40,13 @@ for profile in auth mail; do
     mise trust
     mise install
     mise run check
+    mise run setup
+    dev_setup_output=$(PHX_SERVER=true mise run setup-code)
+    dev_setup_code_lines=$(printf '%s\n' "$dev_setup_output" | grep -Ec '^Initial setup code: [A-Za-z0-9_-]{43}$' || true)
+    if [[ "$dev_setup_code_lines" != 1 ]]; then
+      echo "Development setup command did not print exactly one setup code" >&2
+      exit 1
+    fi
     # The second run must preserve the generated sources and any later user edits.
     mix ithibati_starter.install --dry-run "${options[@]}"
     if [[ "$profile" == mail ]]; then
@@ -49,7 +56,7 @@ for profile in auth mail; do
     fi
     mise release
     release="$target/_build/prod/rel/$app"
-    for command in server migrate; do
+    for command in server migrate setup-code; do
       if [[ ! -x "$release/bin/$command" ]]; then
         echo "Missing executable release command: $release/bin/$command" >&2
         exit 1
@@ -86,8 +93,16 @@ for profile in auth mail; do
       fi
       "$release/bin/migrate"
       "$release/bin/migrate"
-      # Run from outside the release directory to verify the launchers resolve it themselves.
+      # The operator command must work in the unpacked release without putting its
+      # code in the integration log. Application startup may also print log lines.
       cd "$fixture_root"
+      setup_output=$(PHX_SERVER=true "$release/bin/setup-code")
+      setup_code_lines=$(printf '%s\n' "$setup_output" | grep -Ec '^Initial setup code: [A-Za-z0-9_-]{43}$' || true)
+      if [[ "$setup_code_lines" != 1 ]]; then
+        echo "Release setup command did not print exactly one setup code" >&2
+        exit 1
+      fi
+      # Run from outside the release directory to verify the launchers resolve it themselves.
       "$release/bin/server" >"$target/release.log" 2>&1 &
       server_pid=$!
       if ! curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 \

@@ -8,7 +8,7 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
     first = virtual_authenticator(session)
 
     session
-    |> open("/")
+    |> unlock_setup()
     |> fill_in(css("input[name=username]"), with: "ada")
     |> click(button("Create your passkey"))
     |> landed_on("/recovery-codes")
@@ -60,7 +60,7 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
       cmd: "Emulation.setDeviceMetricsOverride", params: %{width: 390, height: 844, deviceScaleFactor: 1, mobile: true}
     })
     session
-    |> open("/")
+    |> unlock_setup()
     |> fill_in(css("input[name=username]"), with: "ada")
     |> click(button("Erstelle deinen Passkey"))
     |> landed_on("/recovery-codes")
@@ -80,7 +80,7 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
 
   feature "a recovery code confirms identity when the passkey is unavailable", %{session: session} do
     virtual_authenticator(session)
-    session |> open("/") |> fill_in(css("input[name=username]"), with: "ada") |> click(button("Create your passkey")) |> landed_on("/recovery-codes")
+    session |> unlock_setup() |> fill_in(css("input[name=username]"), with: "ada") |> click(button("Create your passkey")) |> landed_on("/recovery-codes")
     account = Repo.get_by!(User, username: "ada")
     [code | _] = RecoveryCodes.regenerate(account)
     session

@@ -10,7 +10,7 @@ defmodule __MODULE__Web.Auth do
   @behaviour Ithibati.Web.Handler
 
   import Phoenix.Controller, only: [json: 2]
-  import Plug.Conn, only: [put_session: 3]
+  import Plug.Conn, only: [delete_session: 2, get_session: 1, get_session: 2, put_session: 3]
 
   alias Ecto.Multi
   alias Ithibati.Identity.Grant
@@ -19,6 +19,7 @@ defmodule __MODULE__Web.Auth do
   alias Ithibati.Identity.Passkeys
   alias Ithibati.Schema
   alias Ithibati.Web.Gate
+  alias __MODULE__.InitialSetup
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
   alias __MODULE__Web.Reauth
@@ -32,10 +33,16 @@ defmodule __MODULE__Web.Auth do
     end
   end
 
-  def registration_subject(_conn, params) do
-    if Instance.needs_setup?(),
-      do: first_account(params),
-      else: invited(params["token"])
+  def registration_subject(conn, params) do
+    if Instance.needs_setup?() do
+      if InitialSetup.authorized_session?(get_session(conn)) do
+        first_account(params)
+      else
+        {:error, :setup_authorization_required}
+      end
+    else
+      invited(params["token"])
+    end
   end
 
   # The invitation says who this will be, so the browser is not asked. A form that let somebody
@@ -85,13 +92,14 @@ defmodule __MODULE__Web.Auth do
 
   def register(conn, key_attrs, username, params) do
     username
-    |> acceptance(params["token"], key_attrs)
+    |> acceptance(conn, params["token"], key_attrs)
     |> Repo.transaction()
     |> case do
       {:ok, %{account: account, recovery_codes: codes}} ->
         {:ok,
          conn
          |> Gate.log_in(account)
+         |> delete_session(:initial_setup_authorization)
          |> put_session(:recovery_codes, codes)
          |> json(%{redirect: "/recovery-codes"})}
 
@@ -106,9 +114,9 @@ defmodule __MODULE__Web.Auth do
   # Two shapes of the same transaction, and which one this is comes from the same question
   # `registration_subject/2` asked rather than from the request: the browser sends the whole body
   # again at this step, so anything read from `params` here is the client's word for it.
-  defp acceptance(username, token, key_attrs) do
+  defp acceptance(username, conn, token, key_attrs) do
     if Instance.needs_setup?(),
-      do: claim_instance(username, key_attrs),
+      do: claim_instance(username, key_attrs, get_session(conn, :initial_setup_authorization)),
       else: accept_invitation(Invitations.fetch(token), username, key_attrs)
   end
 
@@ -132,8 +140,9 @@ defmodule __MODULE__Web.Auth do
   # `claim/2` is what stops it from being the second as well. Before the grant, like `accept/2`
   # above: a transaction that is going to be refused should not mint recovery codes on its way to
   # being rolled back, because they sit in plaintext in the `changes_so_far` the caller is handed.
-  defp claim_instance(username, key_attrs) do
+  defp claim_instance(username, key_attrs, authorization) do
     Multi.new()
+    |> Multi.run(:setup_authorization, fn repo, _changes -> InitialSetup.consume(repo, authorization) end)
     |> Multi.insert(:account, User.changeset(%User{}, %{"username" => username}))
     |> Instance.claim()
     |> Grant.with_key_and_codes(key_attrs)

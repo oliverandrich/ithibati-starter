@@ -13,6 +13,7 @@ defmodule __MODULE__Web.AuthTest do
   alias Ithibati.Identity.Invitations
   alias __MODULE__.Accounts.Invitation
   alias __MODULE__.Accounts.User
+  alias __MODULE__.InitialSetup
   alias __MODULE__Web.Auth
 
   # What `Ithibati.Identity.Passkeys.verify_registration/2` hands the handler, reduced to the two
@@ -25,8 +26,14 @@ defmodule __MODULE__Web.AuthTest do
   # `Gate.log_in/2` renews the session, which raises unless one was fetched.
   defp conn, do: Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{})
 
+  defp setup_conn do
+    {:ok, code} = InitialSetup.issue_code()
+    {:ok, authorization} = InitialSetup.authorize(code)
+    Plug.Conn.put_session(conn(), :initial_setup_authorization, authorization)
+  end
+
   defp claim_instance(username) do
-    {:ok, _conn} = Auth.register(conn(), key_attrs(), username, %{})
+    {:ok, _conn} = Auth.register(setup_conn(), key_attrs(), username, %{})
 
     Repo.get_by!(User, username: username)
   end
@@ -38,13 +45,40 @@ defmodule __MODULE__Web.AuthTest do
   end
 
   describe "the first account" do
-    test "arrives without an invitation, and claims the instance doing it" do
-      assert {:ok, "first_one"} = Auth.registration_subject(conn(), %{"username" => "first_one"})
+    test "cannot start or finish a claim without operator authorization" do
+      assert {:error, :setup_authorization_required} =
+               Auth.registration_subject(conn(), %{"username" => "first_one"})
 
-      assert {:ok, _conn} = Auth.register(conn(), key_attrs(), "first_one", %{})
+      assert {:error, :setup_authorization_required} =
+               Auth.register(conn(), key_attrs(), "first_one", %{})
+
+      refute Repo.get_by(User, username: "first_one")
+    end
+
+    test "arrives without an invitation, and claims the instance doing it" do
+      authorized = setup_conn()
+      assert {:ok, "first_one"} = Auth.registration_subject(authorized, %{"username" => "first_one"})
+
+      assert {:ok, _conn} = Auth.register(authorized, key_attrs(), "first_one", %{})
 
       assert Repo.get_by(User, username: "first_one")
       refute Instance.needs_setup?()
+      assert is_nil(Repo.get(InitialSetup, 1))
+      assert {:error, :already_claimed} = InitialSetup.issue_code()
+    end
+
+    test "a rotated code also revokes a challenge already authorized" do
+      authorized = setup_conn()
+      assert {:ok, "first_one"} = Auth.registration_subject(authorized, %{"username" => "first_one"})
+      assert {:ok, _new_code} = InitialSetup.issue_code()
+
+      assert {:error, :setup_authorization_required} =
+               Auth.registration_subject(authorized, %{"username" => "first_one"})
+
+      assert {:error, :setup_authorization_required} =
+               Auth.register(authorized, key_attrs(), "first_one", %{})
+
+      refute Repo.get_by(User, username: "first_one")
     end
 
     test "is the only one: the next person needs an invitation" do
@@ -55,7 +89,7 @@ defmodule __MODULE__Web.AuthTest do
     end
 
     test "is refused without a username, rather than minting a challenge for nobody" do
-      assert {:error, :username_required} = Auth.registration_subject(conn(), %{})
+      assert {:error, :username_required} = Auth.registration_subject(setup_conn(), %{})
     end
 
     # The expensive order to get wrong: approving it here means a passkey dialog, a credential the
@@ -63,13 +97,13 @@ defmodule __MODULE__Web.AuthTest do
     test "is refused when the name is one the schema could never store" do
       for value <- ["Alice Smith!", "alice.smith", String.duplicate("a", 31), ""] do
         assert {:error, :invalid_username} =
-                 Auth.registration_subject(conn(), %{"username" => value}),
+                 Auth.registration_subject(setup_conn(), %{"username" => value}),
                "approved #{inspect(value)}"
       end
     end
 
     test "and the name it approves is the one that will be stored" do
-      assert {:ok, "ada"} = Auth.registration_subject(conn(), %{"username" => "  Ada  "})
+      assert {:ok, "ada"} = Auth.registration_subject(setup_conn(), %{"username" => "  Ada  "})
     end
   end
 
@@ -156,7 +190,7 @@ defmodule __MODULE__Web.AuthTest do
   # what it answers for one that should never have got there. "Taken" would be a lie about a name
   # nobody holds — and the two errors come from different places, so only the constraint can say.
   test "a subject the schema refuses is answered as malformed, not as taken" do
-    assert {:error, :invalid_username} = Auth.register(conn(), key_attrs(), "Not A Name!", %{})
+    assert {:error, :invalid_username} = Auth.register(setup_conn(), key_attrs(), "Not A Name!", %{})
   end
 
   # Two invitations may name one person — nothing stops that, and nothing should, since the first

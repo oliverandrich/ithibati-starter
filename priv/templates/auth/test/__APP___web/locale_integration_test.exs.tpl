@@ -18,6 +18,8 @@ defmodule __MODULE__Web.LocaleIntegrationTest do
   test "ceremony requests resolve the locale as well", %{conn: conn} do
     conn =
       conn
+      |> init_test_session(%{})
+      |> __MODULE__.SetupSupport.authorize_conn()
       |> put_req_header("accept-language", "de")
       |> post("/auth/registration/challenge", %{"username" => "ada"})
 
@@ -29,7 +31,7 @@ defmodule __MODULE__Web.LocaleIntegrationTest do
   test "connected auth screens and failures are translated", %{conn: conn} do
     conn = put_req_header(conn, "accept-language", "de")
     {:ok, view, html} = live(conn, "/setup")
-    assert html =~ "Erstelle deinen Passkey"
+    assert html =~ "Einrichtungscode"
 
     assert view
            |> element("#passkey")

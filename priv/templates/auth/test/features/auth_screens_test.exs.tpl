@@ -5,7 +5,7 @@ defmodule __MODULE__Web.AuthScreensTest do
     virtual_authenticator(session)
 
     session
-    |> open("/")
+    |> unlock_setup()
     |> assert_has(css("#claim-form"))
     |> refute_has(css("input[name=email]"))
     |> fill_in(css("input[name=username]"), with: "ada")

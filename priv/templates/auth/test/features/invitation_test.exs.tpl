@@ -14,7 +14,7 @@ defmodule __MODULE__Web.InvitationTest do
   # something else can reach their subject in a line.
   defp claim(session, username) do
     session
-    |> open("/")
+    |> unlock_setup()
     |> fill_in(css("input[name=username]"), with: username)
     |> click(button("Create your passkey"))
     |> landed_on("/recovery-codes")
@@ -42,7 +42,12 @@ defmodule __MODULE__Web.InvitationTest do
 
     session
     |> open("/")
-    |> assert_has(css("p", text: "Choose your username and create a passkey"))
+    |> assert_has(css("#setup-code-form"))
+    |> refute_has(css("#claim-form"))
+    |> fill_in(css("input[name=setup_code]"), with: "wrong")
+    |> click(button("Unlock setup"))
+    |> through_navigation(css("[role=alert]", text: "That setup code is invalid"))
+    |> unlock_setup()
     |> fill_in(css("input[name=username]"), with: "ada")
     |> click(button("Create your passkey"))
     |> landed_on("/recovery-codes")

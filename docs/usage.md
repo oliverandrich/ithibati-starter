@@ -27,10 +27,11 @@ Start developing:
 mise trust
 mise install
 mise run setup
+mise run setup-code
 mise run dev
 ```
 
-Open **http://localhost:4000** and claim your instance. The generated
+Open **http://localhost:4000**, enter the printed code and claim your instance. The generated
 `CONTRIBUTING.md` covers development and checks; `docs/operations.md` covers deployment.
 `mise run setup` explicitly creates and migrates the development database; the
 installer itself does not.
@@ -159,7 +160,7 @@ receipt. Email-as-identifier remains an application-level customization.
 | Route | Purpose |
 | --- | --- |
 | `/` | Protected home with invitation creation |
-| `/setup` | First-account setup; closes after the instance is claimed |
+| `/setup` | Operator-code entry and first-account setup; closes after the instance is claimed |
 | `/login` | Passkey sign-in |
 | `/recover` | Recovery-code sign-in |
 | `/invite/:token` | Accept an invitation with a passkey |
@@ -191,12 +192,13 @@ passes that choice to LiveView. Connected views keep their language until the ne
 full load. There is no account preference or language switch; q-value weighting is
 not implemented. Add translations through Gettext in the generated app.
 
-**Deployment remains yours.** Claim the first account privately before exposing a
-new instance. Rate limits are in-memory and per node; restarts reset them. Configure
-trusted proxies or edge limits for your deployment, especially with multiple nodes.
+**Deployment remains yours.** Generate the setup code with the release command in
+the generated operations guide and enter it over HTTPS. Without a code, an empty
+instance cannot be claimed. Rate limits are in-memory and per node; restarts reset
+them. Configure trusted proxies or edge limits, especially with multiple nodes.
 The healthcheck proves HTTP liveness, not database readiness. Migrations and cleanup
 never run automatically during application boot.
 
-Generated applications share `mise dev`, `mise reset`, `mise migrate` and
+Generated applications share `mise dev`, `mise reset`, `mise migrate`, `mise setup-code` and
 `mise release`. Reset explicitly recreates the development database; release
-builds provide `bin/migrate` and `bin/server` for the target machine.
+builds provide `bin/migrate`, `bin/setup-code` and `bin/server` for the target machine.

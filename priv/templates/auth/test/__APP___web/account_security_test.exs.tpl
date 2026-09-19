@@ -10,7 +10,7 @@ defmodule __MODULE__Web.AccountSecurityTest do
   defp attrs, do: %{key_id: :crypto.strong_rand_bytes(16), public_key: :crypto.strong_rand_bytes(64)}
 
   setup do
-    {:ok, signed} = Auth.register(Plug.Test.init_test_session(build_conn(), %{}), attrs(), "ada", %{})
+    {:ok, signed} = Auth.register(build_conn() |> Plug.Test.init_test_session(%{}) |> __MODULE__.SetupSupport.authorize_conn(), attrs(), "ada", %{})
     account = Repo.get_by!(User, username: "ada")
     session = get_session(signed) |> Map.put("confirmed_at", System.system_time(:second)) |> Map.put("confirmed_account_id", account.id)
     %{conn: Plug.Test.init_test_session(build_conn(), session), account: account}

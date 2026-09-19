@@ -85,8 +85,9 @@ with Ithibati Starter:
   database, including migrations and seeds. Run only when explicitly requested.
 - `migrate`: explicit development migrations.
 - `release`: compile assets and build a production release for the build platform.
-- In the unpacked release, `bin/migrate` applies migrations and `bin/server`
-  starts the HTTP server. Startup never runs migrations automatically.
+- In the unpacked release, `bin/migrate` applies migrations, `bin/setup-code`
+  issues the first-account code and `bin/server` starts the HTTP server. Startup
+  never runs migrations automatically.
 
 Application-specific asset builds and quality checks remain in Mix aliases.
 

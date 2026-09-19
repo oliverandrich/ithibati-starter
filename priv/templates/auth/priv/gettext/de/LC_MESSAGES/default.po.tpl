@@ -35,11 +35,6 @@ msgstr "Zurück zur Passkey-Anmeldung"
 msgid "Choose a username for your guest, then send them their personal invitation link."
 msgstr "Wähle einen Benutzernamen für deinen Gast und sende ihm seinen persönlichen Einladungslink."
 
-#: lib/__APP___web/live/sign_in_live.ex:105
-#, elixir-autogen, elixir-format
-msgid "Choose your username and create a passkey to set up your account."
-msgstr "Wähle deinen Benutzernamen und erstelle einen Passkey für dein Konto."
-
 #: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:6
 #, elixir-autogen, elixir-format
 msgid "Copy recovery codes"
@@ -573,3 +568,23 @@ msgstr "Benutzername: %{username}"
 #, elixir-autogen, elixir-format
 msgid "Your invitation to %{site}"
 msgstr "Deine Einladung zu %{site}"
+
+#: lib/__APP___web/live/sign_in_live.ex
+msgid "Setup code"
+msgstr "Einrichtungscode"
+
+#: lib/__APP___web/live/sign_in_live.ex
+msgid "Unlock setup"
+msgstr "Einrichtung freischalten"
+
+#: lib/__APP___web/live/sign_in_live.ex
+msgid "Enter the operator setup code, then choose your username and create a passkey."
+msgstr "Gib den Einrichtungscode des Betreibers ein, wähle dann deinen Benutzernamen und erstelle einen Passkey."
+
+#: lib/__APP___web/controllers/setup_controller.ex
+msgid "That setup code is invalid or has been replaced."
+msgstr "Dieser Einrichtungscode ist ungültig oder wurde ersetzt."
+
+#: lib/__APP___web/ceremony_messages.ex
+msgid "Enter a current setup code before creating a passkey."
+msgstr "Gib einen aktuellen Einrichtungscode ein, bevor du einen Passkey erstellst."

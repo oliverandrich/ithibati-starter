@@ -24,6 +24,7 @@ defmodule __MODULE__Web.CeremonyMessages do
   defp sentence("account_mismatch"), do: gettext("Use a passkey or recovery code belonging to your current account.")
   defp sentence("authentication_required"), do: gettext("Please sign in again before adding a passkey.")
   defp sentence("invitation_required"), do: gettext("This instance is invitation-only.")
+  defp sentence("setup_authorization_required"), do: gettext("Enter a current setup code before creating a passkey.")
   defp sentence("invitation_unknown"), do: gettext("That invitation has been used, or has expired.")
   defp sentence("username_taken"), do: gettext("That username is taken.")
 

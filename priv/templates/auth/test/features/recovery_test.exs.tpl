@@ -8,7 +8,7 @@ defmodule __MODULE__Web.RecoveryTest do
 
     codes =
       session
-      |> open("/")
+      |> unlock_setup()
       |> fill_in(css("input[name=username]"), with: "ada")
       |> click(button("Create your passkey"))
       |> landed_on("/recovery-codes")

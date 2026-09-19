@@ -42,11 +42,6 @@ msgstr ""
 msgid "Choose a username for your guest, then send them their personal invitation link."
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:105
-#, elixir-autogen, elixir-format
-msgid "Choose your username and create a passkey to set up your account."
-msgstr ""
-
 #: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:6
 #, elixir-autogen, elixir-format
 msgid "Copy recovery codes"
@@ -579,4 +574,24 @@ msgstr ""
 #: lib/__APP__/invitation_email.ex:9
 #, elixir-autogen, elixir-format
 msgid "Your invitation to %{site}"
+msgstr ""
+
+#: lib/__APP___web/live/sign_in_live.ex
+msgid "Setup code"
+msgstr ""
+
+#: lib/__APP___web/live/sign_in_live.ex
+msgid "Unlock setup"
+msgstr ""
+
+#: lib/__APP___web/live/sign_in_live.ex
+msgid "Enter the operator setup code, then choose your username and create a passkey."
+msgstr ""
+
+#: lib/__APP___web/controllers/setup_controller.ex
+msgid "That setup code is invalid or has been replaced."
+msgstr ""
+
+#: lib/__APP___web/ceremony_messages.ex
+msgid "Enter a current setup code before creating a passkey."
 msgstr ""

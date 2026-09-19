@@ -6,12 +6,17 @@ Created with Ithibati Starter 0.1.0: Phoenix, LiveView, PostgreSQL and opinionat
 mise trust
 mise install
 mise run setup
+mise run setup-code
 mise dev
 ```
 
+Enter the printed code at `/setup` to create the first account. Generate a replacement
+code with the same command if needed; only the latest code works.
+
 Use `mise reset` to explicitly recreate the development database (deletes its data),
 `mise migrate` for pending development migrations, and `mise release` to build the
-production package. In that package, run `bin/migrate` once, then `bin/server`.
+production package. In that package, run `bin/migrate`, `bin/setup-code`, then
+`bin/server` as described in [Operations](docs/operations.md).
 
 ## Documentation
 

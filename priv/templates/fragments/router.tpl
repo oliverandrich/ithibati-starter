@@ -56,6 +56,8 @@ defmodule __MODULE__Web.Router do
   scope "/", __MODULE__Web do
     pipe_through :browser
 
+    post "/setup/authorize", SetupController, :authorize
+
     live_session :public, on_mount: [{Ithibati.Web.Gate, :current_account}, {__MODULE__Web.Locale, :set}] do
       live "/login", SignInLive, :login
       live "/recover", SignInLive, :recover

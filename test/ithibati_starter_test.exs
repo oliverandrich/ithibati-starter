@@ -44,12 +44,15 @@ defmodule IthibatiStarterTest do
       files = result.assigns.test_files
 
       assert files["docs/operations.md"] =~ "bin/migrate"
+      assert files["docs/operations.md"] =~ "bin/setup-code"
       assert files["docs/authentication.md"] =~ "Sample.AuthCleanup.run()"
+      assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["CONTRIBUTING.md"] =~ "Chrome"
       refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
       refute files["CONTRIBUTING.md"] =~ "## Health, releases"
       assert files["README.md"] =~ "docs/operations.md"
+      assert files["README.md"] =~ "mise run setup-code"
       assert files["AGENTS.md"] =~ "Documentation structure"
       refute Map.has_key?(files, "docs/development.md")
 
@@ -96,6 +99,7 @@ defmodule IthibatiStarterTest do
     assert diff(result, only: "mix.exs") =~ "== 0.4.0"
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
+    assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
   end
 
   for opts <- [[], [with_mail: true]] do
@@ -105,6 +109,11 @@ defmodule IthibatiStarterTest do
       result = project() |> IthibatiStarter.install(@command_opts)
 
       assert_creates(result, "mise.toml", fn text ->
+        assert text =~ "[tasks.setup-code]"
+
+        assert text =~
+                 ~s|run = "env -u PHX_SERVER mix run -e 'Sample.InitialSetup.print_code!()'"|
+
         assert text =~ "[tasks.reset]"
         assert text =~ ~s(run = "mix ecto.reset")
         assert text =~ "[tasks.release]"
@@ -115,7 +124,7 @@ defmodule IthibatiStarterTest do
     end
 
     @tag :command_contract
-    test "release launchers start the server and migrate from any directory for #{inspect(opts)}" do
+    test "release launchers start the server, migrate and issue setup codes from any directory for #{inspect(opts)}" do
       result = project() |> IthibatiStarter.install(@command_opts) |> apply_igniter!()
       files = result.assigns.test_files
 
@@ -130,12 +139,18 @@ defmodule IthibatiStarterTest do
 
       for {name, expected} <- [
             {"server", "true\nstart\n"},
-            {"migrate", "\neval\nSample.Release.migrate()\n"}
+            {"migrate", "\neval\nSample.Release.migrate()\n"},
+            {"setup-code", "\neval\nSample.InitialSetup.print_code!()\n"}
           ] do
         source = Map.fetch!(files, "rel/overlays/bin/#{name}")
         path = Path.join(directory, name)
         File.write!(path, source)
         assert {^expected, 17} = System.cmd("sh", [path], cd: "/", env: [{"PHX_SERVER", nil}])
+
+        if name == "setup-code" do
+          assert {^expected, 17} =
+                   System.cmd("sh", [path], cd: "/", env: [{"PHX_SERVER", "true"}])
+        end
       end
     end
   end

@@ -6,7 +6,7 @@ defmodule __MODULE__Web.GermanAuthTest do
     virtual_authenticator(session)
 
     session
-    |> open("/")
+    |> unlock_setup()
     |> assert_has(css("html[lang=de]"))
     |> fill_in(css("input[name=username]"), with: "ada")
     |> click(button("Erstelle deinen Passkey"))
