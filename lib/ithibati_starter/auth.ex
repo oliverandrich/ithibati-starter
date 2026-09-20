@@ -15,11 +15,14 @@ defmodule IthibatiStarter.Auth do
     |> Deps.add_dep({:ithibati, "== 0.5.0"}, yes?: true)
     |> Deps.add_dep({:wallaby, "~> 0.31.0", only: :test, runtime: false}, yes?: true)
     |> Files.copy_tree("auth", b)
-    |> Files.replace(
-      "lib/#{b.app}/application.ex",
-      "children = [",
-      "children = [\n      #{b.module}.AuthRateLimiter,"
-    )
+    |> Files.replace("lib/#{b.app}/application.ex", "    children = [", """
+        # Before anything binds a port. An instance whose claim is not protected must not
+        # serve one request: the first stranger to arrive would be the one who claims it.
+        #{b.module}.Claim.verify!()
+
+        children = [
+          #{b.module}.AuthRateLimiter,\
+    """)
     |> Config.configure("config.exs", :phoenix, [:filter_parameters], [
       "password",
       "secret",
@@ -56,6 +59,13 @@ defmodule IthibatiStarter.Auth do
       "same_site: \"Lax\"",
       "same_site: \"Lax\",\n    encryption_salt: #{inspect(Base.encode64(:crypto.strong_rand_bytes(12)))}"
     )
+    |> Files.replace("lib/#{b.app}_web/endpoint.ex", "  plug Plug.RequestId", """
+      # Before the request id and the telemetry, so a log line names the visitor rather than
+      # the proxy that carried them.
+      plug #{b.module}Web.ClientIp
+
+      plug Plug.RequestId\
+    """)
     |> Files.replace("lib/#{b.app}_web/endpoint.ex", "  plug Plug.Static,", """
       if Application.compile_env(:#{b.app}, :sql_sandbox, false) do
         plug Phoenix.Ecto.SQL.Sandbox
@@ -78,6 +88,7 @@ defmodule IthibatiStarter.Auth do
       "System.get_env(\"PORT\", \"4000\")",
       "System.get_env(\"PORT\", if(config_env() == :test, do: \"4102\", else: \"4000\"))"
     )
+    |> Files.append("config/runtime.exs", Files.template("fragments/trusted_proxies_runtime", b))
     |> Files.replace(
       "test/#{b.app}_web/controllers/page_controller_test.exs",
       "assert html_response(conn, 200) =~ \"Peace of mind from prototype to production\"",

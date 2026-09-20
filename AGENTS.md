@@ -110,4 +110,8 @@ shared-host tuning as a universal default without measurements.
   scaffolding or overall tooling modernization, use the personal
   `elixir-project-setup` skill; Credo-only setup uses `elixir-quality`.
   Routine project checks do not trigger skill adoption.
+- Generate exactly two profiles: username invitations, and the same with invitation
+  mail. Accounts are identified by a username in both; an address is a delivery
+  detail, never the identifier. `:operator_code` is the only claim mode, and a
+  generated application verifies it where it starts.
 - Keep upstream attribution and generated documentation aligned with the templates.

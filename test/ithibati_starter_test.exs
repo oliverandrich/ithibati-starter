@@ -47,6 +47,8 @@ defmodule IthibatiStarterTest do
       assert files["docs/operations.md"] =~ "bin/setup-code"
       assert files["docs/operations.md"] =~ "Sample.AuthCleanup.run()"
       assert files["docs/authentication.md"] =~ "manual_invitation: {10, 3600}"
+      assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
+      assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["CONTRIBUTING.md"] =~ "Chrome"
@@ -127,6 +129,48 @@ defmodule IthibatiStarterTest do
 
     assert files["lib/sample_web/auth.ex"] =~ "Instance.claim(authorization: authorization)"
     refute files["lib/sample_web/auth.ex"] =~ "InitialSetup.consume"
+  end
+
+  test "an unsupported claim mode stops the boot instead of offering a field nobody can satisfy" do
+    files =
+      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+
+    assert files["lib/sample/claim.ex"] =~ "Config.initial_claim_mode()"
+    assert files["lib/sample/claim.ex"] =~ ":operator_code"
+    assert Map.has_key?(files, "test/sample/claim_test.exs")
+
+    assert [_, started] = String.split(files["lib/sample/application.ex"], "Claim.verify!()")
+    assert started =~ "children = ["
+
+    assert files["lib/sample/initial_setup.ex"] =~ "Claim.verify!()"
+  end
+
+  test "a request forwarded by a trusted proxy is counted against the visitor" do
+    files =
+      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+
+    client_ip = files["lib/sample_web/client_ip.ex"]
+    assert client_ip =~ ":trusted_proxies"
+    # A proxy writes one header and hands the rest through as the visitor wrote them.
+    assert client_ip =~ ~s(@header "x-forwarded-for")
+
+    # Every address-keyed budget counts the visitor this plug resolved, not the socket.
+    assert files["lib/sample_web/auth_rate_limit.ex"] =~ "ClientIp.bucket(conn.remote_ip)"
+
+    assert files["lib/sample_web/controllers/setup_controller.ex"] =~
+             "AuthRateLimit.key(conn, :setup)"
+
+    assert Map.has_key?(files, "test/sample_web/client_ip_test.exs")
+
+    # Before the request id, so a log line names the visitor rather than the proxy.
+    assert [_, logged] =
+             String.split(files["lib/sample_web/endpoint.ex"], "plug SampleWeb.ClientIp")
+
+    assert logged =~ "plug Plug.RequestId"
+
+    assert files["config/runtime.exs"] =~ "TRUSTED_PROXIES"
+    assert files["config/runtime.exs"] =~ ":inet.parse_strict_address"
+    assert Map.has_key?(files, "test/sample_web/trusted_proxies_test.exs")
   end
 
   for opts <- [[], [with_mail: true]] do

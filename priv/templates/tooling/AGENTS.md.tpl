@@ -58,6 +58,18 @@ content. Preserve project-specific documentation; common structure does not impl
 identical application features. Other agent entry points such as `CLAUDE.md` refer
 to `AGENTS.md` and do not maintain another set of rules.
 
+## Authentication scope
+
+Accounts are identified by a username, with or without invitation mail. An address
+is a delivery detail, never the identifier. `:operator_code` is the only supported
+claim mode; `__MODULE__.Claim` refuses to start an instance configured otherwise.
+Do not add Ithibati's `:open` mode, a second identifier, or a registration path
+that skips an invitation.
+
+Authentication budgets are keyed by `conn.remote_ip`. `__MODULE__Web.ClientIp`
+supplies that address and believes `X-Forwarded-For` only on a connection from the
+loopback or from `TRUSTED_PROXIES`. Keep the plug ahead of the request id.
+
 ## Deployment scope
 
 Ship the application as a Mix release with its runtime: unpack, configure, run.

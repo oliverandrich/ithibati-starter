@@ -12,8 +12,9 @@ mise run release
 ```
 
 The release is in `_build/prod/rel/__APP__`. Set `DATABASE_URL`, `SECRET_KEY_BASE`,
-`PHX_HOST` and `PORT` for the deployment. Run migration once as an explicit deploy
-step, issue the first-account setup code on the server, then start the application:
+`PHX_HOST` and `PORT` for the deployment, and `TRUSTED_PROXIES` when a reverse proxy
+runs on another host. Run migration once as an explicit deploy step, issue the
+first-account setup code on the server, then start the application:
 
 ```sh
 bin/migrate
@@ -31,6 +32,19 @@ closes `/setup`. A server started before a code is issued stays locked for claim
 To replace a lost or exposed code before claiming the instance, run the same command
 again. The previous code and sessions authorized by it stop working. On a shared
 server, keep the command output visible only to the operator.
+
+The usual deployment is a release behind a reverse proxy on the same host. Every
+request then arrives from one socket, so authentication budgets would be shared by
+everybody behind it. `__MODULE__Web.ClientIp` takes the visitor's address from
+`X-Forwarded-For` instead, and believes that header only on a connection from the
+loopback or from an address named in `TRUSTED_PROXIES`, comma separated and one
+address per entry rather than a range. A name that is not an address stops the boot
+rather than being dropped quietly, so an instance exposed directly still counts the
+address it actually sees.
+
+The application refuses to start unless `config :ithibati, initial_claim: :operator_code`
+is set. An unprotected claim would hand the instance to the first stranger who finds the
+host, so this is a refusal to boot rather than a setup page nobody can satisfy.
 
 The migration command starts the repo without the HTTP server. It is safe to run
 again when all migrations are already applied. It does not create the database.
@@ -56,7 +70,7 @@ on each application node. A restart resets their windows. In a multi-node deploy
 use a trusted reverse proxy or shared limiter for a client-IP budget across nodes.
 The manual-invitation budget is keyed by account, so an IP-only edge limit cannot
 enforce a single quota across nodes; use a shared account-keyed limiter if that
-guarantee is needed. Do not trust arbitrary `X-Forwarded-For` request headers.
+guarantee is needed.
 See [Authentication](authentication.md#authentication-limits-and-maintenance) for
 the default limits and configuration.
 

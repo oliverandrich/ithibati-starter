@@ -38,8 +38,14 @@ Powered by **Ithibati 0.5.0**, with username-based accounts and passkeys:
   valid for five minutes.
 - **Revocable sessions:** sign out here or on every device, including connected
   LiveViews. Session cookies are encrypted.
+- **One claim mode:** `initial_claim: :operator_code` is checked where the
+  application starts, so a misconfigured instance refuses to boot.
 - **Auth rate limits:** 10 setup-code submissions, 10 recovery requests and 120
-  other ceremony requests per peer IP per minute, per running instance.
+  other ceremony requests per visitor address per minute, per running instance.
+- **Real client addresses:** behind a reverse proxy, `X-Forwarded-For` is believed
+  on a connection from the loopback or from `TRUSTED_PROXIES`, and nowhere else.
+  No other forwarding header is read, and private visitor addresses are told apart.
+  Budgets count one IPv6 `/64` as one visitor.
 - **Request protection:** CSRF checks, a baseline Content Security Policy and
   request-log filtering for tokens, recovery codes and WebAuthn credentials.
 

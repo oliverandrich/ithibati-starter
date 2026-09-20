@@ -10,6 +10,12 @@ invitation; every authenticated member can create links on `/`. Links are
 shown once, expire, and are accepted once. There is no administrator role or mail
 delivery; share links through your chosen channel.
 
+Accounts are identified by a username, here and with invitation mail; an address is a
+delivery detail, never the identifier. The claim mode is fixed to
+`config :ithibati, initial_claim: :operator_code`, and `__MODULE__.Claim` checks it where
+the application starts. Ithibati's `:open` mode is therefore a refusal to boot rather than
+a setup page offering a field nobody can satisfy.
+
 Sessions are revocable and cookies are encrypted because they temporarily carry
 recovery codes. Recovery codes are displayed once after registration. Adapt the
 account policy to the application.
@@ -36,7 +42,7 @@ and German.
 ## Authentication limits and maintenance
 
 `AuthRateLimit` allows 10 recovery requests and 120 other ceremony requests per
-peer IP in a 60-second fixed window. Responses use HTTP 429, `Retry-After`, and a
+visitor address in a 60-second fixed window. Responses use HTTP 429, `Retry-After`, and a
 translated ceremony message. The manual-link form allows 10 creation attempts per
 signed-in account per hour; invalid attempts also use that budget. A rejected attempt
 creates no invitation and shows a translated message. Configure `:auth_rate_limits`
@@ -44,16 +50,21 @@ on the application as
 `[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, manual_invitation: {10, 3600}]`
 (positive counts and seconds). The manual limit is separate from the mail sender
 and recipient limits when mail delivery is enabled; neither spends the other's budget.
-The setup-code form allows 10 submissions per peer IP per minute by default.
+The setup-code form allows 10 submissions per visitor address per minute by default.
 Replacing a code revokes earlier authorizations but does not reset that budget.
 The form redirects with `Retry-After` and a translated message when the budget
 is exhausted.
 
 The supervised in-memory counters are atomic and bounded to 10,000 keys per node;
-their windows expire and a restart resets them. Ceremony and setup limits use
-`conn.remote_ip` and do not trust arbitrary `X-Forwarded-For` headers. Behind a
-reverse proxy, configure trusted proxy handling or enforce client-IP limits at the
-edge. Multiple nodes need a shared client-IP limit, and a shared account-keyed
+their windows expire and a restart resets them. Ceremony and setup limits count per
+`conn.remote_ip`, which `__MODULE__Web.ClientIp` takes from `X-Forwarded-For` only on a
+connection from the loopback or an address named in `TRUSTED_PROXIES`; see
+[Operations](operations.md). No other forwarding header is read, because a proxy
+hands those through exactly as the visitor wrote them. One IPv6 allocation is one
+budget: `ClientIp.bucket/1` counts the `/64`, which a visitor cannot rotate out of. Behind a reverse proxy every
+request otherwise arrives from one socket, and one stranger would spend the budget
+of everybody sharing it.
+Multiple nodes need a shared client-IP limit, and a shared account-keyed
 limiter if the manual-link quota must hold across nodes. These defaults are not a
 distributed rate-limit service.
 

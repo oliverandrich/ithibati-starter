@@ -92,7 +92,10 @@ Add `--with-mail` for email invitations.
 
 ## Choose your profile
 
-Ithibati is always included. Choose whether invitations should also be delivered by email:
+Ithibati is always included, and these two profiles are the only ones the starter
+supports. Accounts are identified by a username in both; an email address is a
+delivery detail, never the identifier. Choose whether invitations should also be
+delivered by email:
 
 | Feature | Default | `--with-mail` |
 | --- | :---: | :---: |
