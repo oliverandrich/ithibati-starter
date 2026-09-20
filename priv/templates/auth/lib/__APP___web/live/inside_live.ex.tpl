@@ -9,6 +9,7 @@ defmodule __MODULE__Web.InsideLive do
   use __MODULE__Web, :live_view
 
   alias __MODULE__.Accounts.Invitation
+  alias __MODULE__.AuthRateLimiter
   alias __MODULE__.Repo
   alias __MODULE__Web.CoreComponents
 
@@ -23,14 +24,17 @@ defmodule __MODULE__Web.InsideLive do
   end
 
   def handle_event("invite", %{"username" => username}, socket) do
-    %Invitation{}
-    |> Invitation.changeset(%{"username" => username})
-    |> Repo.insert()
-    |> case do
+    {limit, seconds} = AuthRateLimiter.limit(:manual_invitation)
+    key = {:manual_invitation, socket.assigns.current_account.id}
+
+    with :ok <- AuthRateLimiter.check(key, limit, seconds),
+         {:ok, invitation} <- %Invitation{} |> Invitation.changeset(%{"username" => username}) |> Repo.insert() do
       # The token is the only copy there will ever be: the row holds its sha256, and the virtual
       # field is empty on anything read back later. So it goes on the screen now or not at all.
-      {:ok, invitation} ->
-        {:noreply, assign(socket, link: url(~p"/invite/#{invitation.token}"), username: "")}
+      {:noreply, assign(socket, link: url(~p"/invite/#{invitation.token}"), username: "")}
+    else
+      {:error, retry_after} when is_integer(retry_after) ->
+        {:noreply, assign(socket, error: gettext("Too many invitations. Please try again later."))}
 
       {:error, changeset} ->
         {:noreply, assign(socket, error: changeset_message(changeset))}

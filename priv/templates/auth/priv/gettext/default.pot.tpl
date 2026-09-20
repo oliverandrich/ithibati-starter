@@ -562,6 +562,7 @@ msgid "Their email address"
 msgstr ""
 
 #: lib/__APP___web/controllers/invitation_controller.ex:15
+#: lib/__APP___web/live/inside_live.ex:37
 #, elixir-autogen, elixir-format
 msgid "Too many invitations. Please try again later."
 msgstr ""

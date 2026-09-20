@@ -45,7 +45,8 @@ defmodule IthibatiStarterTest do
 
       assert files["docs/operations.md"] =~ "bin/migrate"
       assert files["docs/operations.md"] =~ "bin/setup-code"
-      assert files["docs/authentication.md"] =~ "Sample.AuthCleanup.run()"
+      assert files["docs/operations.md"] =~ "Sample.AuthCleanup.run()"
+      assert files["docs/authentication.md"] =~ "manual_invitation: {10, 3600}"
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["CONTRIBUTING.md"] =~ "Chrome"
@@ -59,6 +60,7 @@ defmodule IthibatiStarterTest do
 
       if @documentation_opts[:with_mail] do
         assert files["docs/mail.md"] =~ "SMTP_HOST"
+        assert files["docs/mail.md"] =~ "separate from the manual-link"
         assert files["README.md"] =~ "docs/mail.md"
         assert files["docs/authentication.md"] =~ "(mail.md)"
         refute files["CONTRIBUTING.md"] =~ "SMTP_HOST"

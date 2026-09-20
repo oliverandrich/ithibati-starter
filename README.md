@@ -26,7 +26,7 @@ Powered by **Ithibati 0.4.0**, with username-based accounts and passkeys:
 - **Claim the site:** an operator-issued setup code authorizes the first account;
   subsequent registrations require an invitation.
 - **Invitations:** signed-in members can create personal, expiring, single-use
-  links for a chosen username.
+  links for a chosen username, limited to 10 attempts per account per hour.
 - **Separate sign-in and recovery screens:** use a passkey, or a recovery code
   when your passkey is unavailable.
 - **Passkey settings:** add, rename and remove your own passkeys. The last one
@@ -80,8 +80,8 @@ Dependency advisories run separately through `mise run audit`.
   sessions, abandoned challenges and expired, unaccepted invitations.
 - Environment-based database configuration and a documented release workflow.
 
-Cleanup is explicit. Choose Oban, cron or your hosting platform in the application
-when you need scheduling; the starter installs no scheduler.
+Cleanup is explicit. The generated operations guide gives a recurring release
+command; the starter installs no scheduler.
 
 ## Get started
 

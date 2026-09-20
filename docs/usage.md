@@ -130,7 +130,8 @@ nor personal AI skills are required by generated applications.
 
 **This starter defaults to usernames, invitation-only registration and manually
 shared invitation links.** That is the starter's chosen policy, not a restriction
-of Ithibati.
+of Ithibati. The manual form allows 10 creation attempts per signed-in account
+per hour per node; its limit is separate from optional mail delivery.
 
 Ithibati lets an application choose its identifier, including an email address.
 Since 0.4.0 it also provides optional invitation-mail delivery through
@@ -156,9 +157,10 @@ STARTTLS and certificate verification. Configure `MAIL_FROM`, `SMTP_HOST`,
 configuration and delivery limits. Other providers can replace the Swoosh adapter.
 
 Delivery is synchronous, limited to 10 attempts per member and 3 per recipient per
-hour per node. There are no automatic retries or background jobs. Transport errors
-leave the invitation valid and show an error; transport acceptance is not proof of
-receipt. Email-as-identifier remains an application-level customization.
+hour per node. These mail budgets do not spend the manual-link budget. There are no
+automatic retries or background jobs. Transport errors leave the invitation valid
+and show an error; transport acceptance is not proof of receipt. Email-as-identifier
+remains an application-level customization.
 
 ## Generated pages
 
@@ -200,7 +202,9 @@ not implemented. Add translations through Gettext in the generated app.
 **Deployment remains yours.** Generate the setup code with the release command in
 the generated operations guide and enter it over HTTPS. Without a code, an empty
 instance cannot be claimed. Rate limits are in-memory and per node; restarts reset
-them. Configure trusted proxies or edge limits, especially with multiple nodes.
+them. Configure trusted proxies or edge limits for client-IP requests, and use a
+shared account-keyed limit if manual-link quotas must hold across multiple nodes.
+The generated operations guide includes a recurring auth-cleanup command.
 The healthcheck proves HTTP liveness, not database readiness. Migrations and cleanup
 never run automatically during application boot.
 

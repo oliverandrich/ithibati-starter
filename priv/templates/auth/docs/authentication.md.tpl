@@ -36,34 +36,33 @@ and German.
 
 `AuthRateLimit` allows 10 recovery requests and 120 other ceremony requests per
 peer IP in a 60-second fixed window. Responses use HTTP 429, `Retry-After`, and a
-translated ceremony message. Configure `:auth_rate_limits` on the application as
-`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}]` (positive counts and seconds).
+translated ceremony message. The manual-link form allows 10 creation attempts per
+signed-in account per hour; invalid attempts also use that budget. A rejected attempt
+creates no invitation and shows a translated message. Configure `:auth_rate_limits`
+on the application as
+`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, manual_invitation: {10, 3600}]`
+(positive counts and seconds). The manual limit is separate from the mail sender
+and recipient limits when mail delivery is enabled; neither spends the other's budget.
 The setup-code form allows 10 submissions per peer IP and issued code per minute by default.
 Replacing a code resets that budget. The form redirects with `Retry-After` and a
 translated message when the budget is exhausted.
 
 The supervised in-memory counters are atomic and bounded to 10,000 keys per node;
-a restart resets them. They use `conn.remote_ip` and do not trust arbitrary
-`X-Forwarded-For` headers. Behind a reverse proxy, configure trusted proxy handling
-in the deployment or enforce client-IP limits at the edge. Multiple nodes require
-a shared edge limit for a cluster-wide budget. These defaults are not a distributed
-rate-limit service.
+their windows expire and a restart resets them. Ceremony and setup limits use
+`conn.remote_ip` and do not trust arbitrary `X-Forwarded-For` headers. Behind a
+reverse proxy, configure trusted proxy handling or enforce client-IP limits at the
+edge. Multiple nodes need a shared client-IP limit, and a shared account-keyed
+limiter if the manual-link quota must hold across nodes. These defaults are not a
+distributed rate-limit service.
 
 The passkey settings page provides **Sign out on all devices**, including the
 current session. Ithibati revokes stored sessions and broadcasts disconnects to
 live sockets. Passkeys remain valid for future logins.
 
-Run `mix auth.cleanup` explicitly in development or from your own scheduler.
-For an already-running release, call:
-
-```sh
-bin/__APP__ rpc '__MODULE__.AuthCleanup.run()'
-```
-
-It returns deletion counts for expired sessions, abandoned challenges and expired,
+Schedule [auth cleanup](operations.md#authentication-maintenance) on the running
+release. It removes expired sessions, abandoned challenges and expired,
 unaccepted invitations. Valid credentials, recovery codes and accepted invitations
-are preserved. Nothing schedules this automatically: use Oban, cron or the hosting
-platform if the concrete application needs scheduled maintenance.
+are preserved.
 
 Phoenix request logs filter passwords, secrets, tokens, recovery codes and WebAuthn
 credentials through `:filter_parameters`. Preserve this filtering when adding logging.

@@ -36,6 +36,29 @@ again when all migrations are already applied. It does not create the database.
 Provide a database and take backups through your deployment's normal workflow.
 The application does not migrate automatically during boot.
 
+## Authentication maintenance
+
+Arrange a recurring job on the host, for example daily, to run this against the
+already-running release:
+
+```sh
+bin/__APP__ rpc '__MODULE__.AuthCleanup.run()'
+```
+
+The command reports counts of expired sessions, abandoned challenges and expired,
+unaccepted invitations removed. It is safe to repeat and leaves active credentials,
+recovery codes and accepted invitations untouched. In development, run
+`mix auth.cleanup` explicitly. The release does not install a scheduler or cron job.
+
+Authentication request limits and manual-link invitations use in-memory counters
+on each application node. A restart resets their windows. In a multi-node deployment,
+use a trusted reverse proxy or shared limiter for a client-IP budget across nodes.
+The manual-invitation budget is keyed by account, so an IP-only edge limit cannot
+enforce a single quota across nodes; use a shared account-keyed limiter if that
+guarantee is needed. Do not trust arbitrary `X-Forwarded-For` request headers.
+See [Authentication](authentication.md#authentication-limits-and-maintenance) for
+the default limits and configuration.
+
 For an explicitly reviewed rollback, replace the example version below with the
 oldest migration version to undo (the boundary version is also rolled back):
 

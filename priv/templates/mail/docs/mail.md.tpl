@@ -24,6 +24,8 @@ production. Keep development servers private: the preview contains usable links.
 
 Any signed-in member can invite. Delivery is synchronous, after invitation creation
 commits, limited to 10 attempts per member and 3 per recipient per hour per node.
+These mail budgets are separate from the manual-link form's 10 attempts per account
+per hour; using one form does not spend the other form's budget.
 Configure an edge/shared limit when deploying multiple nodes. Mail follows the
 inviter's browser language; the recipient's browser chooses the acceptance page's language.
 

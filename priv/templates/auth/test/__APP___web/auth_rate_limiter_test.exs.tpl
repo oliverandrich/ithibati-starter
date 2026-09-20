@@ -13,10 +13,15 @@ defmodule __MODULE__Web.AuthRateLimiterTest do
     assert AuthRateLimiter.check(:two, 3, 60, server) == :ok
   end
 
-  test "an expired window allows requests again", %{server: server} do
-    assert AuthRateLimiter.check(:one, 1, 1, server) == :ok
-    assert {:error, _seconds} = AuthRateLimiter.check(:one, 1, 1, server)
+  test "manual invitation accounts have separate budgets that reset after the window", %{server: server} do
+    first = {:manual_invitation, 1}
+    second = {:manual_invitation, 2}
+
+    assert AuthRateLimiter.check(first, 1, 1, server) == :ok
+    assert {:error, _seconds} = AuthRateLimiter.check(first, 1, 1, server)
+    assert AuthRateLimiter.check(second, 1, 1, server) == :ok
+
     Process.sleep(1100)
-    assert AuthRateLimiter.check(:one, 1, 1, server) == :ok
+    assert AuthRateLimiter.check(first, 1, 1, server) == :ok
   end
 end
