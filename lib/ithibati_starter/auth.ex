@@ -12,7 +12,7 @@ defmodule IthibatiStarter.Auth do
     invitation = Module.concat([b.module, Accounts, Invitation])
 
     igniter
-    |> Deps.add_dep({:ithibati, "== 0.4.0"}, yes?: true)
+    |> Deps.add_dep({:ithibati, "== 0.5.0"}, yes?: true)
     |> Deps.add_dep({:wallaby, "~> 0.31.0", only: :test, runtime: false}, yes?: true)
     |> Files.copy_tree("auth", b)
     |> Files.replace(
@@ -32,8 +32,11 @@ defmodule IthibatiStarter.Auth do
     |> Config.configure("config.exs", :ithibati, [:user_schema], user)
     |> Config.configure("config.exs", :ithibati, [:invitation_schema], invitation)
     |> Config.configure("config.exs", :ithibati, [:users_key_type], :id)
+    |> Config.configure("config.exs", :ithibati, [:initial_claim], :operator_code)
     |> Config.configure("test.exs", app, [endpoint, :server], true)
     |> Config.configure("test.exs", app, [:sql_sandbox], true)
+    # Browser features all arrive from loopback and otherwise share the production setup budget.
+    |> Config.configure("test.exs", app, [:auth_rate_limits], setup: {1_000, 60})
     |> Config.configure("test.exs", :wallaby, [:otp_app], app)
     |> Config.configure("test.exs", :wallaby, [:driver], Wallaby.Chrome)
     |> Config.configure("test.exs", :wallaby, [:js_logger], nil)

@@ -13,7 +13,6 @@ defmodule __MODULE__Web.AuthTest do
   alias Ithibati.Identity.Invitations
   alias __MODULE__.Accounts.Invitation
   alias __MODULE__.Accounts.User
-  alias __MODULE__.InitialSetup
   alias __MODULE__Web.Auth
 
   # What `Ithibati.Identity.Passkeys.verify_registration/2` hands the handler, reduced to the two
@@ -27,8 +26,8 @@ defmodule __MODULE__Web.AuthTest do
   defp conn, do: Plug.Test.init_test_session(Phoenix.ConnTest.build_conn(), %{})
 
   defp setup_conn do
-    {:ok, code} = InitialSetup.issue_code()
-    {:ok, authorization} = InitialSetup.authorize(code)
+    {:ok, code} = Instance.issue_code()
+    {:ok, authorization} = Instance.authorize_code(code)
     Plug.Conn.put_session(conn(), :initial_setup_authorization, authorization)
   end
 
@@ -63,14 +62,13 @@ defmodule __MODULE__Web.AuthTest do
 
       assert Repo.get_by(User, username: "first_one")
       refute Instance.needs_setup?()
-      assert is_nil(Repo.get(InitialSetup, 1))
-      assert {:error, :already_claimed} = InitialSetup.issue_code()
+      assert {:error, :already_claimed} = Instance.issue_code()
     end
 
     test "a rotated code also revokes a challenge already authorized" do
       authorized = setup_conn()
       assert {:ok, "first_one"} = Auth.registration_subject(authorized, %{"username" => "first_one"})
-      assert {:ok, _new_code} = InitialSetup.issue_code()
+      assert {:ok, _new_code} = Instance.issue_code()
 
       assert {:error, :setup_authorization_required} =
                Auth.registration_subject(authorized, %{"username" => "first_one"})

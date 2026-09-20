@@ -18,7 +18,7 @@ defmodule __MODULE__Web.FeatureCase do
   import Wallaby.Browser
 
   alias Wallaby.Query
-  alias __MODULE__.InitialSetup
+  alias Ithibati.Identity.Instance
 
   using do
     quote do
@@ -52,7 +52,7 @@ defmodule __MODULE__Web.FeatureCase do
 
   @doc "Issue the operator code and enter it in the real setup form."
   def unlock_setup(session) do
-    {:ok, code} = InitialSetup.issue_code()
+    {:ok, code} = Instance.issue_code()
 
     session
     |> open("/setup")

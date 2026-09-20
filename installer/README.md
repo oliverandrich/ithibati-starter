@@ -8,11 +8,11 @@ From this directory, build and install locally:
 
 ```sh
 mix archive.build
-mix archive.install ithibati_new-0.2.0.ez
+mix archive.install ithibati_new-0.3.0.ez
 ```
 
 Install the `phx_new` 1.8.14 and `igniter_new` 0.5.34 archives first.
-Archive version 0.2.0 selects Starter tag `v0.2.0` by default. Run
+Archive version 0.3.0 selects Starter tag `v0.3.0` by default. Run
 `mix help ithibati.new` for options. Use `--starter` to select a local checkout
 or another tag or commit. The generated `mix.lock` records the resolved commit.
 

@@ -53,7 +53,7 @@ defmodule IthibatiStarterTest do
       refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
       refute files["CONTRIBUTING.md"] =~ "## Health, releases"
       assert files["README.md"] =~ "docs/operations.md"
-      assert files["README.md"] =~ "Ithibati Starter 0.2.0"
+      assert files["README.md"] =~ "Ithibati Starter 0.3.0"
       assert files["README.md"] =~ "mise run setup-code"
       assert files["AGENTS.md"] =~ "Documentation structure"
       refute Map.has_key?(files, "docs/development.md")
@@ -90,10 +90,10 @@ defmodule IthibatiStarterTest do
 
   test "default profile installs pinned invitation authentication and tooling" do
     result = project() |> IthibatiStarter.install()
-    assert Mix.Project.config()[:version] == "0.2.0"
+    assert Mix.Project.config()[:version] == "0.3.0"
 
     assert_creates(result, ".ithibati-starter", fn text ->
-      assert String.starts_with?(text, "0.2.0\n")
+      assert String.starts_with?(text, "0.3.0\n")
     end)
 
     assert_has_task(result, "format", [])
@@ -105,10 +105,28 @@ defmodule IthibatiStarterTest do
       assert text =~ "mise run check"
     end)
 
-    assert diff(result, only: "mix.exs") =~ "== 0.4.0"
+    assert diff(result, only: "mix.exs") =~ "== 0.5.0"
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
+  end
+
+  test "generated protected claim uses Ithibati schema version 3" do
+    files =
+      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+
+    assert files["config/config.exs"] =~ "initial_claim: :operator_code"
+
+    assert files["priv/repo/migrations/20260920000000_add_setup_codes.exs"] =~
+             "Ithibati.Migration.up(from: 2, version: 3)"
+
+    refute Map.has_key?(
+             files,
+             "priv/repo/migrations/20260919000000_create_initial_setup_codes.exs"
+           )
+
+    assert files["lib/sample_web/auth.ex"] =~ "Instance.claim(authorization: authorization)"
+    refute files["lib/sample_web/auth.ex"] =~ "InitialSetup.consume"
   end
 
   for opts <- [[], [with_mail: true]] do

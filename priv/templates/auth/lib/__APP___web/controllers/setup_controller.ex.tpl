@@ -4,7 +4,6 @@ defmodule __MODULE__Web.SetupController do
 
   alias Ithibati.Identity.Instance
   alias __MODULE__.AuthRateLimiter
-  alias __MODULE__.InitialSetup
 
   def authorize(conn, params) do
     conn = put_resp_header(conn, "cache-control", "no-store")
@@ -12,7 +11,7 @@ defmodule __MODULE__Web.SetupController do
     if Instance.needs_setup?() do
       {limit, seconds} = AuthRateLimiter.limit(:setup)
 
-      case AuthRateLimiter.check({:setup, conn.remote_ip, InitialSetup.current_digest()}, limit, seconds) do
+      case AuthRateLimiter.check({:setup, conn.remote_ip}, limit, seconds) do
         :ok -> authorize_code(conn, params["setup_code"])
 
         {:error, retry_after} ->
@@ -27,7 +26,7 @@ defmodule __MODULE__Web.SetupController do
   end
 
   defp authorize_code(conn, code) do
-    case InitialSetup.authorize(code) do
+    case Instance.authorize_code(code) do
       {:ok, authorization} ->
         conn
         |> put_session(:initial_setup_authorization, authorization)

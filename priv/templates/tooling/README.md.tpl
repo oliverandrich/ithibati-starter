@@ -1,6 +1,6 @@
 # __MODULE__
 
-Created with Ithibati Starter 0.2.0: Phoenix, LiveView, PostgreSQL and opinionated tooling.
+Created with Ithibati Starter 0.3.0: Phoenix, LiveView, PostgreSQL and opinionated tooling.
 
 ```sh
 mise trust

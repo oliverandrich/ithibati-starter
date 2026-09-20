@@ -22,8 +22,9 @@ bin/server
 ```
 
 The setup command prints a random code to your terminal; capture it there, not in
-service logs or a deployment artifact. The database stores only its digest. Open
-`https://YOUR_HOST/setup`, enter the code, choose a username and register a passkey.
+service logs or a deployment artifact. Ithibati stores only its digest in the
+version 3 setup-code table. Open `https://YOUR_HOST/setup`, enter the code,
+choose a username and register a passkey.
 The authorization in that browser session lasts ten minutes; re-enter the code if
 it expires. A successful claim consumes the code in the account transaction and
 closes `/setup`. A server started before a code is issued stays locked for claims.

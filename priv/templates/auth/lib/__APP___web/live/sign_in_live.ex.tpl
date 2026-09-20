@@ -10,12 +10,13 @@ defmodule __MODULE__Web.SignInLive do
   use __MODULE__Web, :live_view
 
   alias Ithibati.Identity.Instance
-  alias __MODULE__.InitialSetup
   alias __MODULE__Web.CeremonyMessages
 
   @impl true
   def mount(_params, session, socket) do
-    setup_authorized? = socket.assigns.live_action == :setup and InitialSetup.authorized_session?(session)
+    setup_authorized? =
+      socket.assigns.live_action == :setup and
+        Instance.authorized?(session["initial_setup_authorization"])
     {:ok, assign(socket, username: "", error: nil, setup_authorized?: setup_authorized?)}
   end
 

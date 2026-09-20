@@ -1,7 +1,8 @@
 # Authentication
 
-Ithibati is pinned to 0.4.0. On an empty database, an operator-issued code must
-unlock `/setup` before the first account can register a username and passkey. Issue
+The application pins Ithibati 0.5.0 and applies its schema version 3. On an empty
+database, an operator-issued code must unlock `/setup` before the first account
+can register a username and passkey. Issue
 the code after migration as described in [Operations](operations.md); enter it over
 HTTPS. The code is printed only by that command, stored only as a digest, and
 consumed with the first account claim. Later registrations require a valid
@@ -43,9 +44,10 @@ on the application as
 `[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, manual_invitation: {10, 3600}]`
 (positive counts and seconds). The manual limit is separate from the mail sender
 and recipient limits when mail delivery is enabled; neither spends the other's budget.
-The setup-code form allows 10 submissions per peer IP and issued code per minute by default.
-Replacing a code resets that budget. The form redirects with `Retry-After` and a
-translated message when the budget is exhausted.
+The setup-code form allows 10 submissions per peer IP per minute by default.
+Replacing a code revokes earlier authorizations but does not reset that budget.
+The form redirects with `Retry-After` and a translated message when the budget
+is exhausted.
 
 The supervised in-memory counters are atomic and bounded to 10,000 keys per node;
 their windows expire and a restart resets them. Ceremony and setup limits use

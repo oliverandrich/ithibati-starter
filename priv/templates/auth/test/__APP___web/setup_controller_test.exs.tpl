@@ -1,10 +1,22 @@
 defmodule __MODULE__Web.SetupControllerTest do
   use __MODULE__Web.ConnCase
 
-  alias __MODULE__.InitialSetup
+  alias Ithibati.Identity.Instance
+
+  setup do
+    previous = Application.get_env(:__APP__, :auth_rate_limits)
+
+    on_exit(fn ->
+      if previous,
+        do: Application.put_env(:__APP__, :auth_rate_limits, previous),
+        else: Application.delete_env(:__APP__, :auth_rate_limits)
+    end)
+
+    :ok
+  end
 
   test "missing and invalid codes cannot unlock setup", %{conn: conn} do
-    {:ok, code} = InitialSetup.issue_code()
+    {:ok, code} = Instance.issue_code()
 
     for params <- [%{}, %{"setup_code" => "wrong"}] do
       response = post(conn, "/setup/authorize", params)
@@ -15,7 +27,7 @@ defmodule __MODULE__Web.SetupControllerTest do
   end
 
   test "a valid code unlocks setup without putting the code in the response", %{conn: conn} do
-    {:ok, code} = InitialSetup.issue_code()
+    {:ok, code} = Instance.issue_code()
     response = post(conn, "/setup/authorize", %{"setup_code" => code})
 
     assert redirected_to(response) == "/setup"
@@ -25,7 +37,8 @@ defmodule __MODULE__Web.SetupControllerTest do
   end
 
   test "limits setup-code guesses before accepting even the correct code", %{conn: conn} do
-    {:ok, code} = InitialSetup.issue_code()
+    Application.put_env(:__APP__, :auth_rate_limits, setup: {10, 60})
+    {:ok, code} = Instance.issue_code()
     ip = {192, 0, 2, rem(System.unique_integer([:positive]), 254) + 1}
     conn = %{conn | remote_ip: ip}
 
@@ -40,24 +53,18 @@ defmodule __MODULE__Web.SetupControllerTest do
     assert get_resp_header(limited, "retry-after") != []
     refute get_session(limited, :initial_setup_authorization)
 
-    {:ok, replacement} = InitialSetup.issue_code()
-    refreshed = post(conn, "/setup/authorize", %{"setup_code" => replacement})
-    assert get_session(refreshed, :initial_setup_authorization)
+    {:ok, replacement} = Instance.issue_code()
+    still_limited = post(conn, "/setup/authorize", %{"setup_code" => replacement})
+    assert get_resp_header(still_limited, "retry-after") != []
+    refute get_session(still_limited, :initial_setup_authorization)
   end
 
   test "uses the configured setup-code limit", %{conn: conn} do
-    previous = Application.get_env(:__APP__, :auth_rate_limits)
-    on_exit(fn ->
-      if previous,
-        do: Application.put_env(:__APP__, :auth_rate_limits, previous),
-        else: Application.delete_env(:__APP__, :auth_rate_limits)
-    end)
-
     Application.put_env(:__APP__, :auth_rate_limits,
       recovery: {10, 60}, ceremony: {120, 60}, setup: {1, 60}
     )
 
-    {:ok, code} = InitialSetup.issue_code()
+    {:ok, code} = Instance.issue_code()
     ip = {198, 51, 100, rem(System.unique_integer([:positive]), 254) + 1}
     conn = %{conn | remote_ip: ip}
 
@@ -68,7 +75,7 @@ defmodule __MODULE__Web.SetupControllerTest do
   end
 
   test "the code submission requires a CSRF token", %{conn: conn} do
-    {:ok, code} = InitialSetup.issue_code()
+    {:ok, code} = Instance.issue_code()
 
     assert_error_sent(403, fn ->
       conn

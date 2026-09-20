@@ -10,7 +10,7 @@ defmodule __MODULE__Web.Auth do
   @behaviour Ithibati.Web.Handler
 
   import Phoenix.Controller, only: [json: 2]
-  import Plug.Conn, only: [delete_session: 2, get_session: 1, get_session: 2, put_session: 3]
+  import Plug.Conn, only: [delete_session: 2, get_session: 2, put_session: 3]
 
   alias Ecto.Multi
   alias Ithibati.Identity.Grant
@@ -19,7 +19,6 @@ defmodule __MODULE__Web.Auth do
   alias Ithibati.Identity.Passkeys
   alias Ithibati.Schema
   alias Ithibati.Web.Gate
-  alias __MODULE__.InitialSetup
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
   alias __MODULE__Web.Reauth
@@ -35,7 +34,7 @@ defmodule __MODULE__Web.Auth do
 
   def registration_subject(conn, params) do
     if Instance.needs_setup?() do
-      if InitialSetup.authorized_session?(get_session(conn)) do
+      if Instance.authorized?(get_session(conn, :initial_setup_authorization)) do
         first_account(params)
       else
         {:error, :setup_authorization_required}
@@ -142,9 +141,8 @@ defmodule __MODULE__Web.Auth do
   # being rolled back, because they sit in plaintext in the `changes_so_far` the caller is handed.
   defp claim_instance(username, key_attrs, authorization) do
     Multi.new()
-    |> Multi.run(:setup_authorization, fn repo, _changes -> InitialSetup.consume(repo, authorization) end)
     |> Multi.insert(:account, User.changeset(%User{}, %{"username" => username}))
-    |> Instance.claim()
+    |> Instance.claim(authorization: authorization)
     |> Grant.with_key_and_codes(key_attrs)
   end
 
