@@ -146,6 +146,12 @@ beans check
 
 ## Licensing and publication
 
+For a new Starter release, align the library and archive versions, generated
+version marker and README, and the archive's default Starter tag. After checks
+pass, tag the reviewed commit with `vVERSION` and install the archive from that
+tag. Never move a published tag; use a new version for later changes. The
+generated application's `mix.lock` records the tag's resolved commit.
+
 Contributions are included under the [MIT license](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE). Preserve [NOTICE](https://github.com/oliverandrich/ithibati-starter/blob/main/NOTICE)
 and [THIRD_PARTY_LICENSES.md](https://github.com/oliverandrich/ithibati-starter/blob/main/THIRD_PARTY_LICENSES.md) when adapting upstream code.
 Generated application code belongs in the consuming application's repository;

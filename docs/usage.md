@@ -11,7 +11,7 @@ Install the pinned generators and the starter archive once:
 ```sh
 mix archive.install hex phx_new 1.8.14
 mix archive.install hex igniter_new 0.5.34
-mix archive.install github oliverandrich/ithibati-starter --sparse installer
+mix archive.install github oliverandrich/ithibati-starter tag v0.2.0 --sparse installer
 ```
 
 Create a Phoenix app with the starter:
@@ -20,6 +20,10 @@ Create a Phoenix app with the starter:
 mix ithibati.new my_app
 cd my_app
 ```
+
+The `ithibati_new` 0.2.0 archive selects Starter tag `v0.2.0` by default. Check
+the `ithibati_starter` entry in the generated `mix.lock` to identify the exact
+resolved commit. `--starter` accepts another tag, commit or local checkout.
 
 Start developing:
 
@@ -42,9 +46,10 @@ and installs the starter as a development-only dependency. Installation prompts,
 including Igniter's large-diff preview prompt, are accepted automatically. Pass
 `--no-yes` to restore interactive confirmation.
 
-The default starter source follows `main`. For reproducible generation, use
-`--starter ithibati_starter@github:oliverandrich/ithibati-starter@COMMIT_SHA`.
-Installation does not require a Hex release.
+The archive and Starter use the same release tag. To reproduce a generated
+application later, keep the release tag, the Starter commit from `mix.lock`, the
+selected profile and your dependency lockfile. Installation does not require a
+Hex release.
 
 <details>
 <summary>Use Igniter directly</summary>
@@ -55,7 +60,7 @@ After installing the generators above:
 mix igniter.new my_app \
   --with phx.new \
   --with-args="--no-mailer" \
-  --install ithibati_starter@github:oliverandrich/ithibati-starter@main \
+  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.2.0 \
   --only dev
 ```
 
@@ -70,7 +75,7 @@ Build the archive from the checkout's `installer/` directory:
 
 ```sh
 mix archive.build
-mix archive.install ithibati_new-0.1.0.ez
+mix archive.install ithibati_new-0.2.0.ez
 ```
 
 Then, from the directory where the new project should live:
@@ -110,7 +115,7 @@ Or use Igniter directly; the starter adopts and configures the Phoenix mailer:
 ```sh
 mix igniter.new my_app \
   --with phx.new \
-  --install ithibati_starter@github:oliverandrich/ithibati-starter@main \
+  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.2.0 \
   --only dev --with-mail
 ```
 

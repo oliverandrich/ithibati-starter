@@ -17,7 +17,7 @@ defmodule IthibatiStarter do
   @doc "Plans an installation. Options: `:with_mail` and `:without_beans`."
   def install(igniter, opts \\ []) do
     profile =
-      "0.1.0\nauth=true\nbeans=#{!opts[:without_beans]}\n" <>
+      "0.2.0\nauth=true\nbeans=#{!opts[:without_beans]}\n" <>
         if(opts[:with_mail], do: "mail=true\n", else: "")
 
     if Igniter.exists?(igniter, @marker) do

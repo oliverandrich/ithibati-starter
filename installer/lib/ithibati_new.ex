@@ -1,7 +1,7 @@
 defmodule IthibatiNew do
   @moduledoc "Builds the Igniter invocation for an opinionated Phoenix project."
 
-  @starter "ithibati_starter@github:oliverandrich/ithibati-starter@main"
+  @starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.2.0"
   @switches [
     with_mail: :boolean,
     without_beans: :boolean,

@@ -52,6 +52,7 @@ defmodule IthibatiStarterTest do
       refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
       refute files["CONTRIBUTING.md"] =~ "## Health, releases"
       assert files["README.md"] =~ "docs/operations.md"
+      assert files["README.md"] =~ "Ithibati Starter 0.2.0"
       assert files["README.md"] =~ "mise run setup-code"
       assert files["AGENTS.md"] =~ "Documentation structure"
       refute Map.has_key?(files, "docs/development.md")
@@ -87,6 +88,12 @@ defmodule IthibatiStarterTest do
 
   test "default profile installs pinned invitation authentication and tooling" do
     result = project() |> IthibatiStarter.install()
+    assert Mix.Project.config()[:version] == "0.2.0"
+
+    assert_creates(result, ".ithibati-starter", fn text ->
+      assert String.starts_with?(text, "0.2.0\n")
+    end)
+
     assert_has_task(result, "format", [])
     assert_creates(result, "lib/sample/accounts/invitation.ex")
     assert_creates(result, "lib/sample_web/live/sign_in_live.ex")

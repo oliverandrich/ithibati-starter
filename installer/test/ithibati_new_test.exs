@@ -1,18 +1,24 @@
 defmodule IthibatiNewTest do
   use ExUnit.Case, async: true
 
+  @pinned_starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.2.0"
+
   test "default command supplies Phoenix, the starter and dev-only installation" do
     assert IthibatiNew.arguments(["my_app"]) == [
              "my_app",
              "--with",
              "phx.new",
              "--install",
-             "ithibati_starter@github:oliverandrich/ithibati-starter@main",
+             @pinned_starter,
              "--only",
              "dev",
              "--with-args=--no-mailer",
              "--yes"
            ]
+  end
+
+  test "archive version identifies the pinned default" do
+    assert IthibatiNew.MixProject.project()[:version] == "0.2.0"
   end
 
   test "accepts installation prompts by default for both profiles" do
@@ -34,9 +40,13 @@ defmodule IthibatiNewTest do
   end
 
   test "supports a local or pinned starter source without shell interpolation" do
-    source = "ithibati_starter@path:/tmp/starter with spaces"
-    args = IthibatiNew.arguments(["my_app", "--starter", source])
-    assert Enum.chunk_every(args, 2, 1, :discard) |> Enum.member?(["--install", source])
+    for source <- [
+          "ithibati_starter@path:/tmp/starter with spaces",
+          "ithibati_starter@github:oliverandrich/ithibati-starter@aadf7562ac7a24cd98f1af91d27d8654c298ca4a"
+        ] do
+      args = IthibatiNew.arguments(["my_app", "--starter", source])
+      assert Enum.chunk_every(args, 2, 1, :discard) |> Enum.member?(["--install", source])
+    end
   end
 
   test "requires one project path and refuses unsupported options" do
