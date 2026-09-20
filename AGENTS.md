@@ -110,5 +110,4 @@ shared-host tuning as a universal default without measurements.
   scaffolding or overall tooling modernization, use the personal
   `elixir-project-setup` skill; Credo-only setup uses `elixir-quality`.
   Routine project checks do not trigger skill adoption.
-- Prefix shell commands with `rtk` when available.
 - Keep upstream attribution and generated documentation aligned with the templates.
