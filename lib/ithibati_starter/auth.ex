@@ -7,6 +7,7 @@ defmodule IthibatiStarter.Auth do
   def install(igniter, b) do
     app = String.to_atom(b.app)
     endpoint = Module.concat([b.module <> "Web", Endpoint])
+    mailer = Module.concat([b.module, Mailer])
     repo = Module.concat([b.module, Repo])
     user = Module.concat([b.module, Accounts, User])
     invitation = Module.concat([b.module, Accounts, Invitation])
@@ -14,11 +15,14 @@ defmodule IthibatiStarter.Auth do
     igniter
     |> Deps.add_dep({:ithibati, "== 0.5.0"}, yes?: true)
     |> Deps.add_dep({:wallaby, "~> 0.31.0", only: :test, runtime: false}, yes?: true)
+    |> Deps.add_dep({:swoosh, "~> 1.28"}, yes?: true)
+    |> Deps.add_dep({:gen_smtp, "~> 1.3"}, yes?: true)
     |> Files.copy_tree("auth", b)
     |> Files.replace("lib/#{b.app}/application.ex", "    children = [", """
         # Before anything binds a port. An instance whose claim is not protected must not
         # serve one request: the first stranger to arrive would be the one who claims it.
         #{b.module}.Claim.verify!()
+        #{b.module}.Identity.verify!()
 
         children = [
           #{b.module}.AuthRateLimiter,\
@@ -31,6 +35,15 @@ defmodule IthibatiStarter.Auth do
       "setup_code",
       "credential"
     ])
+    |> Config.configure("config.exs", :swoosh, [:api_client], false)
+    |> Config.configure("dev.exs", app, [mailer, :adapter], Swoosh.Adapters.Local)
+    |> Config.configure("dev.exs", app, [:mail_enabled], true)
+    |> Config.configure("dev.exs", app, [:mail_from], {b.module, "invitations@localhost"})
+    |> Config.configure("test.exs", app, [mailer, :adapter], Swoosh.Adapters.Test)
+    |> Config.configure("test.exs", app, [:mail_from], {b.module, "invitations@example.test"})
+    |> Config.configure("test.exs", :swoosh, [:local], false)
+    |> Config.configure("prod.exs", :swoosh, [:local], false)
+    |> Config.configure("prod.exs", :swoosh, [:api_client], false)
     |> Config.configure("config.exs", :ithibati, [:repo], repo)
     |> Config.configure("config.exs", :ithibati, [:user_schema], user)
     |> Config.configure("config.exs", :ithibati, [:invitation_schema], invitation)
@@ -89,6 +102,8 @@ defmodule IthibatiStarter.Auth do
       "System.get_env(\"PORT\", if(config_env() == :test, do: \"4102\", else: \"4000\"))"
     )
     |> Files.append("config/runtime.exs", Files.template("fragments/trusted_proxies_runtime", b))
+    |> Files.append("config/runtime.exs", Files.template("fragments/mail_runtime", b))
+    |> Files.append("config/runtime.exs", Files.template("fragments/account_identity_runtime", b))
     |> Files.replace(
       "test/#{b.app}_web/controllers/page_controller_test.exs",
       "assert html_response(conn, 200) =~ \"Peace of mind from prototype to production\"",

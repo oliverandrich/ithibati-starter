@@ -1,7 +1,7 @@
 defmodule IthibatiNewTest do
   use ExUnit.Case, async: true
 
-  @pinned_starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.3.0"
+  @pinned_starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.4.0"
 
   test "default command supplies Phoenix, the starter and dev-only installation" do
     assert IthibatiNew.arguments(["my_app"]) == [
@@ -12,31 +12,35 @@ defmodule IthibatiNewTest do
              @pinned_starter,
              "--only",
              "dev",
-             "--with-args=--no-mailer",
              "--yes"
            ]
   end
 
   test "archive version identifies the pinned default" do
-    assert IthibatiNew.MixProject.project()[:version] == "0.3.0"
+    assert IthibatiNew.MixProject.project()[:version] == "0.4.0"
   end
 
-  test "accepts installation prompts by default for both profiles" do
-    for options <- [[], ["--with-mail"]] do
+  test "accepts installation prompts by default" do
+    for options <- [[], ["--without-beans"]] do
       assert "--yes" in IthibatiNew.arguments(["my_app" | options])
       refute "--yes" in IthibatiNew.arguments(["my_app", "--no-yes" | options])
     end
   end
 
-  test "mail uses the default Phoenix mailer without contradictory flags" do
-    args =
-      IthibatiNew.arguments(["my_app", "--with-mail", "--without-beans", "--yes"])
+  # Every application ships the mailer, so nothing asks Phoenix to leave it out.
+  test "the Phoenix mailer is kept, and no flag contradicts it" do
+    args = IthibatiNew.arguments(["my_app", "--without-beans", "--yes"])
 
-    assert "--with-mail" in args
     assert "--without-beans" in args
     assert "--yes" in args
-    refute Enum.any?(args, &String.contains?(&1, "no-mailer"))
+    refute Enum.any?(args, &String.contains?(&1, "mailer"))
     assert Enum.count(args, &(&1 == "phx.new")) == 1
+  end
+
+  test "an option this archive no longer has is refused" do
+    assert_raise OptionParser.ParseError, fn ->
+      IthibatiNew.arguments(["my_app", "--with-mail"])
+    end
   end
 
   test "supports a local or pinned starter source without shell interpolation" do

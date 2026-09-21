@@ -7,14 +7,21 @@ the code after migration as described in [Operations](operations.md); enter it o
 HTTPS. The code is printed only by that command, stored only as a digest, and
 consumed with the first account claim. Later registrations require a valid
 invitation; every authenticated member can create links on `/`. Links are
-shown once, expire, and are accepted once. There is no administrator role or mail
-delivery; share links through your chosen channel.
+shown once, expire, and are accepted once. There is no administrator role.
 
-Accounts are identified by a username, here and with invitation mail; an address is a
-delivery detail, never the identifier. The claim mode is fixed to
-`config :ithibati, initial_claim: :operator_code`, and `__MODULE__.Claim` checks it where
-the application starts. Ithibati's `:open` mode is therefore a refusal to boot rather than
-a setup page offering a field nobody can satisfy.
+An account is named or addressed, which `__MODULE__.Identity` answers from
+`ACCOUNT_IDENTITY`. Named is the default: the link is shared through whatever
+channel its sender likes. Addressed means the invitee's identifier is an email
+address, the link is delivered to it, and that delivery is what proves the address.
+Both schemas leave Ithibati's `:format` off and take it from the mode instead,
+because the identifier field itself is fixed when the schema compiles. An instance
+that addresses accounts without a mail configuration does not start. A delivery
+that fails is reported and the link stays shareable by hand. See
+[Operations](operations.md) for the variables.
+
+The claim mode is fixed to `config :ithibati, initial_claim: :operator_code`, and
+`__MODULE__.Claim` checks it where the application starts. Ithibati's `:open` mode is
+therefore a refusal to boot rather than a setup page offering a field nobody can satisfy.
 
 Sessions are revocable and cookies are encrypted because they temporarily carry
 recovery codes. Recovery codes are displayed once after registration. Adapt the
@@ -43,13 +50,20 @@ and German.
 
 `AuthRateLimit` allows 10 recovery requests and 120 other ceremony requests per
 visitor address in a 60-second fixed window. Responses use HTTP 429, `Retry-After`, and a
-translated ceremony message. The manual-link form allows 10 creation attempts per
-signed-in account per hour; invalid attempts also use that budget. A rejected attempt
-creates no invitation and shows a translated message. Configure `:auth_rate_limits`
-on the application as
-`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, manual_invitation: {10, 3600}]`
-(positive counts and seconds). The manual limit is separate from the mail sender
-and recipient limits when mail delivery is enabled; neither spends the other's budget.
+translated ceremony message. Making an invitation allows 20 per signed-in account in a
+24-hour window. Configure `:auth_rate_limits` on the application as
+`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, manual_invitation: {20, 86_400}]`
+(positive counts and seconds). A refused inviter is told how long to wait, in minutes
+for a window shorter than an hour and in hours otherwise.
+
+The invitation budget is counted against the account through `AuthRateLimit.key/2`,
+not the browser: a session, a name or an address would each let the same person start
+over. It is spent before the form is validated, so an attempt that fails for any other
+reason still costs one; otherwise the budget is emptied by typing nonsense. A refusal
+writes no invitation, sends nothing, and leaves a link already on screen where it is,
+because that link exists nowhere else. A day rather than an hour, because what this
+guards against is not a burst but an account somebody else is holding, spending the
+operator's mail credentials at a steady drip.
 The setup-code form allows 10 submissions per visitor address per minute by default.
 Replacing a code revokes earlier authorizations but does not reset that budget.
 The form redirects with `Retry-After` and a translated message when the budget

@@ -21,12 +21,17 @@ it without the starter as a runtime dependency.
 
 ### Authentication and account security
 
-Powered by **Ithibati 0.5.0**, with username-based accounts and passkeys:
+Powered by **Ithibati 0.5.0**, with passkeys and accounts that are named or addressed:
 
 - **Claim the site:** an operator-issued setup code authorizes the first account;
   subsequent registrations require an invitation.
+- **Named or addressed accounts:** `ACCOUNT_IDENTITY` decides whether an account
+  is a username or an email address. One column, one format, chosen at runtime.
 - **Invitations:** signed-in members can create personal, expiring, single-use
-  links for a chosen username, limited to 10 attempts per account per hour.
+  links, limited to 20 per account per day. Addressed, the link is
+  delivered to the invitee and that delivery is what proves the address.
+- **Mail included:** every application ships a Swoosh mailer, a development mailbox
+  and authenticated SMTP. An instance that addresses accounts without one does not start.
 - **Separate sign-in and recovery screens:** use a passkey, or a recovery code
   when your passkey is unavailable.
 - **Passkey settings:** add, rename and remove your own passkeys. The last one
@@ -100,7 +105,7 @@ Install the pinned generators and the starter archive once:
 ```sh
 mix archive.install hex phx_new 1.8.14
 mix archive.install hex igniter_new 0.5.34
-mix archive.install github oliverandrich/ithibati-starter tag v0.3.0 --sparse installer
+mix archive.install github oliverandrich/ithibati-starter tag v0.4.0 --sparse installer
 ```
 
 Create a Phoenix app with the starter:
@@ -110,9 +115,9 @@ mix ithibati.new my_app
 cd my_app
 ```
 
-The `ithibati_new` 0.3.0 archive selects Starter tag `v0.3.0` by default. The
+The `ithibati_new` 0.4.0 archive selects Starter tag `v0.4.0` by default. The
 generated `mix.lock` records the tag's resolved commit. Use `--starter` to choose
-a local checkout or another revision. Starter 0.3.0 generates applications with
+a local checkout or another revision. Starter 0.4.0 generates applications with
 Ithibati 0.5.0 and schema version 3.
 
 Start developing:

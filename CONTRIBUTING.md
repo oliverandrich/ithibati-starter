@@ -127,9 +127,9 @@ overview and quick start, CONTRIBUTING for development, AGENTS for agent rules,
 and `docs/` for actual usage, configuration, operations and architecture guides.
 Keep explanations in one place and update links when moving them.
 
-Generated application guides live in each profile's `docs/` template directory.
-Authentication is always documented; mail documentation and its links are added
-only for `--with-mail`. Keep both profiles covered by the installer tests.
+Generated application guides live in the profile's `docs/` template directory.
+Authentication and operations are always documented, including how an account is
+named or addressed. Keep the installer tests covering it.
 
 ## Local work tracking
 

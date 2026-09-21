@@ -14,7 +14,9 @@ defmodule __MODULE__Web.InsideLiveTest do
     }
   end
 
-  test "manual invitations stop at the per-account hourly limit", %{conn: conn} do
+  # A day rather than an hour, because what this guards against is not a burst: it is an account
+  # somebody else is holding, spending the operator's mail credentials at a steady drip.
+  test "manual invitations stop at the per-account daily budget", %{conn: conn} do
     {:ok, signed} =
       conn
       |> Plug.Test.init_test_session(%{})
@@ -24,18 +26,19 @@ defmodule __MODULE__Web.InsideLiveTest do
     conn = Plug.Test.init_test_session(build_conn(), get_session(signed))
     {:ok, view, _html} = live(conn, "/")
 
-    for number <- 1..10 do
+    for number <- 1..20 do
       view
       |> form("#invitation-form", username: "guest#{number}")
       |> render_submit()
     end
 
-    assert Repo.aggregate(Invitation, :count) == 10
+    assert Repo.aggregate(Invitation, :count) == 20
 
-    html = view |> form("#invitation-form", username: "guest11") |> render_submit()
+    html = view |> form("#invitation-form", username: "guest21") |> render_submit()
 
-    assert html =~ "Too many invitations. Please try again later."
-    assert Repo.aggregate(Invitation, :count) == 10
+    # Hours, because nobody reads tens of thousands of seconds as a waiting time.
+    assert html =~ "Too many invitations. Try again in 24 hours."
+    assert Repo.aggregate(Invitation, :count) == 20
 
     german_conn =
       build_conn()
@@ -43,9 +46,9 @@ defmodule __MODULE__Web.InsideLiveTest do
       |> put_req_header("accept-language", "de")
 
     {:ok, german_view, _html} = live(german_conn, "/")
-    german_html = german_view |> form("#invitation-form", username: "guest12") |> render_submit()
-    assert german_html =~ "Zu viele Einladungen. Bitte versuche es später erneut."
-    assert Repo.aggregate(Invitation, :count) == 10
+    german_html = german_view |> form("#invitation-form", username: "guest22") |> render_submit()
+    assert german_html =~ "Zu viele Einladungen. Versuche es in 24 Stunden erneut."
+    assert Repo.aggregate(Invitation, :count) == 20
 
     another = Repo.insert!(Invitation.changeset(%Invitation{}, %{username: "grace"}))
 

@@ -1,6 +1,6 @@
 defmodule __MODULE__Web.TrustedProxiesTest do
   @moduledoc """
-  What `config/runtime.exs` makes of `TRUSTED_PROXIES`, run against the file itself.
+  What `config/runtime.exs` makes of its environment variables, run against the file itself.
 
   Nothing else executes that block. A release reads it once at startup, so a value this parser
   mishandles is first seen as an instance that will not boot, or worse, as one that boots and
@@ -8,14 +8,20 @@ defmodule __MODULE__Web.TrustedProxiesTest do
   """
   use ExUnit.Case, async: false
 
-  defp configured(value) do
-    System.put_env("TRUSTED_PROXIES", value)
-    on_exit(fn -> System.delete_env("TRUSTED_PROXIES") end)
+  # One helper for both variables. The environment differs because the identity block is kept out
+  # of tests, where a shell that happens to export it must not decide what the suite runs against.
+  defp read(mix_env, variable, value, key) do
+    System.put_env(variable, value)
+    on_exit(fn -> System.delete_env(variable) end)
 
     "config/runtime.exs"
-    |> Config.Reader.read!(env: :test)
-    |> get_in([:__APP__, :trusted_proxies])
+    |> Config.Reader.read!(env: mix_env)
+    |> get_in([:__APP__, key])
   end
+
+  defp configured(value), do: read(:test, "TRUSTED_PROXIES", value, :trusted_proxies)
+
+  defp identity(value), do: read(:dev, "ACCOUNT_IDENTITY", value, :account_identity)
 
   test "addresses arrive as addresses, in both families" do
     assert configured("10.0.0.2, fd00::2") == [{10, 0, 0, 2}, {64_768, 0, 0, 0, 0, 0, 0, 2}]
@@ -31,6 +37,17 @@ defmodule __MODULE__Web.TrustedProxiesTest do
   # the message shows it as the empty string it is.
   test "an entry of nothing says so rather than pointing at a blank" do
     assert_raise RuntimeError, ~r/""/, fn -> configured("10.0.0.2, ,fd00::2") end
+  end
+
+  test "an account is named or addressed, and says so either way" do
+    assert identity("email") == :email
+    assert identity("username") == :username
+  end
+
+  # The same promise `TRUSTED_PROXIES` keeps. Taking only the exact word and dropping the rest in
+  # silence would boot an instance naming its accounts while its operator configured addresses.
+  test "and anything else stops the boot rather than being dropped quietly" do
+    assert_raise RuntimeError, ~r/Email/, fn -> identity("Email") end
   end
 
   # An operator who typed a hostname gets told on the spot. Dropping it would leave an instance

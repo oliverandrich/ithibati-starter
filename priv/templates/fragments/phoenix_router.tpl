@@ -38,6 +38,7 @@ defmodule __MODULE__Web.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: __MODULE__Web.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end

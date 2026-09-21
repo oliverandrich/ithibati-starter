@@ -10,18 +10,10 @@ defmodule __MODULE__.ClaimTest do
   use ExUnit.Case, async: false
 
   alias __MODULE__.Claim
+  alias __MODULE__.SetupSupport
 
   defp with_claim(mode, fun) do
-    previous = Application.fetch_env(:ithibati, :initial_claim)
-    Application.put_env(:ithibati, :initial_claim, mode)
-
-    on_exit(fn ->
-      case previous do
-        {:ok, was} -> Application.put_env(:ithibati, :initial_claim, was)
-        :error -> Application.delete_env(:ithibati, :initial_claim)
-      end
-    end)
-
+    SetupSupport.put_env(:ithibati, :initial_claim, mode)
     fun.()
   end
 

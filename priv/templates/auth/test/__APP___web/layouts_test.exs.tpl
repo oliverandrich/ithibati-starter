@@ -2,18 +2,20 @@ defmodule __MODULE__Web.LayoutsTest do
   @moduledoc """
   The one place where the browser is told the same rule as the server.
 
-  A `pattern` attribute that disagrees with `Ithibati.Schema.Identifier.username_format/0` refuses
-  names the server would take, or waves through names it will not, and neither failure says
-  anything — so the derivation that keeps them in step is pinned rather than trusted.
+  A `pattern` attribute that disagrees with `__MODULE__.Identity.format/0` refuses names the
+  server would take, or waves through names it will not, and neither failure says anything — so
+  the derivation that keeps them in step is pinned rather than trusted.
   """
-  use ExUnit.Case, async: true
+  # async: false — one test turns the identity mode around.
+  use ExUnit.Case, async: false
 
-  alias Ithibati.Schema.Identifier
+  alias __MODULE__.Identity
+  alias __MODULE__.SetupSupport
   alias __MODULE__Web.Layouts
 
   # HTML anchors `pattern` implicitly; this is what the browser compiles it to.
   defp as_browser_sees_it do
-    Regex.compile!("\\A(?:" <> Layouts.username_pattern() <> ")\\z")
+    Regex.compile!("\\A(?:" <> Layouts.identifier_pattern() <> ")\\z")
   end
 
   test "the pattern the form carries answers exactly what the library answers" do
@@ -33,8 +35,7 @@ defmodule __MODULE__Web.LayoutsTest do
           "",
           "alice\n"
         ] do
-      assert Regex.match?(as_browser_sees_it(), value) ==
-               Regex.match?(Identifier.username_format(), value),
+      assert Regex.match?(as_browser_sees_it(), value) == Regex.match?(Identity.format(), value),
              "the form and the server disagree about #{inspect(value)}"
     end
   end
@@ -43,6 +44,14 @@ defmodule __MODULE__Web.LayoutsTest do
   # anchor would not merely be untidy — the browser would refuse to compile the attribute and stop
   # validating anything at all, silently.
   test "and carries no anchor the browser cannot compile" do
-    refute Layouts.username_pattern() =~ ~r/\\[Az]/
+    refute Layouts.identifier_pattern() =~ ~r/\\[Az]/
+  end
+
+  # An address gets `type="email"` and the browser's own check. A pattern built from the email
+  # grammar would be the disagreement this module exists to prevent, so there is none.
+  test "an instance that addresses its accounts carries no pattern at all" do
+    SetupSupport.put_identity(:email)
+
+    assert Layouts.identifier_pattern() == nil
   end
 end

@@ -13,19 +13,10 @@ defmodule __MODULE__Web.ClientIpTest do
   # async: false — three of these name trusted proxies, which is application config.
   use ExUnit.Case, async: false
 
+  alias __MODULE__.SetupSupport
   alias __MODULE__Web.ClientIp
 
-  defp trusting(addresses) do
-    previous = Application.fetch_env(:__APP__, :trusted_proxies)
-    Application.put_env(:__APP__, :trusted_proxies, addresses)
-
-    on_exit(fn ->
-      case previous do
-        {:ok, was} -> Application.put_env(:__APP__, :trusted_proxies, was)
-        :error -> Application.delete_env(:__APP__, :trusted_proxies)
-      end
-    end)
-  end
+  defp trusting(addresses), do: SetupSupport.put_env(:__APP__, :trusted_proxies, addresses)
 
   defp conn(peer, headers) do
     :get

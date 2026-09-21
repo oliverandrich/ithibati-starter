@@ -11,11 +11,18 @@ defmodule __MODULE__Web.InviteLive do
   use __MODULE__Web, :live_view
 
   alias Ithibati.Identity.Invitations
+  alias __MODULE__.Identity
   alias __MODULE__Web.CeremonyMessages
 
   @impl true
   def mount(%{"token" => token}, _session, socket) do
-    {:ok, assign(socket, token: token, invitation: Invitations.fetch(token), error: nil)}
+    {:ok,
+     assign(socket,
+       token: token,
+       invitation: Invitations.fetch(token),
+       error: nil,
+       email?: Identity.email?()
+     )}
   end
 
   @impl true
@@ -34,7 +41,12 @@ defmodule __MODULE__Web.InviteLive do
     ~H"""
     <Layouts.auth flash={@flash} title={gettext("You’re invited")}>
       <p :if={@invitation} class="mb-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
-        {gettext("The account will be called %{username}.", username: @invitation.username)}
+        <span :if={not @email?}>
+          {gettext("The account will be called %{username}.", username: @invitation.username)}
+        </span>
+        <span :if={@email?}>
+          {gettext("The account will belong to %{address}.", address: @invitation.username)}
+        </span>
       </p>
 
       <div :if={is_nil(@invitation)} role="alert" class="rounded-lg border p-4 border-red-300 bg-red-50 text-red-950 dark:border-red-700 dark:bg-red-950 dark:text-red-100 mt-6">

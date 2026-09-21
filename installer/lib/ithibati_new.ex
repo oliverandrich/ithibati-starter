@@ -1,9 +1,8 @@
 defmodule IthibatiNew do
   @moduledoc "Builds the Igniter invocation for an opinionated Phoenix project."
 
-  @starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.3.0"
+  @starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.4.0"
   @switches [
-    with_mail: :boolean,
     without_beans: :boolean,
     yes: :boolean,
     starter: :string
@@ -18,7 +17,7 @@ defmodule IthibatiNew do
           path
 
         _ ->
-          Mix.raise("Usage: mix ithibati.new PATH [--with-mail] [--without-beans] [--no-yes]")
+          Mix.raise("Usage: mix ithibati.new PATH [--without-beans] [--no-yes]")
       end
 
     [
@@ -30,7 +29,6 @@ defmodule IthibatiNew do
       "--only",
       "dev"
     ] ++
-      if(opts[:with_mail], do: ["--with-mail"], else: ["--with-args=--no-mailer"]) ++
       if(opts[:without_beans], do: ["--without-beans"], else: []) ++
       if(Keyword.get(opts, :yes, true), do: ["--yes"], else: [])
   end

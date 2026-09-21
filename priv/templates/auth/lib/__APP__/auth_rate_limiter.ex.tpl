@@ -6,7 +6,7 @@ defmodule __MODULE__.AuthRateLimiter do
     recovery: {10, 60},
     ceremony: {120, 60},
     setup: {10, 60},
-    manual_invitation: {10, 3600}
+    manual_invitation: {20, 86_400}
   ]
 
   def start_link(opts), do: GenServer.start_link(__MODULE__.AuthRateLimiter, %{}, name: Keyword.get(opts, :name, __MODULE__.AuthRateLimiter))

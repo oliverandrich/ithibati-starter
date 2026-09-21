@@ -8,6 +8,7 @@ defmodule __MODULE__Web.AuthRateLimit do
   """
   @behaviour Plug
   import Plug.Conn
+  alias __MODULE__.Accounts.User
   alias __MODULE__.AuthRateLimiter
   alias __MODULE__Web.ClientIp
 
@@ -25,6 +26,16 @@ defmodule __MODULE__Web.AuthRateLimit do
     end
   end
 
-  @doc "The budget a request is counted against: one group, one visitor."
-  def key(conn, group), do: {group, ClientIp.bucket(conn.remote_ip)}
+  @doc """
+  The counter key for one group of requests, from an account or from a visitor.
+
+  Built here so that every budget in the application is counted the same way. A caller that spelt
+  the key itself would be one endpoint away from counting an IPv6 visitor per address, and the
+  budget would mean nothing there without anything saying so.
+
+  An account is counted by its own id and not by the browser in front of it: a session, a name or
+  an address would each let the same person start over, and the account is what is spending.
+  """
+  def key(%User{id: id}, group), do: {group, id}
+  def key(%Plug.Conn{} = conn, group), do: {group, ClientIp.bucket(conn.remote_ip)}
 end

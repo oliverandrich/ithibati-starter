@@ -12,9 +12,39 @@ mise run release
 ```
 
 The release is in `_build/prod/rel/__APP__`. Set `DATABASE_URL`, `SECRET_KEY_BASE`,
-`PHX_HOST` and `PORT` for the deployment, and `TRUSTED_PROXIES` when a reverse proxy
-runs on another host. Run migration once as an explicit deploy step, issue the
-first-account setup code on the server, then start the application:
+`PHX_HOST` and `PORT` for the deployment, `TRUSTED_PROXIES` when a reverse proxy
+runs on another host, and `ACCOUNT_IDENTITY` with the mail variables when accounts
+are addressed rather than named.
+
+| Variable | What it decides |
+| --- | --- |
+| `ACCOUNT_IDENTITY` | `username` (the default) or `email`; anything else stops the boot. `email` requires the mail settings below |
+| `MAIL_ENABLED` | `true` to deliver invitations; required by `ACCOUNT_IDENTITY=email` |
+| `MAIL_FROM` | The address invitations come from |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Submission server; the port defaults to 587 |
+
+## Naming or addressing accounts
+
+An account is called one of two things here, and the instance chooses which before
+anybody registers.
+
+By default it is a username, and an invitation is a link whoever made it passes on
+however they like. Nothing is sent and no mail is configured.
+
+`ACCOUNT_IDENTITY=email` makes it an address instead. The invitation is then addressed
+to that address and delivered to it, which is also what proves the address belongs to
+whoever answers. That requires `MAIL_ENABLED=true` and the `SMTP_*` variables beside it.
+Submission is authenticated and the server's certificate is verified; port 465 is taken
+as implicit TLS and anything else as STARTTLS. An instance that asks for addresses
+without being able to send any refuses to start and says so.
+
+Choose once, before the first account. Turning an instance that already has accounts
+from names to addresses would leave every identifier it holds failing the new format.
+
+## Migrating and starting
+
+Run migration once as an explicit deploy step, issue the first-account setup code
+on the server, then start the application:
 
 ```sh
 bin/migrate
@@ -25,7 +55,7 @@ bin/server
 The setup command prints a random code to your terminal; capture it there, not in
 service logs or a deployment artifact. Ithibati stores only its digest in the
 version 3 setup-code table. Open `https://YOUR_HOST/setup`, enter the code,
-choose a username and register a passkey.
+enter the identifier this instance asks for, and register a passkey.
 The authorization in that browser session lasts ten minutes; re-enter the code if
 it expires. A successful claim consumes the code in the account transaction and
 closes `/setup`. A server started before a code is issued stays locked for claims.
@@ -68,9 +98,11 @@ recovery codes and accepted invitations untouched. In development, run
 Authentication request limits and manual-link invitations use in-memory counters
 on each application node. A restart resets their windows. In a multi-node deployment,
 use a trusted reverse proxy or shared limiter for a client-IP budget across nodes.
-The manual-invitation budget is keyed by account, so an IP-only edge limit cannot
-enforce a single quota across nodes; use a shared account-keyed limiter if that
-guarantee is needed.
+Making an invitation is limited too, but per signed-in account rather than per
+address: 20 in a 24-hour window, configurable with the other budgets. The counter
+lives in memory on the node that served the request, so several nodes each keep
+their own, and an edge rule keyed by address does not replace one keyed by account.
+Use a shared account-keyed limiter if a cluster-wide quota is needed.
 See [Authentication](authentication.md#authentication-limits-and-maintenance) for
 the default limits and configuration.
 

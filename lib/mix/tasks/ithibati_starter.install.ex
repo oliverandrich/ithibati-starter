@@ -6,7 +6,6 @@ defmodule Mix.Tasks.IthibatiStarter.Install do
       mix igniter.install ithibati_starter --only dev
 
   Options:
-  * `--with-mail`: add invitation delivery, a Swoosh mailer and development mailbox.
   * `--without-beans`: omit local Beans tracking configuration and commands.
 
   Use Igniter's `--dry-run` to preview changes. No database is migrated by installation.
@@ -17,8 +16,8 @@ defmodule Mix.Tasks.IthibatiStarter.Install do
   def info(_argv, _source) do
     %Igniter.Mix.Task.Info{
       group: :ithibati_starter,
-      schema: [with_mail: :boolean, without_beans: :boolean],
-      defaults: [with_mail: false, without_beans: false]
+      schema: [without_beans: :boolean],
+      defaults: [without_beans: false]
     }
   end
 

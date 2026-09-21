@@ -11,7 +11,7 @@ Install the pinned generators and the starter archive once:
 ```sh
 mix archive.install hex phx_new 1.8.14
 mix archive.install hex igniter_new 0.5.34
-mix archive.install github oliverandrich/ithibati-starter tag v0.3.0 --sparse installer
+mix archive.install github oliverandrich/ithibati-starter tag v0.4.0 --sparse installer
 ```
 
 Create a Phoenix app with the starter:
@@ -21,10 +21,10 @@ mix ithibati.new my_app
 cd my_app
 ```
 
-The `ithibati_new` 0.3.0 archive selects Starter tag `v0.3.0` by default. Check
+The `ithibati_new` 0.4.0 archive selects Starter tag `v0.4.0` by default. Check
 the `ithibati_starter` entry in the generated `mix.lock` to identify the exact
 resolved commit. `--starter` accepts another tag, commit or local checkout. The
-0.3.0 tag generates applications with Ithibati 0.5.0 and schema version 3.
+0.4.0 tag generates applications with Ithibati 0.5.0 and schema version 3.
 
 Start developing:
 
@@ -60,8 +60,7 @@ After installing the generators above:
 ```sh
 mix igniter.new my_app \
   --with phx.new \
-  --with-args="--no-mailer" \
-  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.3.0 \
+  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.4.0 \
   --only dev
 ```
 
@@ -76,7 +75,7 @@ Build the archive from the checkout's `installer/` directory:
 
 ```sh
 mix archive.build
-mix archive.install ithibati_new-0.3.0.ez
+mix archive.install ithibati_new-0.4.0.ez
 ```
 
 Then, from the directory where the new project should live:
@@ -86,85 +85,47 @@ mix ithibati.new my_app \
   --starter ithibati_starter@path:/absolute/path/to/ithibati-starter
 ```
 
-Add `--with-mail` for email invitations.
-
 </details>
 
-## Choose your profile
+## One profile, one choice left to the operator
 
-Ithibati is always included, and these two profiles are the only ones the starter
-supports. Accounts are identified by a username in both; an email address is a
-delivery detail, never the identifier. Choose whether invitations should also be
-delivered by email:
+Every generated application gets the same thing: the Phoenix tooling, checks and CI,
+vanilla Tailwind with Lucide and browser locale detection, passkeys with invitations
+and account security, a Swoosh mailer with a local mailbox preview, and the
+healthcheck, release helpers and auth cleanup. What an account is called is not
+chosen when you generate it but when you run it.
 
-| Feature | Default | `--with-mail` |
-| --- | :---: | :---: |
-| Phoenix tooling, checks and CI | ✓ | ✓ |
-| Vanilla Tailwind, Lucide and browser locale detection | ✓ | ✓ |
-| Username accounts, passkeys and account security | ✓ | ✓ |
-| Manual invitation links | ✓ | ✓ |
-| Email invitation form and German/English emails | — | ✓ |
-| Swoosh, local mailbox preview and SMTP configuration | — | ✓ |
-| Healthcheck, release helpers and auth cleanup | ✓ | ✓ |
-| Local Beans configuration | Optional | Optional |
-
-Enable invitation mail when creating a project:
-
-```sh
-mix ithibati.new my_app --with-mail
-```
-
-Or use Igniter directly; the starter adopts and configures the Phoenix mailer:
-
-```sh
-mix igniter.new my_app \
-  --with phx.new \
-  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.3.0 \
-  --only dev --with-mail
-```
-
-An app originally generated with `--no-mailer` is also supported: `--with-mail`
-creates the missing mailer.
-
-Add **`--without-beans`** to either profile to omit local tracking. Beans itself is
+**`--without-beans`** is the only switch, and it omits local tracking. Beans itself is
 installed separately and is not needed to compile, test or run the app. Neither RTK
 nor personal AI skills are required by generated applications.
 
-## Usernames, email and mail delivery
+## Naming or addressing accounts
 
-**This starter defaults to usernames, invitation-only registration and manually
-shared invitation links.** That is the starter's chosen policy, not a restriction
-of Ithibati. The manual form allows 10 creation attempts per signed-in account
-per hour per node; its limit is separate from optional mail delivery.
+**An account is a username or an email address, and the instance decides which**
+through `ACCOUNT_IDENTITY`. Named is the default. Ithibati binds the identifier
+field when a schema compiles, so the two modes are one column and the format is the
+whole difference; `MyApp.Identity` answers it, and both schemas ask.
 
-Ithibati lets an application choose its identifier, including an email address.
-Since 0.4.0 it also provides optional invitation-mail delivery through
-`Ithibati.InvitationMail`, using application-owned content and mailer callbacks.
-See the upstream [email-registration example](https://github.com/oliverandrich/ithibati/tree/v0.5.0/examples/email_registration)
-for an email-address identifier, emailed registration links and a development
-mailbox preview. Authentication still uses passkeys, with recovery codes as fallback.
+Named, an invitation is a link its maker passes on however they like. Nothing is
+sent and no mail is configured. The form allows 20 creations per signed-in account
+per day per node, counted against the account rather than the browser. A day rather
+than an hour, because an addressed invitation spends the operator's mail
+credentials, and the risk is a held account dripping rather than a burst.
 
-These are separate choices: delivering an invitation by email does not require
-using email as the account identifier, and choosing an email identifier does not
-itself enable delivery or verify mailbox ownership. The application's registration
-policy decides who may request an invitation.
+Addressed, the invitee's identifier is an email address, the link is delivered to
+it, and that delivery is what proves the address. It requires `MAIL_ENABLED=true`
+and the `SMTP_*` variables; an instance that asks for addresses without being able
+to send any refuses to start. A delivery that fails is reported and the link stays
+shareable by hand, because the invitation exists before the delivery and the link
+is the only copy there will ever be.
 
-**`--with-mail` keeps username accounts.** It adds a separate recipient address to
-the invitation form, without storing it on the account. The manual-link form remains
-available. Email content follows the inviter's browser language (English/German).
+Choose once, before the first account. The generated `docs/operations.md` carries the
+variables and `docs/authentication.md` the policy; this page does not restate them.
 
 Development messages appear at **`/dev/mailbox`** and tests use the Swoosh test
-adapter; neither sends external mail. Production uses authenticated SMTP with
-STARTTLS and certificate verification. Configure `MAIL_FROM`, `SMTP_HOST`,
-`SMTP_USERNAME`, `SMTP_PASSWORD` and optionally `SMTP_PORT` (default `587`), plus
-`PHX_HOST` for trusted invitation URLs. The generated `docs/mail.md` documents
-configuration and delivery limits. Other providers can replace the Swoosh adapter.
-
-Delivery is synchronous, limited to 10 attempts per member and 3 per recipient per
-hour per node. These mail budgets do not spend the manual-link budget. There are no
-automatic retries or background jobs. Transport errors leave the invitation valid
-and show an error; transport acceptance is not proof of receipt. Email-as-identifier
-remains an application-level customization.
+adapter; neither sends external mail. Submission is authenticated and the server's
+certificate is verified; port 465 is taken as implicit TLS and anything else as
+STARTTLS. Other providers can replace the Swoosh adapter.
 
 ## Generated pages
 
@@ -180,7 +141,7 @@ remains an application-level customization.
 | `/account/recovery-codes` | Remaining code count and confirmed regeneration |
 | `/account/verify` | Identity confirmation for sensitive changes |
 | `/health` | Liveness probe |
-| `/dev/mailbox` | Development mail preview, only with `--with-mail` |
+| `/dev/mailbox` | Development mail preview |
 
 Customize `Layouts.auth/1` and `Layouts.member/1` to change the shared appearance.
 Auth components use the project's module name as their wordmark.

@@ -4,12 +4,10 @@ defmodule Mix.Tasks.Ithibati.New do
   Creates an opinionated Phoenix application through Igniter.
 
       mix ithibati.new my_app
-      mix ithibati.new my_app --with-mail
 
   Install the Phoenix 1.8.14 and igniter_new 0.5.34 archives first.
-  Ithibati authentication is always included. Options:
+  Ithibati authentication and invitation delivery are always included. Options:
 
-    * `--with-mail` adds invitation delivery using the Phoenix mailer.
     * `--without-beans` omits local Beans configuration.
     * `--yes` accepts the generator's installation prompts (the default).
     * `--no-yes` restores interactive installation and diff prompts.

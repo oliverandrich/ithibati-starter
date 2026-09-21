@@ -60,11 +60,12 @@ to `AGENTS.md` and do not maintain another set of rules.
 
 ## Authentication scope
 
-Accounts are identified by a username, with or without invitation mail. An address
-is a delivery detail, never the identifier. `:operator_code` is the only supported
-claim mode; `__MODULE__.Claim` refuses to start an instance configured otherwise.
-Do not add Ithibati's `:open` mode, a second identifier, or a registration path
-that skips an invitation.
+An account is named or addressed, and `__MODULE__.Identity` answers which. The two
+modes are one column and one format; the identifier field is fixed when the schema
+compiles, so neither schema may carry `:format`. Ask `Identity` instead, in the
+schema, the screen and the sentence. `:operator_code` is the only supported claim
+mode. Do not add Ithibati's `:open` mode, a second identifier column, or a
+registration path that skips an invitation.
 
 Authentication budgets are keyed by `conn.remote_ip`. `__MODULE__Web.ClientIp`
 supplies that address and believes `X-Forwarded-For` only on a connection from the

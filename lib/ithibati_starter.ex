@@ -9,16 +9,13 @@ defmodule IthibatiStarter do
   alias Igniter.Project.Module, as: ProjectModule
   alias IthibatiStarter.Auth
   alias IthibatiStarter.Files
-  alias IthibatiStarter.Mail
   alias IthibatiStarter.Tooling
 
   @marker ".ithibati-starter"
 
-  @doc "Plans an installation. Options: `:with_mail` and `:without_beans`."
+  @doc "Plans an installation. Options: `:without_beans`."
   def install(igniter, opts \\ []) do
-    profile =
-      "0.3.0\nauth=true\nbeans=#{!opts[:without_beans]}\n" <>
-        if(opts[:with_mail], do: "mail=true\n", else: "")
+    profile = "0.4.0\nauth=true\nbeans=#{!opts[:without_beans]}\n"
 
     if Igniter.exists?(igniter, @marker) do
       {igniter, current} = Files.read(igniter, @marker)
@@ -48,10 +45,11 @@ defmodule IthibatiStarter do
       {igniter, router_source} = Files.read(igniter, router)
 
       cond do
-        not fresh_router?(router_source, bindings, opts) ->
+        not fresh_router?(router_source, bindings) ->
           Igniter.add_issue(
             igniter,
-            "The router differs from the fresh Phoenix 1.8.14 scaffold; refusing to replace it."
+            "The router differs from the fresh Phoenix 1.8.14 scaffold with a mailer; " <>
+              "refusing to replace it."
           )
 
         Enum.any?(
@@ -77,7 +75,6 @@ defmodule IthibatiStarter do
           igniter
           |> Tooling.install(bindings, opts)
           |> Auth.install(bindings)
-          |> maybe_mail(bindings, opts)
           |> Igniter.create_new_file(@marker, profile)
           |> Igniter.add_task("format", [])
           |> Igniter.add_notice(
@@ -98,23 +95,11 @@ defmodule IthibatiStarter do
     end
   end
 
-  defp fresh_router?(source, bindings, opts) do
-    base = Files.template("fragments/phoenix_router", bindings)
-
-    with_mailer =
-      String.replace(
-        base,
-        "metrics: #{bindings.module}Web.Telemetry",
-        "metrics: #{bindings.module}Web.Telemetry\n      forward \"/mailbox\", Plug.Swoosh.MailboxPreview"
-      )
-
-    canonical(source) == canonical(base) or
-      (opts[:with_mail] == true and canonical(source) == canonical(with_mailer))
+  # Every generated application ships the mailer, so the scaffold this replaces is the one
+  # Phoenix writes with it: the mailbox preview is part of a fresh router rather than a variant.
+  defp fresh_router?(source, bindings) do
+    canonical(source) == canonical(Files.template("fragments/phoenix_router", bindings))
   end
 
   defp canonical(source), do: source |> Code.string_to_quoted!() |> Macro.to_string()
-
-  defp maybe_mail(igniter, bindings, opts) do
-    if opts[:with_mail], do: Mail.install(igniter, bindings), else: igniter
-  end
 end

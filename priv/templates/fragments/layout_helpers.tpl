@@ -1,4 +1,4 @@
-  alias Ithibati.Schema.Identifier
+  alias __MODULE__.Identity
 
   @doc """
   The element the passkey hook attaches to.
@@ -27,15 +27,61 @@
   @doc """
   What an identifier may look like, for the browser to check before the server does.
 
-  Derived from `Ithibati.Schema.Identifier.username_format/0` rather than written out beside it: an
+  Derived from the shape this instance actually asks for rather than written out beside it: an
   HTML `pattern` that disagrees with the server refuses names the server would take, or waves
   through names it will not, and nothing says so. The anchors come off because `pattern` is
   implicitly anchored and its grammar has no `\\A`.
+
+  An address gets no pattern. `type="email"` is the browser's own check for one, and the email
+  grammar does not survive the trip into `pattern` intact.
   """
-  def username_pattern do
-    Identifier.username_format()
-    |> Regex.source()
-    |> String.replace(["\\A", "\\z"], "")
+  def identifier_pattern do
+    if Identity.email?(),
+      do: nil,
+      else: Identity.format() |> Regex.source() |> String.replace(["\\A", "\\z"], "")
+  end
+
+  @doc """
+  The field an account is identified by, asked for the way this instance means it.
+
+  One component rather than a pair of `:if`-gated inputs in every screen that asks. The two
+  halves differ in more than a label, and spelling them out per screen is how one of them ends
+  up without an `autocomplete` while the other has one.
+  """
+  attr :value, :string, default: ""
+  attr :name, :string, default: "username"
+  attr :label, :string, default: nil
+  attr :placeholder, :string, default: nil
+
+  def identifier_input(assigns) do
+    assigns =
+      assigns
+      |> assign(:email?, Identity.email?())
+      |> assign_new(:label, fn -> nil end)
+
+    ~H"""
+    <.input
+      :if={@email?}
+      type="email"
+      name={@name}
+      value={@value}
+      label={@label || gettext("Email address")}
+      autocomplete="email"
+      required
+      placeholder={@placeholder || "you@example.org"}
+    />
+    <.input
+      :if={not @email?}
+      name={@name}
+      value={@value}
+      label={@label || gettext("Username")}
+      autocomplete="username"
+      required
+      pattern={identifier_pattern()}
+      title={gettext("Letters, digits and underscores, up to thirty")}
+      placeholder={@placeholder || gettext("your_username")}
+    />
+    """
   end
 
 

@@ -10,6 +10,7 @@ defmodule __MODULE__Web.SignInLive do
   use __MODULE__Web, :live_view
 
   alias Ithibati.Identity.Instance
+  alias __MODULE__.Identity
   alias __MODULE__Web.CeremonyMessages
 
   @impl true
@@ -17,7 +18,13 @@ defmodule __MODULE__Web.SignInLive do
     setup_authorized? =
       socket.assigns.live_action == :setup and
         Instance.authorized?(session["initial_setup_authorization"])
-    {:ok, assign(socket, username: "", error: nil, setup_authorized?: setup_authorized?)}
+    {:ok,
+     assign(socket,
+       username: "",
+       error: nil,
+       setup_authorized?: setup_authorized?,
+       email?: Identity.email?()
+     )}
   end
 
   @impl true
@@ -69,7 +76,7 @@ defmodule __MODULE__Web.SignInLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.auth flash={@flash} title={title(@live_action)} subtitle={subtitle(@live_action)}>
+    <Layouts.auth flash={@flash} title={title(@live_action)} subtitle={subtitle(@live_action, @email?)}>
       <div :if={@error} role="alert" class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">{@error}</div>
 
       <div :if={@live_action == :login}>
@@ -86,7 +93,7 @@ defmodule __MODULE__Web.SignInLive do
       </.form>
 
       <form :if={@live_action == :setup and @setup_authorized?} id="claim-form" phx-change="validate" phx-submit="register">
-        <.input name="username" value={@username} label={gettext("Username")} autocomplete="username" required pattern={Layouts.username_pattern()} title={gettext("Letters, digits and underscores, up to thirty")} placeholder={gettext("your_username")} />
+        <Layouts.identifier_input value={@username} />
         <Layouts.auth_button>{gettext("Create your passkey")}</Layouts.auth_button>
       </form>
 
@@ -109,7 +116,13 @@ defmodule __MODULE__Web.SignInLive do
   defp title(:setup), do: gettext("Make yourself at home")
   defp title(:recover), do: gettext("Use a recovery code")
 
-  defp subtitle(:login), do: nil
-  defp subtitle(:setup), do: gettext("Enter the operator setup code, then choose your username and create a passkey.")
-  defp subtitle(:recover), do: gettext("Enter one of the codes you saved when you set up your account. Each code works once.")
+  defp subtitle(:login, _email?), do: nil
+
+  defp subtitle(:setup, true),
+    do: gettext("Enter the operator setup code, then your email address, and create a passkey.")
+
+  defp subtitle(:setup, false),
+    do: gettext("Enter the operator setup code, then choose your username and create a passkey.")
+
+  defp subtitle(:recover, _email?), do: gettext("Enter one of the codes you saved when you set up your account. Each code works once.")
 end

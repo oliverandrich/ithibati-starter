@@ -26,12 +26,13 @@ mix archive.install hex igniter_new 0.5.34 --force
 (cd "$starter_root/installer" && mix archive.build -o "$fixture_root/ithibati_new.ez")
 mix archive.install "$fixture_root/ithibati_new.ez" --force
 
-for profile in auth mail; do
+# One profile. Beans is the only thing still optional, so it is the only variation left.
+for profile in beans nobeans; do
   app="starter_${profile}"
   target="$fixture_root/$app"
   options=(--yes)
-  if [[ "$profile" == mail ]]; then
-    options=(--yes --with-mail --without-beans)
+  if [[ "$profile" == nobeans ]]; then
+    options=(--yes --without-beans)
   fi
 
   (cd "$fixture_root" && mix ithibati.new "$target" --starter "ithibati_starter@path:$starter_root" "${options[@]}")
@@ -49,10 +50,12 @@ for profile in auth mail; do
     fi
     # The second run must preserve the generated sources and any later user edits.
     mix ithibati_starter.install --dry-run "${options[@]}"
-    if [[ "$profile" == mail ]]; then
-      test -e "lib/$app/mailer.ex"
+    # Every application ships the mailer and decides the identifier at runtime.
+    test -e "lib/$app/mailer.ex"
+    test -e "lib/$app/identity.ex"
+    test -e "test/${app}_web/invitation_delivery_test.exs"
+    if [[ "$profile" == nobeans ]]; then
       test ! -e .beans.yml
-      test -e "test/${app}_web/invitation_mail_test.exs"
     fi
     mise release
     release="$target/_build/prod/rel/$app"
@@ -85,12 +88,11 @@ for profile in auth mail; do
       SECRET_KEY_BASE=$(elixir -e 'IO.write(Base.encode64(:crypto.strong_rand_bytes(64)))')
       export SECRET_KEY_BASE
       export PHX_HOST=localhost
-      if [[ "$profile" == mail ]]; then
-        # Runtime configuration is required even for migrations. This smoke test
-        # never sends mail and must not inherit real SMTP credentials.
-        export SMTP_HOST=localhost SMTP_PORT=9
-        export SMTP_USERNAME=smoke SMTP_PASSWORD=smoke MAIL_FROM=smoke@example.invalid
-      fi
+      # Mail is opt-in, and an instance that addresses its accounts needs it before it will
+      # start. This smoke test never sends anything and must not inherit real credentials.
+      export ACCOUNT_IDENTITY=email MAIL_ENABLED=true
+      export SMTP_HOST=localhost SMTP_PORT=9
+      export SMTP_USERNAME=smoke SMTP_PASSWORD=smoke MAIL_FROM=smoke@example.invalid
       "$release/bin/migrate"
       "$release/bin/migrate"
       # The operator command must work in the unpacked release without putting its
