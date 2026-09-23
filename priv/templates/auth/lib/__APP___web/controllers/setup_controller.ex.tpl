@@ -10,7 +10,7 @@ defmodule __MODULE__Web.SetupController do
     conn = put_resp_header(conn, "cache-control", "no-store")
 
     if Instance.needs_setup?() do
-      {limit, seconds} = AuthRateLimiter.limit(:setup)
+      {limit, seconds} = AuthRateLimiter.budget(:setup)
 
       case AuthRateLimiter.check(AuthRateLimit.key(conn, :setup), limit, seconds) do
         :ok -> authorize_code(conn, params["setup_code"])

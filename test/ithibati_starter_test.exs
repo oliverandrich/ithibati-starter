@@ -39,7 +39,7 @@ defmodule IthibatiStarterTest do
       assert files["docs/operations.md"] =~ "bin/migrate"
       assert files["docs/operations.md"] =~ "bin/setup-code"
       assert files["docs/operations.md"] =~ "Sample.AuthCleanup.run()"
-      assert files["docs/authentication.md"] =~ "manual_invitation: {20, 86_400}"
+      assert files["docs/authentication.md"] =~ "invite: {20, 86_400}"
       assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
       assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"

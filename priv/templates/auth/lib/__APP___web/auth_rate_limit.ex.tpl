@@ -18,7 +18,7 @@ defmodule __MODULE__Web.AuthRateLimit do
   @impl true
   def call(conn, _opts) do
     group = if conn.request_path == "/auth/recovery", do: :recovery, else: :ceremony
-    {limit, seconds} = AuthRateLimiter.limit(group)
+    {limit, seconds} = AuthRateLimiter.budget(group)
     case AuthRateLimiter.check(key(conn, group), limit, seconds) do
       :ok -> conn
       {:error, retry_after} ->

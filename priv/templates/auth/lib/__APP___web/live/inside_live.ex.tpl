@@ -27,8 +27,8 @@ defmodule __MODULE__Web.InsideLive do
   end
 
   def handle_event("invite", %{"username" => username}, socket) do
-    {limit, seconds} = AuthRateLimiter.limit(:manual_invitation)
-    key = AuthRateLimit.key(socket.assigns.current_account, :manual_invitation)
+    {limit, seconds} = AuthRateLimiter.budget(:invite)
+    key = AuthRateLimit.key(socket.assigns.current_account, :invite)
 
     with :ok <- AuthRateLimiter.check(key, limit, seconds),
          {:ok, invitation} <- %Invitation{} |> Invitation.changeset(%{"username" => username}) |> Repo.insert() do

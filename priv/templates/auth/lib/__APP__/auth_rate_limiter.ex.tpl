@@ -2,19 +2,19 @@ defmodule __MODULE__.AuthRateLimiter do
   @moduledoc "Bounded per-node fixed-window counters. Use an edge limit across multiple nodes."
   use GenServer
 
-  @default_limits [
+  @defaults [
     recovery: {10, 60},
     ceremony: {120, 60},
     setup: {10, 60},
-    manual_invitation: {20, 86_400}
+    invite: {20, 86_400}
   ]
 
   def start_link(opts), do: GenServer.start_link(__MODULE__.AuthRateLimiter, %{}, name: Keyword.get(opts, :name, __MODULE__.AuthRateLimiter))
   def check(key, limit, seconds, server \\ __MODULE__.AuthRateLimiter), do: GenServer.call(server, {:check, key, limit, seconds})
 
-  def limit(group) do
+  def budget(group) do
     configured = Application.get_env(:__APP__, :auth_rate_limits, [])
-    Keyword.get(configured, group, Keyword.fetch!(@default_limits, group))
+    Keyword.get(configured, group, Keyword.fetch!(@defaults, group))
   end
 
   @impl true

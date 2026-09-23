@@ -14,8 +14,8 @@ defmodule __MODULE__Web.AuthRateLimiterTest do
   end
 
   test "manual invitation accounts have separate budgets that reset after the window", %{server: server} do
-    first = {:manual_invitation, 1}
-    second = {:manual_invitation, 2}
+    first = {:invite, 1}
+    second = {:invite, 2}
 
     assert AuthRateLimiter.check(first, 1, 1, server) == :ok
     assert {:error, _seconds} = AuthRateLimiter.check(first, 1, 1, server)

@@ -52,7 +52,7 @@ and German.
 visitor address in a 60-second fixed window. Responses use HTTP 429, `Retry-After`, and a
 translated ceremony message. Making an invitation allows 20 per signed-in account in a
 24-hour window. Configure `:auth_rate_limits` on the application as
-`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, manual_invitation: {20, 86_400}]`
+`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, invite: {20, 86_400}]`
 (positive counts and seconds). A refused inviter is told how long to wait, in minutes
 for a window shorter than an hour and in hours otherwise.
 
