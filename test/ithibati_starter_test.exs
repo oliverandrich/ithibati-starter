@@ -96,7 +96,9 @@ defmodule IthibatiStarterTest do
       assert text =~ "mise run check"
     end)
 
-    assert diff(result, only: "mix.exs") =~ "== 0.5.0"
+    # A patch of the library is taken, a minor is not. The lockfile still decides what is
+    # installed; this decides what an update may reach for.
+    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.5.0"})
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")

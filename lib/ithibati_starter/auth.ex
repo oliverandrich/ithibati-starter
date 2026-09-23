@@ -13,7 +13,9 @@ defmodule IthibatiStarter.Auth do
     invitation = Module.concat([b.module, Accounts, Invitation])
 
     igniter
-    |> Deps.add_dep({:ithibati, "== 0.5.0"}, yes?: true)
+    # A patch of the library is taken, a minor is not. The lockfile still decides what is
+    # installed; this decides what an update may reach for.
+    |> Deps.add_dep({:ithibati, "~> 0.5.0"}, yes?: true)
     |> Deps.add_dep({:wallaby, "~> 0.31.0", only: :test, runtime: false}, yes?: true)
     |> Deps.add_dep({:swoosh, "~> 1.28"}, yes?: true)
     |> Deps.add_dep({:gen_smtp, "~> 1.3"}, yes?: true)
