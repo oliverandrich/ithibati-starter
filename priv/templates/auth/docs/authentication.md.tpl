@@ -1,6 +1,6 @@
 # Authentication
 
-The application pins Ithibati 0.5.0 and applies its schema version 3. On an empty
+The application pins Ithibati 0.6.0 and applies its schema version 4. On an empty
 database, an operator-issued code must unlock `/setup` before the first account
 can register a username and passkey. Issue
 the code after migration as described in [Operations](operations.md); enter it over

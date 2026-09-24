@@ -24,7 +24,7 @@ cd my_app
 The `ithibati_new` 0.4.0 archive selects Starter tag `v0.4.0` by default. Check
 the `ithibati_starter` entry in the generated `mix.lock` to identify the exact
 resolved commit. `--starter` accepts another tag, commit or local checkout. The
-0.4.0 tag generates applications with Ithibati 0.5.0 and schema version 3.
+0.4.0 tag generates applications with Ithibati 0.6.0 and schema version 4.
 
 Start developing:
 

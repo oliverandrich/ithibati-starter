@@ -5,7 +5,7 @@
 [![CI](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)
 [![Phoenix 1.8](https://img.shields.io/badge/Phoenix-1.8-orange.svg)](https://phoenixframework.org)
-[![Ithibati 0.5.0](https://img.shields.io/badge/Ithibati-0.5.0-violet.svg)](https://github.com/oliverandrich/ithibati)
+[![Ithibati 0.6.0](https://img.shields.io/badge/Ithibati-0.6.0-violet.svg)](https://github.com/oliverandrich/ithibati)
 
 An opinionated [Igniter](https://github.com/ash-project/igniter) installer for fresh
 Phoenix applications: passkeys, invitation-only accounts, vanilla Tailwind,
@@ -21,7 +21,7 @@ it without the starter as a runtime dependency.
 
 ### Authentication and account security
 
-Powered by **Ithibati 0.5.0**, with passkeys and accounts that are named or addressed:
+Powered by **Ithibati 0.6.0**, with passkeys and accounts that are named or addressed:
 
 - **Claim the site:** an operator-issued setup code authorizes the first account;
   subsequent registrations require an invitation.
@@ -118,7 +118,7 @@ cd my_app
 The `ithibati_new` 0.4.0 archive selects Starter tag `v0.4.0` by default. The
 generated `mix.lock` records the tag's resolved commit. Use `--starter` to choose
 a local checkout or another revision. Starter 0.4.0 generates applications with
-Ithibati 0.5.0 and schema version 3.
+Ithibati 0.6.0 and schema version 4.
 
 Start developing:
 

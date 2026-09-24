@@ -98,13 +98,13 @@ defmodule IthibatiStarterTest do
 
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.5.0"})
+    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.6.0"})
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
   end
 
-  test "generated protected claim uses Ithibati schema version 3" do
+  test "generated protected claim and invitation table sit on the library's versions" do
     files =
       project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
 
@@ -112,6 +112,12 @@ defmodule IthibatiStarterTest do
 
     assert files["priv/repo/migrations/20260920000000_add_setup_codes.exs"] =~
              "Ithibati.Migration.up(from: 2, version: 3)"
+
+    # A table generated today is built at the version the library is on. `ithibati_invitation/0`
+    # declares the inviter from 4, so a table pinned lower has a column every invitation query
+    # asks for and the table does not answer.
+    assert files["priv/repo/migrations/20260913115900_create_invitations.exs"] =~
+             "Ithibati.Migration.invitation_columns(version: 4)"
 
     refute Map.has_key?(
              files,
