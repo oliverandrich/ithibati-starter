@@ -88,7 +88,7 @@ defmodule __MODULE__Web.ClientIp do
   # loopback written the plain way. Without this the plug does nothing on the one deployment it
   # is for, and quietly: a test built on `Plug.Test.conn/3` never sees the mapped form. The
   # guard is the whole check, because OTP's conversion reads the low bits of anything it is given.
-  defp unmapped({0, 0, 0, 0, 0, 0xFFFF, _, _} = address),
+  defp unmapped({0, 0, 0, 0, 0, 0xFFFF, _high, _low} = address),
     do: :inet.ipv4_mapped_ipv6_address(address)
 
   defp unmapped(address), do: address
