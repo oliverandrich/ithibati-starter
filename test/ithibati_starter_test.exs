@@ -245,11 +245,16 @@ defmodule IthibatiStarterTest do
 
     files = result |> apply_igniter!() |> then(& &1.assigns.test_files)
 
-    # The library binds the identifier field when it compiles, so the shape is all that is left
-    # to choose, and neither schema may fix it.
+    # The library binds the identifier field when it compiles, so the shape is all that is left to
+    # choose, and neither schema may fix it. Naming the module that answers is not fixing it: the
+    # pair is escaped into the generated changeset and asked on every one, so an instance can
+    # still decide. A literal pattern here would be the mistake, and so would a schema doing the
+    # validating itself after the fact.
     for schema <- ["lib/sample/accounts/user.ex", "lib/sample/accounts/invitation.ex"] do
-      refute files[schema] =~ "format:", schema
-      assert files[schema] =~ "Identity.validate()", schema
+      assert files[schema] =~ "format: {Sample.Identity, :format}", schema
+      assert files[schema] =~ "format_message: {Sample.Identity, :format_message}", schema
+      refute files[schema] =~ "~r/", schema
+      refute files[schema] =~ "Identity.validate()", schema
     end
 
     assert [_, started] = String.split(files["lib/sample/application.ex"], "Identity.verify!()")

@@ -21,6 +21,18 @@ defmodule __MODULE__.IdentityTest do
   defp valid?(Invitation, value),
     do: %Invitation{} |> Invitation.changeset(%{"username" => value}) |> Map.fetch!(:valid?)
 
+  # Written as the second half of a sentence, because Ecto puts the field's label in front of it:
+  # a message naming the field again reads "Email address must be an email address."
+  defp refusal(value) do
+    changeset = Invitation.changeset(%Invitation{}, %{"username" => value})
+
+    refute changeset.valid?
+    assert [username: {message, _meta}] = changeset.errors
+    refute message =~ "blank"
+
+    message
+  end
+
   describe "the mode" do
     test "is a name unless something says otherwise" do
       SetupSupport.delete_env(:__APP__, :account_identity)
@@ -75,16 +87,20 @@ defmodule __MODULE__.IdentityTest do
       refute Ecto.Changeset.get_change(changeset, :token)
     end
 
-    # The refusal has to name the shape. Building it around a changeset that was first made from
-    # nothing would leave a blank-field error on a field somebody filled in.
+    # The refusal has to name the shape rather than report a blank field somebody filled in, and
+    # it has to say what this instance asks for. Ecto's own "has invalid format" names the fault
+    # and not the rule, which beside a name field tells nobody what to type instead.
     test "and says what is wrong with it, not that it is missing" do
       as(:email)
 
-      changeset = Invitation.changeset(%Invitation{}, %{"username" => "grace_hopper"})
+      assert refusal("grace_hopper") == "must look like grace@example.org"
 
-      assert [username: {message, _meta}] = changeset.errors
-      refute message =~ "blank"
+      as(:username)
+
+      assert refusal("grace@example.org") ==
+               "must be 1-30 lowercase letters, numbers or underscores"
     end
+
   end
 
   describe "asking for addresses without being able to send any" do
