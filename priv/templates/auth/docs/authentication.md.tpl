@@ -9,6 +9,14 @@ consumed with the first account claim. Later registrations require a valid
 invitation; every authenticated member can create links on `/`. Links are
 shown once, expire, and are accepted once. There is no administrator role.
 
+The same page lists what is outstanding: for whom, by whom and when it runs
+out. Any member can take any of them back, and the link stops working at once.
+This example has no way to remove an account, so that is the only moment
+anybody has a say over who joins. `__MODULE__.Invitations` holds the queries,
+and they come from Ithibati rather than being written again: `pending_query/0`
+is the predicate `fetch/1` uses, and `withdraw/1` rechecks the acceptance
+inside its delete.
+
 An account is named or addressed, which `__MODULE__.Identity` answers from
 `ACCOUNT_IDENTITY`. Named is the default: the link is shared through whatever
 channel its sender likes. Addressed means the invitee's identifier is an email

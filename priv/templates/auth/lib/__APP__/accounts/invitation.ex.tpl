@@ -21,6 +21,12 @@ defmodule __MODULE__.Accounts.Invitation do
   schema "invitations" do
     ithibati_invitation()
 
+    # `define_field: false`: `ithibati_invitation/0` declares `invited_by_id` and two declarations
+    # of one column is a compile error. The library writes the column and names the foreign key
+    # for it; whether there is an association to preload is this application's to say, and the
+    # invitations page reads it.
+    belongs_to :invited_by, __MODULE__.Accounts.User, define_field: false
+
     timestamps(type: :utc_datetime_usec)
   end
 

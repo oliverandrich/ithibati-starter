@@ -8,18 +8,31 @@ defmodule __MODULE__Web.InsideLive do
   """
   use __MODULE__Web, :live_view
 
-  alias __MODULE__.Accounts.Invitation
   alias __MODULE__.AuthRateLimiter
   alias __MODULE__.Identity
-  alias __MODULE__.Repo
+  alias __MODULE__.Invitations
   alias __MODULE__Web.AuthRateLimit
   alias __MODULE__Web.CoreComponents
   alias __MODULE__Web.InvitationMail
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, username: "", link: nil, error: nil, email?: Identity.email?())}
+    socket =
+      assign(socket,
+        username: "",
+        link: nil,
+        # Which invitation the link on screen belongs to. The link is the only copy of its token
+        # — the row keeps a digest — so taking some other invitation back must not take it away,
+        # and there is nothing on the withdrawn row to recognise it by afterwards.
+        link_id: nil,
+        error: nil,
+        email?: Identity.email?()
+      )
+
+    {:ok, listed(socket)}
   end
+
+  defp listed(socket), do: assign(socket, pending: Invitations.pending())
 
   @impl true
   def handle_event("validate", %{"username" => username}, socket) do
@@ -31,12 +44,21 @@ defmodule __MODULE__Web.InsideLive do
     key = AuthRateLimit.key(socket.assigns.current_account, :invite)
 
     with :ok <- AuthRateLimiter.check(key, limit, seconds),
-         {:ok, invitation} <- %Invitation{} |> Invitation.changeset(%{"username" => username}) |> Repo.insert() do
+         {:ok, invitation} <-
+           Invitations.open(socket.assigns.current_account, %{"username" => username}) do
       # The token is the only copy there will ever be: the row holds its sha256, and the virtual
       # field is empty on anything read back later. So it goes on the screen now or not at all.
       link = url(~p"/invite/#{invitation.token}")
 
-      {:noreply, assign(socket, link: link, username: "", error: undelivered(invitation, link))}
+      {:noreply,
+       socket
+       |> listed()
+       |> assign(
+         link: link,
+         link_id: invitation.id,
+         username: "",
+         error: undelivered(invitation, link)
+       )}
     else
       {:error, retry_after} when is_integer(retry_after) ->
         {:noreply, assign(socket, error: too_many(retry_after))}
@@ -45,6 +67,38 @@ defmodule __MODULE__Web.InsideLive do
         {:noreply, assign(socket, error: changeset_message(changeset, socket.assigns.email?))}
     end
   end
+
+  # The id comes off the wire, and nothing here scopes it: every member may withdraw any
+  # invitation that has not been accepted, which is the same rule as "every member may invite".
+  # There is no "yours" to get wrong.
+  def handle_event("withdraw", %{"id" => id}, socket) do
+    {:noreply, socket |> taken_back(Invitations.get(id)) |> listed()}
+  end
+
+  defp taken_back(socket, nil),
+    do: assign(socket, error: gettext("That invitation is no longer there."))
+
+  defp taken_back(socket, invitation) do
+    case Invitations.withdraw(invitation) do
+      {:ok, gone} ->
+        socket = assign(socket, error: nil)
+        if gone.id == socket.assigns.link_id, do: forgotten(socket), else: socket
+
+      # Ithibati answers `:already_accepted` for a row that was accepted *or* is no longer there,
+      # because it rechecks inside the delete and a miss cannot tell the two apart. Two members
+      # pressing this at once would otherwise leave the second reading that somebody accepted an
+      # invitation the first one withdrew.
+      {:error, :already_accepted} ->
+        assign(socket,
+          error:
+            gettext(
+              "That invitation is not waiting any more. Somebody accepted it, or took it back first."
+            )
+        )
+    end
+  end
+
+  defp forgotten(socket), do: assign(socket, link: nil, link_id: nil)
 
   # Told in hours, because a day-long window counts down in tens of thousands of seconds and
   # nobody reads that as a waiting time. The budget is configurable, though, so a window shorter
@@ -121,7 +175,48 @@ defmodule __MODULE__Web.InsideLive do
         </span>
       </div>
 
+      <h2 class="mt-10 text-lg font-semibold">{gettext("Outstanding invitations")}</h2>
 
+      <p :if={@pending == []} class="mt-2 text-sm opacity-70">
+        {gettext("Nothing is waiting to be accepted.")}
+      </p>
+
+      <p :if={@pending != []} class="mt-2 text-sm opacity-70">
+        {gettext(
+          "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
+        )}
+      </p>
+
+      <ul :if={@pending != []} id="pending-invitations" class="mt-4 divide-y">
+        <li
+          :for={invitation <- @pending}
+          id={"invitation-#{invitation.id}"}
+          class="flex flex-wrap items-center gap-x-4 gap-y-1 py-3"
+        >
+          <span class="font-medium">{invitation.username}</span>
+
+          <span class="text-sm opacity-70">
+            <%= if invitation.invited_by do %>
+              {gettext("Invited by %{username}", username: invitation.invited_by.username)}
+            <% else %>
+              {gettext("Invited by %{username}", username: gettext("Unknown"))}
+            <% end %>
+          </span>
+
+          <span class="text-sm opacity-70">
+            {gettext("Runs out %{date}", date: Calendar.strftime(invitation.expires_at, "%Y-%m-%d"))}
+          </span>
+
+          <button
+            type="button"
+            phx-click="withdraw"
+            phx-value-id={invitation.id}
+            class="ml-auto text-sm underline underline-offset-4"
+          >
+            {gettext("Take it back")}
+          </button>
+        </li>
+      </ul>
     </Layouts.member>
     """
   end
