@@ -91,8 +91,9 @@ bin/__APP__ rpc '__MODULE__.AuthCleanup.run()'
 ```
 
 The command reports counts of expired sessions, abandoned challenges and expired,
-unaccepted invitations removed. It is safe to repeat and leaves active credentials,
-recovery codes and accepted invitations untouched. In development, run
+unaccepted invitations removed. It disconnects the LiveViews of each expired session.
+A connected LiveView outlives its session by up to the job's interval. It is safe to
+repeat and leaves active credentials, recovery codes and accepted invitations untouched. In development, run
 `mix auth.cleanup` explicitly. The release does not install a scheduler or cron job.
 
 Authentication request limits and manual-link invitations use in-memory counters

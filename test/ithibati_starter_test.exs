@@ -98,7 +98,7 @@ defmodule IthibatiStarterTest do
 
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.6.0"})
+    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.7.1"})
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
