@@ -15,7 +15,7 @@ defmodule IthibatiStarter do
 
   @doc "Plans an installation. Options: `:without_beans`."
   def install(igniter, opts \\ []) do
-    profile = "0.4.0\nauth=true\nbeans=#{!opts[:without_beans]}\n"
+    profile = "0.5.0\nauth=true\nbeans=#{!opts[:without_beans]}\n"
 
     if Igniter.exists?(igniter, @marker) do
       {igniter, current} = Files.read(igniter, @marker)

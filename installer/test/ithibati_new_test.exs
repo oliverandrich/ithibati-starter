@@ -1,7 +1,7 @@
 defmodule IthibatiNewTest do
   use ExUnit.Case, async: true
 
-  @pinned_starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.4.0"
+  @pinned_starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.5.0"
 
   test "default command supplies Phoenix, the starter and dev-only installation" do
     assert IthibatiNew.arguments(["my_app"]) == [
@@ -17,7 +17,7 @@ defmodule IthibatiNewTest do
   end
 
   test "archive version identifies the pinned default" do
-    assert IthibatiNew.MixProject.project()[:version] == "0.4.0"
+    assert IthibatiNew.MixProject.project()[:version] == "0.5.0"
   end
 
   test "accepts installation prompts by default" do
