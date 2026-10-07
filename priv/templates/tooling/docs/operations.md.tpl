@@ -67,8 +67,9 @@ The usual deployment is a release behind a reverse proxy on the same host. Every
 request then arrives from one socket, so authentication budgets would be shared by
 everybody behind it. `__MODULE__Web.ClientIp` takes the visitor's address from
 `X-Forwarded-For` instead, and believes that header only on a connection from the
-loopback or from an address named in `TRUSTED_PROXIES`, comma separated and one
-address per entry rather than a range. A name that is not an address stops the boot
+loopback or from an address named in `TRUSTED_PROXIES`, comma separated. An entry is an
+address, or a range such as `172.20.0.0/16` for a proxy in a container whose address changes.
+A name that is neither stops the boot
 rather than being dropped quietly, so an instance exposed directly still counts the
 address it actually sees.
 

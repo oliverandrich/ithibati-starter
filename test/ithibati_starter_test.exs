@@ -166,7 +166,8 @@ defmodule IthibatiStarterTest do
     assert logged =~ "plug Plug.RequestId"
 
     assert files["config/runtime.exs"] =~ "TRUSTED_PROXIES"
-    assert files["config/runtime.exs"] =~ ":inet.parse_strict_address"
+    # Each entry is read by the plug that uses it, an address or a range.
+    assert files["config/runtime.exs"] =~ "SampleWeb.ClientIp.parse_proxy(name)"
     assert Map.has_key?(files, "test/sample_web/trusted_proxies_test.exs")
   end
 
