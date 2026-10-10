@@ -86,8 +86,9 @@ silently skip coverage.
 The script installs the pinned generators and the local archive in an isolated
 archive directory, then uses `mix ithibati.new` to create disposable default and
 mail-enabled applications. It runs each application's full gate, checks that
-reapplying the same profile is a no-op, builds both production releases, runs
-their migrations twice against disposable databases and starts each over HTTP.
+reapplying the same profile is a no-op and builds both production releases. Each
+release starts on an empty disposable database and migrates it. A second database
+covers the opt-out: migrations run twice by hand, then the release starts over HTTP.
 It chooses a test database partition and cleans up its temporary project
 directory and release smoke databases. Cleanup of the partitioned test databases
 remains the responsibility of the local test environment. Never use a development

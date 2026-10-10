@@ -22,6 +22,7 @@ are addressed rather than named.
 | `MAIL_ENABLED` | `true` to deliver invitations; required by `ACCOUNT_IDENTITY=email` |
 | `MAIL_FROM` | The address invitations come from |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Submission server; the port defaults to 587 |
+| `__APP_UPCASE___MIGRATE_ON_START` | `false` to migrate by hand with `bin/migrate`; unset or `true` migrates on start; anything else stops the boot |
 
 ## Naming or addressing accounts
 
@@ -43,11 +44,11 @@ from names to addresses would leave every identifier it holds failing the new fo
 
 ## Migrating and starting
 
-Run migration once as an explicit deploy step, issue the first-account setup code
-on the server, then start the application:
+Every start of the application migrates its database first. That includes
+`bin/setup-code` and `bin/server`, so the server never serves an outdated schema.
+Issue the first-account setup code on the server, then start the application:
 
 ```sh
-bin/migrate
 bin/setup-code
 bin/server
 ```
@@ -77,10 +78,17 @@ The application refuses to start unless `config :ithibati, initial_claim: :opera
 is set. An unprotected claim would hand the instance to the first stranger who finds the
 host, so this is a refusal to boot rather than a setup page nobody can satisfy.
 
-The migration command starts the repo without the HTTP server. It is safe to run
-again when all migrations are already applied. It does not create the database.
-Provide a database and take backups through your deployment's normal workflow.
-The application does not migrate automatically during boot.
+A migration that fails stops the start and is logged. A supervisor that restarts
+the service tries it again each time. A long migration can outlast the supervisor's
+start timeout; migrate such a release by hand. Set `__APP_UPCASE___MIGRATE_ON_START=false`
+to migrate by hand, with `bin/migrate` before `bin/server`. That command starts the
+repo without the HTTP server. It is a no-op once all migrations are applied. Neither
+path creates the database. Provide a database and take backups through your
+deployment's normal workflow.
+
+Back up the database before an update, because the new release migrates it as it
+starts. Replacing the release does not undo migrations. The old release works again
+only if it supports the resulting schema.
 
 ## Authentication maintenance
 
@@ -109,10 +117,14 @@ See [Authentication](authentication.md#authentication-limits-and-maintenance) fo
 the default limits and configuration.
 
 For an explicitly reviewed rollback, replace the example version below with the
-oldest migration version to undo (the boundary version is also rolled back):
+oldest migration version to undo (the boundary version is also rolled back). Stop
+the new release first, so a restart cannot migrate again:
 
 ```sh
 bin/__APP__ eval '__MODULE__.Release.rollback(__MODULE__.Repo, 20260918000000)'
 ```
+
+Then start the old release. Starting the new one again re-applies the migrations
+unless `__APP_UPCASE___MIGRATE_ON_START=false` is set.
 
 No deployment service, container image or job scheduler is imposed by the starter.

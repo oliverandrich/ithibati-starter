@@ -15,8 +15,8 @@ code with the same command if needed; only the latest code works.
 
 Use `mise reset` to explicitly recreate the development database (deletes its data),
 `mise migrate` for pending development migrations, and `mise release` to build the
-production package. In that package, run `bin/migrate`, `bin/setup-code`, then
-`bin/server` as described in [Operations](docs/operations.md).
+production package. In that package, run `bin/setup-code`, then `bin/server`. Both
+migrate the database first, as described in [Operations](docs/operations.md).
 
 ## Documentation
 

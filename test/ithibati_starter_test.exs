@@ -189,6 +189,20 @@ defmodule IthibatiStarterTest do
     assert endpoint =~ "websocket: [connect_info: [session: @session_options]]"
   end
 
+  test "a release migrates before it serves, unless the operator opts out" do
+    files =
+      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+
+    assert [_, after_repo] = String.split(files["lib/sample/application.ex"], "Sample.Repo,")
+    assert [_, after_migrator] = String.split(after_repo, "{Ecto.Migrator,")
+    assert after_migrator =~ "skip: !Application.get_env(:sample, :migrate_on_start, false)"
+    assert after_migrator =~ "SampleWeb.Endpoint"
+
+    assert files["config/runtime.exs"] =~ "SAMPLE_MIGRATE_ON_START"
+    assert files["test/sample/migrate_on_start_test.exs"] =~ "SAMPLE_MIGRATE_ON_START"
+    assert files["docs/operations.md"] =~ "SAMPLE_MIGRATE_ON_START"
+  end
+
   @tag :command_contract
   test "mise exposes development, reset and release commands" do
     result = project() |> IthibatiStarter.install()

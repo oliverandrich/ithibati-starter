@@ -65,7 +65,9 @@ to `AGENTS.md` and do not maintain another set of rules.
 ## Deployment scope
 
 Ship the application as a Mix release with its runtime: unpack, configure, run.
-Keep explicit database migration commands and runtime configuration. Persistent
+Every start of a release migrates its database, including `bin/setup-code`,
+unless `<APP>_MIGRATE_ON_START=false`.
+`bin/migrate` and the rollback command remain for explicit runs. Persistent
 application data and secrets belong outside the release directory.
 
 Database provisioning, process supervision, TLS, database dumps and OS-level
@@ -89,8 +91,9 @@ with Ithibati Starter:
   database, including migrations and seeds. Run only when explicitly requested.
 - `migrate`: explicit development migrations.
 - `release`: compile assets and build a production release for the build platform.
-- In the unpacked release, `bin/migrate` applies migrations and `bin/server`
-  starts the HTTP server. Startup never runs migrations automatically.
+- In the unpacked release, `bin/setup-code` and `bin/server` migrate the database
+  first; `bin/server` then starts the HTTP server. `bin/migrate` applies
+  migrations on their own.
 
 Application-specific asset builds and quality checks remain in Mix aliases.
 

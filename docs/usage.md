@@ -170,8 +170,9 @@ instance cannot be claimed. Rate limits are in-memory and per node; restarts res
 them. Configure trusted proxies or edge limits for client-IP requests, and use a
 shared account-keyed limit if manual-link quotas must hold across multiple nodes.
 The generated operations guide includes a recurring auth-cleanup command.
-The healthcheck proves HTTP liveness, not database readiness. Migrations and cleanup
-never run automatically during application boot.
+The healthcheck proves HTTP liveness, not database readiness. A release migrates
+its database on start unless `MY_APP_MIGRATE_ON_START=false`. Development servers
+never migrate on start. Auth cleanup never runs automatically.
 
 Generated applications share `mise dev`, `mise reset`, `mise migrate`, `mise setup-code` and
 `mise release`. Reset explicitly recreates the development database; release

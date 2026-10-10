@@ -41,6 +41,18 @@ defmodule IthibatiStarter.Tooling do
       "en"
     )
     |> database_env()
+    |> Files.replace("lib/#{bindings.app}/application.ex", "      #{bindings.module}.Repo,\n", """
+          #{bindings.module}.Repo,
+          # A release migrates here, before the endpoint serves anything; see config/runtime.exs.
+          # Development and tests migrate by hand.
+          {Ecto.Migrator,
+           repos: Application.fetch_env!(:#{bindings.app}, :ecto_repos),
+           skip: !Application.get_env(:#{bindings.app}, :migrate_on_start, false)},
+    """)
+    |> Files.append(
+      "config/runtime.exs",
+      Files.template("fragments/migrate_on_start_runtime", bindings)
+    )
     |> tidy_scaffold(bindings)
     |> maybe_beans(bindings, opts)
     |> Files.append(".gitignore", "\n/mise.local.toml\n/screenshots/\n")

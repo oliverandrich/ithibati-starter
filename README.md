@@ -84,8 +84,8 @@ Dependency advisories run separately through `mise run audit`.
 ### Operations, without choosing your hosting
 
 - **`GET /health`**: public, session-free liveness endpoint returning `{"status":"ok"}`.
-- **Release helpers**: explicit migration and rollback commands, documented in the
-  generated `docs/operations.md`.
+- **Release helpers**: a release migrates on start unless opted out. Explicit
+  migration and rollback commands remain, documented in the generated `docs/operations.md`.
 - **Auth cleanup**: `mix auth.cleanup` or `MyApp.AuthCleanup.run/0` removes expired
   sessions, abandoned challenges and expired, unaccepted invitations.
 - Environment-based database configuration and a documented release workflow.

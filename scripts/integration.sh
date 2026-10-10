@@ -67,24 +67,57 @@ for profile in beans nobeans; do
     done
     (
       database="${app}_release_$$"
+      manual="${app}_manual_$$"
+      migrate_variable="$(printf '%s' "$app" | tr '[:lower:]' '[:upper:]')_MIGRATE_ON_START"
       server_pid=""
       createdb "$database"
-      cleanup_release() {
+      createdb "$manual"
+      stop_server() {
         if [[ -n "$server_pid" ]]; then
           kill "$server_pid" 2>/dev/null || true
           wait "$server_pid" 2>/dev/null || true
+          server_pid=""
         fi
+      }
+      cleanup_release() {
+        stop_server
         dropdb "$database"
+        dropdb "$manual"
       }
       trap cleanup_release EXIT
-      export PGDATABASE="$database"
-      DATABASE_URL=$(elixir -e '
+      server_url=$(elixir -e '
         encode = &URI.encode(&1, fn c -> URI.char_unreserved?(c) end)
         user = encode.(System.fetch_env!("PGUSER"))
         password = encode.(System.fetch_env!("PGPASSWORD"))
-        IO.write("ecto://#{user}:#{password}@#{System.fetch_env!("PGHOST")}:#{System.fetch_env!("PGPORT")}/#{System.fetch_env!("PGDATABASE")}")
+        IO.write("ecto://#{user}:#{password}@#{System.fetch_env!("PGHOST")}:#{System.fetch_env!("PGPORT")}")
       ')
-      export DATABASE_URL
+      use_database() {
+        export PGDATABASE="$1" DATABASE_URL="$server_url/$1"
+      }
+      # The operator command must work in the unpacked release without putting its
+      # code in the integration log. Application startup may also print log lines.
+      issue_setup_code() {
+        setup_output=$(PHX_SERVER=true "$release/bin/setup-code")
+        setup_code_lines=$(printf '%s\n' "$setup_output" | grep -Ec '^Initial setup code: [A-Za-z0-9_-]{43}$' || true)
+        if [[ "$setup_code_lines" != 1 ]]; then
+          echo "Release setup command did not print exactly one setup code" >&2
+          exit 1
+        fi
+      }
+      migrated() {
+        [[ "$(psql -tAc "select to_regclass('public.schema_migrations') is not null")" == t ]]
+      }
+      # Run from outside the release directory to verify the launchers resolve it themselves.
+      start_server() {
+        "$release/bin/server" >"$target/release.log" 2>&1 &
+        server_pid=$!
+        if ! curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 \
+          --max-time 2 -H 'x-forwarded-proto: https' \
+          "http://localhost:$PORT/health" | grep -F '"status":"ok"'; then
+          cat "$target/release.log" >&2
+          exit 1
+        fi
+      }
       SECRET_KEY_BASE=$(elixir -e 'IO.write(Base.encode64(:crypto.strong_rand_bytes(64)))')
       export SECRET_KEY_BASE
       export PHX_HOST=localhost
@@ -93,26 +126,33 @@ for profile in beans nobeans; do
       export ACCOUNT_IDENTITY=email MAIL_ENABLED=true
       export SMTP_HOST=localhost SMTP_PORT=9
       export SMTP_USERNAME=smoke SMTP_PASSWORD=smoke MAIL_FROM=smoke@example.invalid
-      "$release/bin/migrate"
-      "$release/bin/migrate"
-      # The operator command must work in the unpacked release without putting its
-      # code in the integration log. Application startup may also print log lines.
       cd "$fixture_root"
-      setup_output=$(PHX_SERVER=true "$release/bin/setup-code")
-      setup_code_lines=$(printf '%s\n' "$setup_output" | grep -Ec '^Initial setup code: [A-Za-z0-9_-]{43}$' || true)
-      if [[ "$setup_code_lines" != 1 ]]; then
-        echo "Release setup command did not print exactly one setup code" >&2
+
+      # By default every start migrates, so the documented first step finds an empty database.
+      use_database "$database"
+      issue_setup_code
+      if ! migrated; then
+        echo "Release did not migrate its database on start" >&2
         exit 1
       fi
-      # Run from outside the release directory to verify the launchers resolve it themselves.
-      "$release/bin/server" >"$target/release.log" 2>&1 &
-      server_pid=$!
-      if ! curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 \
-        --max-time 2 -H 'x-forwarded-proto: https' \
-        "http://localhost:$PORT/health" | grep -F '"status":"ok"'; then
-        cat "$target/release.log" >&2
+      start_server
+      # Nothing is left to apply, so the explicit command is a no-op.
+      "$release/bin/migrate"
+      stop_server
+
+      # The opt-out leaves the database to the operator.
+      use_database "$manual"
+      export "$migrate_variable=false"
+      start_server
+      if migrated; then
+        echo "Release migrated although $migrate_variable=false" >&2
         exit 1
       fi
+      stop_server
+      "$release/bin/migrate"
+      "$release/bin/migrate"
+      issue_setup_code
+      start_server
     )
   )
 done
