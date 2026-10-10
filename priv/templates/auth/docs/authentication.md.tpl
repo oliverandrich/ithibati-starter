@@ -35,6 +35,9 @@ Sessions are revocable and cookies are encrypted because they temporarily carry
 recovery codes. Recovery codes are displayed once after registration. Adapt the
 account policy to the application.
 
+The session cookie's max age equals Ithibati's `session_validity`. It survives a
+browser restart until the session expires.
+
 The public auth screens are `/login` (passkey), `/recover` (recovery code), and
 `/setup` (first account only). Signed-in visitors go to `/`. The project name and
 auth appearance live in `Layouts.auth/1`; the one-time code screen includes a copy

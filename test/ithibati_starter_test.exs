@@ -171,6 +171,21 @@ defmodule IthibatiStarterTest do
     assert Map.has_key?(files, "test/sample_web/trusted_proxies_test.exs")
   end
 
+  test "the session cookie lasts as long as the session it carries" do
+    endpoint =
+      project()
+      |> IthibatiStarter.install()
+      |> apply_igniter!()
+      |> then(& &1.assigns.test_files["lib/sample_web/endpoint.ex"])
+
+    refute endpoint =~ "plug Plug.Session, @session_options"
+    assert endpoint =~ "plug :session"
+    assert endpoint =~ "alias Ithibati.Identity.Sessions"
+    assert endpoint =~ "Keyword.put(@session_options, :max_age, Sessions.max_age())"
+    # The socket only reads the cookie, so it keeps the options without a max age.
+    assert endpoint =~ "websocket: [connect_info: [session: @session_options]]"
+  end
+
   @tag :command_contract
   test "mise exposes development, reset and release commands" do
     result = project() |> IthibatiStarter.install()

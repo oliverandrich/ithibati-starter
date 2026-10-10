@@ -81,6 +81,27 @@ defmodule IthibatiStarter.Auth do
 
       plug Plug.RequestId\
     """)
+    |> Files.replace(
+      "lib/#{b.app}_web/endpoint.ex",
+      "  use Phoenix.Endpoint, otp_app: :#{b.app}\n",
+      "  use Phoenix.Endpoint, otp_app: :#{b.app}\n\n  alias Ithibati.Identity.Sessions\n"
+    )
+    |> Files.replace(
+      "lib/#{b.app}_web/endpoint.ex",
+      "  plug Plug.Session, @session_options\n  plug #{b.module}Web.Router\nend",
+      """
+        plug :session
+        plug #{b.module}Web.Router
+
+        # Without a max age the browser drops the cookie when it closes. The validity is read per
+        # request, so `config/runtime.exs` may set it.
+        defp session(conn, _opts) do
+          options = Keyword.put(@session_options, :max_age, Sessions.max_age())
+          Plug.Session.call(conn, Plug.Session.init(options))
+        end
+      end\
+      """
+    )
     |> Files.replace("lib/#{b.app}_web/endpoint.ex", "  plug Plug.Static,", """
       if Application.compile_env(:#{b.app}, :sql_sandbox, false) do
         plug Phoenix.Ecto.SQL.Sandbox

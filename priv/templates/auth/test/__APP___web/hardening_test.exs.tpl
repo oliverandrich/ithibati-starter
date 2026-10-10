@@ -24,7 +24,12 @@ defmodule __MODULE__Web.HardeningTest do
   test "health is public, minimal and does not set a session", %{conn: conn} do
     conn = get(conn, "/health")
     assert json_response(conn, 200) == %{"status" => "ok"}
-    refute Map.has_key?(conn.resp_cookies, "_starter_auth_key")
+    assert conn.resp_cookies == %{}
+  end
+
+  test "the session cookie outlives the browser for as long as the session is valid" do
+    conn = get(build_conn(), "/login")
+    assert conn.resp_cookies["___APP___key"].max_age == Sessions.max_age()
   end
 
   test "sensitive changes require a fresh confirmation" do
