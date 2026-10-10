@@ -156,7 +156,7 @@ teams or background-job framework. Add the policies your app needs.
 application with PostgreSQL, HTML, LiveView, Tailwind and esbuild. Authentication uses
 integer account IDs; `--binary-id` is rejected. Reapplying the same starter
 version/profile is a no-op that preserves edits. Switching profiles is refused.
-This is not an upgrade manager for generated apps.
+This is not an upgrade manager for generated apps; see [Upgrading](upgrading.md).
 
 **The browser chooses the language.** Each request resolves the first supported
 base language in `Accept-Language`, with English as fallback. The session only

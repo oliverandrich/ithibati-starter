@@ -111,7 +111,8 @@ port **43129** in the integration script. Override `PORT` if it is occupied.
    both profiles and preserve reapplication behavior.
 4. **Update documentation.** Explain new defaults, commands and operational
    limits. Preserve upstream attribution and keep the generated documentation
-   aligned with the source templates.
+   aligned with the source templates. When generated behavior changes, add a note
+   under Unreleased in [Upgrading](docs/upgrading.md#version-notes).
 5. **Review before committing.** Look for regressions, security issues and
    unnecessary complexity. Use Conventional Commits, such as
    `fix(auth): preserve recovery confirmation during input`, with a short body

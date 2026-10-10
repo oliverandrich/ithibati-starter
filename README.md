@@ -137,7 +137,8 @@ installer itself does not.
 ## Documentation
 
 [Usage guide](docs/usage.md) covers generator options, profiles, mail, generated
-pages and defaults. Generated applications include `CONTRIBUTING.md`, `AGENTS.md`
+pages and defaults. [Upgrading](docs/upgrading.md) applies later starter versions to a
+generated application. Generated applications include `CONTRIBUTING.md`, `AGENTS.md`
 and application guides under `docs/`.
 
 ## Contributing

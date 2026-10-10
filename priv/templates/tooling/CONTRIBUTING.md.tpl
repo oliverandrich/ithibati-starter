@@ -58,7 +58,9 @@ The `lucide_icons` dependency supplies SVG components without a Tailwind icon pl
 
 Read AGENTS.md for TDD and commit review rules. Generated code belongs to this
 application. Re-running the same starter/profile does nothing; it does not upgrade
-or overwrite your edits. Review dependency updates through normal PRs.
+or overwrite your edits. To apply a later starter version, follow
+[Upgrading](https://github.com/oliverandrich/ithibati-starter/blob/main/docs/upgrading.md).
+Review dependency updates through normal PRs.
 
 `mise dev`, `mise reset`, `mise migrate`, `mise setup-code` and `mise release` are the short forms
 of `mise run …`. Development tasks explicitly use `MIX_ENV=dev`; release builds

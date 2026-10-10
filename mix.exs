@@ -28,7 +28,10 @@ defmodule IthibatiStarter.MixProject do
           ~w(lib priv docs mix.exs README.md CONTRIBUTING.md LICENSE NOTICE THIRD_PARTY_LICENSES.md),
         licenses: ["MIT"]
       ],
-      docs: [main: "readme", extras: ["README.md", "CONTRIBUTING.md", "docs/usage.md"]]
+      docs: [
+        main: "readme",
+        extras: ["README.md", "CONTRIBUTING.md", "docs/usage.md", "docs/upgrading.md"]
+      ]
     ]
   end
 
