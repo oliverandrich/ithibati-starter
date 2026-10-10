@@ -1,6 +1,6 @@
 defmodule IthibatiStarter do
   @moduledoc """
-  Opinionated Phoenix 1.8/PostgreSQL starter with invitation-only Ithibati 0.5.0.
+  Opinionated Phoenix 1.8/PostgreSQL starter with invitation-only Ithibati 0.7.1.
 
   Call `install/2` from an Igniter task. This installer targets fresh applications;
   it is not an upgrade tool. Reapplying the same profile preserves all user edits.
@@ -15,7 +15,7 @@ defmodule IthibatiStarter do
 
   @doc "Plans an installation. Options: `:without_beans`."
   def install(igniter, opts \\ []) do
-    profile = "0.5.0\nauth=true\nbeans=#{!opts[:without_beans]}\n"
+    profile = "0.6.0\nauth=true\nbeans=#{!opts[:without_beans]}\n"
 
     if Igniter.exists?(igniter, @marker) do
       {igniter, current} = Files.read(igniter, @marker)

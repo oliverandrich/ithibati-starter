@@ -11,7 +11,7 @@ Install the pinned generators and the starter archive once:
 ```sh
 mix archive.install hex phx_new 1.8.14
 mix archive.install hex igniter_new 0.5.34
-mix archive.install github oliverandrich/ithibati-starter tag v0.5.0 --sparse installer
+mix archive.install github oliverandrich/ithibati-starter tag v0.6.0 --sparse installer
 ```
 
 Create a Phoenix app with the starter:
@@ -21,10 +21,10 @@ mix ithibati.new my_app
 cd my_app
 ```
 
-The `ithibati_new` 0.5.0 archive selects Starter tag `v0.5.0` by default. Check
+The `ithibati_new` 0.6.0 archive selects Starter tag `v0.6.0` by default. Check
 the `ithibati_starter` entry in the generated `mix.lock` to identify the exact
 resolved commit. `--starter` accepts another tag, commit or local checkout. The
-0.5.0 tag generates applications with Ithibati 0.7.1 and schema version 4.
+0.6.0 tag generates applications with Ithibati 0.7.1 and schema version 4.
 
 Start developing:
 
@@ -60,7 +60,7 @@ After installing the generators above:
 ```sh
 mix igniter.new my_app \
   --with phx.new \
-  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.5.0 \
+  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.6.0 \
   --only dev
 ```
 
@@ -75,7 +75,7 @@ Build the archive from the checkout's `installer/` directory:
 
 ```sh
 mix archive.build
-mix archive.install ithibati_new-0.5.0.ez
+mix archive.install ithibati_new-0.6.0.ez
 ```
 
 Then, from the directory where the new project should live:

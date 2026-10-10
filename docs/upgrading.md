@@ -79,7 +79,7 @@ Check the diff for these before deploying:
 
 Each entry names what changed in generated applications and what to do about it.
 
-### Unreleased
+### 0.6.0
 
 **The session cookie lasts as long as the session.** `lib/my_app_web/endpoint.ex`
 replaces `plug Plug.Session, @session_options` with `plug :session` and a `session/2`
