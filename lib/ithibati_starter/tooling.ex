@@ -13,8 +13,7 @@ defmodule IthibatiStarter.Tooling do
     {:jump_credo_checks, "~> 0.5.0", only: [:dev, :test], runtime: false},
     {:excellent_migrations, "~> 0.1.10", only: [:dev, :test], runtime: false},
     {:sobelow, "~> 0.15.0", only: [:dev, :test], runtime: false},
-    {:mix_audit, "~> 2.1.5", only: [:dev, :test], runtime: false},
-    {:tidewave, "~> 0.9.0", only: :dev}
+    {:mix_audit, "~> 2.1.5", only: [:dev, :test], runtime: false}
   ]
 
   def install(igniter, bindings, opts) do
@@ -42,13 +41,6 @@ defmodule IthibatiStarter.Tooling do
       "en"
     )
     |> database_env()
-    |> Files.replace("lib/#{bindings.app}_web/endpoint.ex", "  if code_reloading? do", """
-      if Application.compile_env(:#{bindings.app}, :dev_routes, false) do
-        plug Tidewave
-      end
-
-      if code_reloading? do
-    """)
     |> tidy_scaffold(bindings)
     |> maybe_beans(bindings, opts)
     |> Files.append(".gitignore", "\n/mise.local.toml\n/screenshots/\n")

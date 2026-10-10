@@ -51,7 +51,6 @@ Production uses `DATABASE_URL` and `SECRET_KEY_BASE`; see [Operations](docs/oper
 Keep migration history unchanged. Credo scans source, tests and all migrations;
 Jump inspects inline HEEx and files reached through embed_templates. ExSlop and
 Jump rules are explicitly selected. Audit findings are separate from PR gates.
-Tidewave runs only in development on loopback at /tidewave/mcp.
 Tailwind/esbuild are Mix-managed; Node is unnecessary.
 Use Lucide components directly, for example `<Lucideicons.chevron_down class="size-4" aria-hidden="true" />`.
 Decorative icons are hidden from assistive technology; label icon-only buttons.

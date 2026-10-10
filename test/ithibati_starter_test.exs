@@ -102,6 +102,9 @@ defmodule IthibatiStarterTest do
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
+
+    refute diff(result, only: "mix.exs") =~ ":tidewave"
+    refute diff(result, only: "lib/sample_web/endpoint.ex") =~ "plug Tidewave"
   end
 
   test "generated protected claim and invitation table sit on the library's versions" do
