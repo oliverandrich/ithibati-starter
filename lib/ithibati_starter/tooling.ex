@@ -40,7 +40,7 @@ defmodule IthibatiStarter.Tooling do
       [Module.concat([bindings.module <> "Web", Gettext]), :default_locale],
       "en"
     )
-    |> database_env()
+    |> databases(bindings)
     |> Files.replace("lib/#{bindings.app}/application.ex", "      #{bindings.module}.Repo,\n", """
           #{bindings.module}.Repo,
           # A release migrates here, before the endpoint serves anything; see config/runtime.exs.
@@ -76,25 +76,60 @@ defmodule IthibatiStarter.Tooling do
     ]
   end
 
-  defp database_env(igniter) do
-    Enum.reduce(["config/dev.exs", "config/test.exs"], igniter, fn path, acc ->
-      acc
-      |> Files.replace(
-        path,
-        "username: \"postgres\"",
-        "username: System.get_env(\"PGUSER\", \"postgres\")"
-      )
-      |> Files.replace(
-        path,
-        "password: \"postgres\"",
-        "password: System.get_env(\"PGPASSWORD\", \"postgres\")"
-      )
-      |> Files.replace(
-        path,
-        "hostname: \"localhost\",",
-        "hostname: System.get_env(\"PGHOST\", \"localhost\"),\n  port: String.to_integer(System.get_env(\"PGPORT\", \"5432\")),"
-      )
-    end)
+  # Phoenix scaffolds PostgreSQL. The repository becomes a dispatcher over one repository per
+  # database, and each environment configures the one `<APP>_DATABASE` names.
+  defp databases(igniter, b) do
+    repo = "config :#{b.app}, #{b.module}.Repo,\n"
+
+    igniter
+    |> Deps.add_dep({:ecto_sqlite3, "~> 0.25"}, yes?: true)
+    |> Files.replace(
+      "config/config.exs",
+      "# Import environment specific config.",
+      Files.template("fragments/database_config", b) <> "\n# Import environment specific config."
+    )
+    |> Files.replace(
+      "config/dev.exs",
+      repo <>
+        scaffold_credentials() <>
+        """
+          database: "#{b.app}_dev",
+          stacktrace: true,
+          show_sensitive_data_on_connection_error: true,
+          pool_size: 10
+        """,
+      Files.template("fragments/database_dev", b)
+    )
+    |> Files.replace(
+      "config/test.exs",
+      repo <>
+        scaffold_credentials() <>
+        """
+          database: "#{b.app}_test\#{System.get_env("MIX_TEST_PARTITION")}",
+          pool: Ecto.Adapters.SQL.Sandbox,
+          pool_size: System.schedulers_online() * 2
+        """,
+      Files.template("fragments/database_test", b)
+    )
+    # The scaffold's PostgreSQL block becomes the else branch; `mix format` indents it.
+    |> Files.replace("config/runtime.exs", [
+      {"  database_url =\n",
+       Files.template("fragments/database_runtime", b) <> "  database_url =\n"},
+      {"    socket_options: maybe_ipv6\n", "    socket_options: maybe_ipv6\n  end\n"}
+    ])
+    |> Files.replace(
+      "test/test_helper.exs",
+      "ExUnit.start()\n",
+      Files.template("fragments/database_test_helper", b)
+    )
+  end
+
+  defp scaffold_credentials do
+    """
+      username: "postgres",
+      password: "postgres",
+      hostname: "localhost",
+    """
   end
 
   defp tidy_scaffold(igniter, b) do

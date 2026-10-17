@@ -2,7 +2,8 @@
 
 ## Get started
 
-You'll need **mise**, **Elixir 1.20.4 / OTP 29.0.6** and **PostgreSQL 18**.
+You'll need **mise** and **Elixir 1.20.4 / OTP 29.0.6**. Development runs on SQLite;
+**PostgreSQL 18** is needed for the generated checks, which test against both databases.
 Chrome and a matching Chromedriver are required for the browser tests.
 Node.js is not required: Mix manages Tailwind and esbuild.
 
@@ -176,6 +177,18 @@ or info box, and `<.card>` a raised area.
 The brand palette appears only in the `signal` tokens. To change it later, replace
 the palette name in those four lines.
 
+## Databases
+
+A generated application serves SQLite and PostgreSQL from one build. `MY_APP_DATABASE`
+chooses one at runtime, `sqlite` by default. Ecto fixes a repository's adapter at compile
+time, so `MyApp.Repo` delegates to `MyApp.Repo.SQLite` or `MyApp.Repo.Postgres`.
+Migrations are shared and must work on both.
+
+Development uses `tmp/my_app_dev.db`. `mise run check` runs every check on SQLite and the
+tests again on PostgreSQL; the browser features run on SQLite alone. A release needs an
+absolute `DATABASE_PATH` for SQLite or `DATABASE_URL` for PostgreSQL. The generated
+`docs/operations.md` describes both.
+
 ## Deliberate defaults
 
 **A starting point, not an admin product.** Every authenticated member can invite
@@ -183,7 +196,8 @@ someone. There are no administrator roles, invitation-management dashboard, bill
 teams or background-job framework. Add the policies your app needs.
 
 **Fresh applications only.** The tested scaffold is a non-umbrella Phoenix 1.8.14
-application with PostgreSQL, HTML, LiveView, Tailwind and esbuild. Authentication uses
+application with PostgreSQL, HTML, LiveView, Tailwind and esbuild. The installer adds
+SQLite beside PostgreSQL; see [Databases](#databases). Authentication uses
 integer account IDs; `--binary-id` is rejected. Reapplying the same starter
 version/profile is a no-op that preserves edits. Switching profiles is refused.
 This is not an upgrade manager for generated apps; see [Upgrading](upgrading.md).

@@ -104,6 +104,19 @@ checks `border-danger` and `border-edge`, and adds tests for `alert/1` and `card
 Applying this by hand touches most templates. Take the diff of the files you have not
 changed, and keep your own colours in the files you have.
 
+**One build serves SQLite and PostgreSQL.** `lib/my_app/repo.ex` becomes a dispatcher over
+the new `lib/my_app/repo/sqlite.ex` and `lib/my_app/repo/postgres.ex`. `mix.exs` adds
+`ecto_sqlite3`. `config/config.exs`, `dev.exs`, `test.exs` and `runtime.exs` read
+`MY_APP_DATABASE`; a release then needs `DATABASE_PATH` or `DATABASE_URL`.
+`test/test_helper.exs` runs SQLite tests one module at a time and skips the browser features
+on PostgreSQL. `test/support/data_case.ex` and `FeatureCase` empty the rate limiter between
+SQLite tests. `mise.toml` checks both databases. New tests are `test/my_app/repo_test.exs`
+and `test/my_app/database_runtime_test.exs`.
+
+For operators: **an existing PostgreSQL installation must set `MY_APP_DATABASE=postgres`**.
+Without it the updated release starts on SQLite and stops for want of `DATABASE_PATH`.
+Moving existing data between the databases is not covered.
+
 ### 0.6.0
 
 **The session cookie lasts as long as the session.** `lib/my_app_web/endpoint.ex`

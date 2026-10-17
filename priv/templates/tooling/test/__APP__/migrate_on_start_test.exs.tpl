@@ -7,33 +7,12 @@ defmodule __MODULE__.MigrateOnStartTest do
   """
   use ExUnit.Case, async: false
 
-  # The variables a production boot requires. Mail stays off, so it asks for nothing more.
-  @prod %{
-    "DATABASE_URL" => "ecto://__APP__:secret@localhost/__APP__",
-    "SECRET_KEY_BASE" => String.duplicate("k", 64),
-    "MAIL_ENABLED" => nil,
-    "ACCOUNT_IDENTITY" => nil
-  }
+  alias __MODULE__.RuntimeConfig
 
-  # A value exported in the developer's shell would otherwise decide the result.
-  defp read(mix_env, env) do
-    previous = Map.new(env, fn {name, _value} -> {name, System.get_env(name)} end)
-    on_exit(fn -> put_env(previous) end)
-    put_env(env)
+  defp read(mix_env, env),
+    do: mix_env |> RuntimeConfig.read(env) |> get_in([:__APP__, :migrate_on_start])
 
-    "config/runtime.exs"
-    |> Config.Reader.read!(env: mix_env)
-    |> get_in([:__APP__, :migrate_on_start])
-  end
-
-  defp put_env(env) do
-    Enum.each(env, fn
-      {name, nil} -> System.delete_env(name)
-      {name, value} -> System.put_env(name, value)
-    end)
-  end
-
-  defp migrates(value), do: read(:prod, Map.put(@prod, "__APP_UPCASE___MIGRATE_ON_START", value))
+  defp migrates(value), do: read(:prod, %{"__APP_UPCASE___MIGRATE_ON_START" => value})
 
   test "a release migrates on start unless told not to" do
     assert migrates(nil) == true

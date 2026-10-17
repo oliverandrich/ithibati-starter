@@ -132,6 +132,11 @@ defmodule IthibatiStarter.Auth do
       "assert html_response(conn, 200) =~ \"Peace of mind from prototype to production\"",
       "assert redirected_to(conn) == ~p\"/login\""
     )
+    |> Files.replace(
+      "test/support/data_case.ex",
+      "  def setup_sandbox(tags) do\n",
+      "  def setup_sandbox(tags) do\n    #{b.module}.SetupSupport.forget_rate_limits()\n"
+    )
     |> Files.append("test/test_helper.exs", """
 
     Application.put_env(:wallaby, :chromedriver, path: #{b.module}Web.BrowserDriver.path(), headless: true)

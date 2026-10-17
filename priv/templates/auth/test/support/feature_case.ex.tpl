@@ -25,6 +25,7 @@ defmodule __MODULE__Web.FeatureCase do
       use Wallaby.Feature
 
       setup %{session: session} do
+        __MODULE__.SetupSupport.forget_rate_limits()
         __MODULE__Web.FeatureCase.language(session, "en")
         :ok
       end

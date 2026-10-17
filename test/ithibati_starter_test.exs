@@ -199,6 +199,48 @@ defmodule IthibatiStarterTest do
     assert files["docs/operations.md"] =~ "SAMPLE_MIGRATE_ON_START"
   end
 
+  test "one build serves SQLite and PostgreSQL, and SAMPLE_DATABASE chooses" do
+    files = installed_files()
+
+    # Ecto fixes an adapter when a repository compiles, so each database has its own.
+    assert files["lib/sample/repo.ex"] =~ "def repo do"
+    assert files["lib/sample/repo/sqlite.ex"] =~ "adapter: Ecto.Adapters.SQLite3"
+    assert files["lib/sample/repo/postgres.ex"] =~ "adapter: Ecto.Adapters.Postgres"
+    assert files["config/config.exs"] =~ "ecto_repos: [Sample.Repo]"
+
+    # `__MODULE__` is the template's placeholder for the application module, so the
+    # repositories name themselves through `__ENV__` and read the shared `Sample.Repo` key.
+    assert files["lib/sample/repo.ex"] =~ "Application.get_env(Sample.Repo, [])"
+    assert files["lib/sample/repo.ex"] =~ "Keyword.put_new(:name, Sample.Repo)"
+
+    for repo <- ["sqlite", "postgres"] do
+      assert files["lib/sample/repo/#{repo}.ex"] =~ "@name __ENV__.module |> Module.split()"
+    end
+
+    assert files["mix.exs"] =~ ~s({:ecto_sqlite3,)
+    # Before the environment files, so dev.exs or test.exs may override the choice.
+    assert [before_import, _] = String.split(files["config/config.exs"], "import_config")
+    assert before_import =~ ~s{System.get_env("SAMPLE_DATABASE", "sqlite")}
+
+    for env <- ["dev", "test"] do
+      assert files["config/#{env}.exs"] =~ ~s{"../tmp/sample_#{env}}
+      assert files["config/#{env}.exs"] =~ ~s{System.get_env("PGHOST", "localhost")}
+    end
+
+    assert files["config/runtime.exs"] =~ ~s{System.get_env("SAMPLE_DATABASE", "sqlite")}
+    assert files["config/runtime.exs"] =~ "DATABASE_PATH"
+    assert files["config/runtime.exs"] =~ "DATABASE_URL"
+    assert files["test/test_helper.exs"] =~ "max_cases: 1"
+
+    assert files["mise.toml"] =~ "SAMPLE_DATABASE=sqlite mix precommit"
+    assert files["mise.toml"] =~ "SAMPLE_DATABASE=postgres mix test"
+    assert files["mise.toml"] =~ ~s(run = "SAMPLE_DATABASE=sqlite mix test")
+    assert files[".github/workflows/ci.yml"] =~ "mise run check"
+    assert files["docs/operations.md"] =~ "SAMPLE_DATABASE"
+    assert files["docs/operations.md"] =~ "DATABASE_PATH"
+    assert files["README.md"] =~ "SAMPLE_DATABASE=postgres"
+  end
+
   @tag :command_contract
   test "mise exposes development, reset and release commands" do
     result = project() |> IthibatiStarter.install()

@@ -24,14 +24,27 @@ env.MIX_ENV = "dev"
 raw = true
 run = "iex -S mix phx.server"
 
+# SQLite is the default and gets every check. PostgreSQL repeats the tests that touch the
+# database; the browser features run on SQLite alone.
 [tasks.check]
 env.MIX_ENV = "test"
-description = "Check workflows, compile, format, lint, security, assets and tests"
-run = ["zizmor .github/", "mix precommit"]
+description = "Check workflows, compile, format, lint, security, assets and tests on both databases"
+run = [
+  "zizmor .github/",
+  "__APP_UPCASE___DATABASE=sqlite mix precommit",
+  "__APP_UPCASE___DATABASE=postgres mix test",
+]
 
+# One command per task, so arguments such as a test path reach `mix test`.
 [tasks.test]
 env.MIX_ENV = "test"
-run = "mix test"
+description = "Run the tests against SQLite"
+run = "__APP_UPCASE___DATABASE=sqlite mix test"
+
+[tasks."test:postgres"]
+env.MIX_ENV = "test"
+description = "Run the tests against PostgreSQL, without the browser features"
+run = "__APP_UPCASE___DATABASE=postgres mix test"
 
 [tasks.format]
 run = "mix format"

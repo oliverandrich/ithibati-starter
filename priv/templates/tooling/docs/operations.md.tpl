@@ -11,18 +11,40 @@ the deployment target:
 mise run release
 ```
 
-The release is in `_build/prod/rel/__APP__`. Set `DATABASE_URL`, `SECRET_KEY_BASE`,
-`PHX_HOST` and `PORT` for the deployment, `TRUSTED_PROXIES` when a reverse proxy
-runs on another host, and `ACCOUNT_IDENTITY` with the mail variables when accounts
-are addressed rather than named.
+The release is in `_build/prod/rel/__APP__`. Set the database variables described in
+[Choosing a database](#choosing-a-database), `SECRET_KEY_BASE`, `PHX_HOST` and `PORT`
+for the deployment, `TRUSTED_PROXIES` when a reverse proxy runs on another host, and
+`ACCOUNT_IDENTITY` with the mail variables when accounts are addressed rather than named.
 
 | Variable | What it decides |
 | --- | --- |
+| `__APP_UPCASE___DATABASE` | `sqlite` (the default) or `postgres`; anything else stops the boot |
+| `DATABASE_PATH` | The SQLite file, as an absolute path; required with `sqlite` |
+| `DATABASE_URL` | The PostgreSQL connection, `ecto://USER:PASS@HOST/DATABASE`; required with `postgres` |
+| `POOL_SIZE` | Database connections; 5 for SQLite and 10 for PostgreSQL by default |
 | `ACCOUNT_IDENTITY` | `username` (the default) or `email`; anything else stops the boot. `email` requires the mail settings below |
 | `MAIL_ENABLED` | `true` to deliver invitations; required by `ACCOUNT_IDENTITY=email` |
 | `MAIL_FROM` | The address invitations come from |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Submission server; the port defaults to 587 |
 | `__APP_UPCASE___MIGRATE_ON_START` | `false` to migrate by hand with `bin/migrate`; unset or `true` migrates on start; anything else stops the boot |
+
+## Choosing a database
+
+One release serves SQLite and PostgreSQL. `__APP_UPCASE___DATABASE` chooses one when the
+release starts. Ecto fixes a repository's adapter at compile time, so the application has
+one repository per database. `__MODULE__.Repo` delegates every call to the chosen one.
+
+SQLite needs no database server. Keep its file outside the release directory, for
+example `DATABASE_PATH=/var/lib/__APP__/__APP__.db`. The directory must exist and be
+writable by the service user. SQLite creates the file on the first start. While the
+release runs, back it up with `sqlite3 "$DATABASE_PATH" ".backup BACKUP_FILE"`. Copy the file
+with its `-wal` and `-shm` files only while the release is stopped.
+
+PostgreSQL needs `__APP_UPCASE___DATABASE=postgres` and `DATABASE_URL`. The database must
+exist before the first start.
+
+Development and tests read the same variable. `mise run check` runs every check on
+SQLite and the tests again on PostgreSQL.
 
 ## Naming or addressing accounts
 
@@ -83,7 +105,7 @@ the service tries it again each time. A long migration can outlast the superviso
 start timeout; migrate such a release by hand. Set `__APP_UPCASE___MIGRATE_ON_START=false`
 to migrate by hand, with `bin/migrate` before `bin/server`. That command starts the
 repo without the HTTP server. It is a no-op once all migrations are applied. Neither
-path creates the database. Provide a database and take backups through your
+path creates a PostgreSQL database. Provide the database and take backups through your
 deployment's normal workflow.
 
 Back up the database before an update, because the new release migrates it as it

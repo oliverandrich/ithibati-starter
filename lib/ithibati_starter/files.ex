@@ -48,15 +48,27 @@ defmodule IthibatiStarter.Files do
     end)
   end
 
-  def replace(igniter, path, old, new) do
-    Igniter.update_file(igniter, path, fn source ->
-      text = Rewrite.Source.get(source, :content)
+  def replace(igniter, path, old, new), do: replace(igniter, path, [{old, new}])
 
-      if String.contains?(text, old) do
-        Rewrite.Source.update(source, :content, String.replace(text, old, new))
-      else
-        {:error, "#{path}: expected Phoenix scaffold anchor missing; refusing to guess."}
+  # Applies the pairs in one update, so a source that is only valid after all of them, such as
+  # an opened block and its `end`, is never parsed half done.
+  def replace(igniter, path, pairs) do
+    Igniter.update_file(igniter, path, fn source ->
+      case replace_all(Rewrite.Source.get(source, :content), pairs) do
+        {:ok, text} ->
+          Rewrite.Source.update(source, :content, text)
+
+        :missing ->
+          {:error, "#{path}: expected Phoenix scaffold anchor missing; refusing to guess."}
       end
+    end)
+  end
+
+  defp replace_all(text, pairs) do
+    Enum.reduce_while(pairs, {:ok, text}, fn {old, new}, {:ok, text} ->
+      if String.contains?(text, old),
+        do: {:cont, {:ok, String.replace(text, old, new)}},
+        else: {:halt, :missing}
     end)
   end
 

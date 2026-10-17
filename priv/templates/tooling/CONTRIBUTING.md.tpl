@@ -2,7 +2,8 @@
 
 ## Get started
 
-Install **mise** and **PostgreSQL 18**, then prepare and start the application:
+Install **mise**, then prepare and start the application. **PostgreSQL 18** is needed
+for `mise run check` and `mise run test`, which also test against it:
 
 ```sh
 mise trust
@@ -18,8 +19,10 @@ to claim the first account.
 
 ## Configure the database
 
-Local defaults are `localhost:5432`, user `postgres`, password `postgres`.
-Override them through the environment when needed:
+Development uses SQLite in `tmp/__APP___dev.db` by default. Set
+`__APP_UPCASE___DATABASE=postgres` to develop against PostgreSQL instead. Its local defaults
+are `localhost:5432`, user `postgres`, password `postgres`. Override them through the
+environment when needed:
 
 ```sh
 export PGHOST=127.0.0.1
@@ -28,16 +31,18 @@ export PGUSER=postgres
 export PGPASSWORD=postgres
 ```
 
-Tests use a separate `__APP___test` database, optionally suffixed with
-`MIX_TEST_PARTITION`. Never point tests at development or production data.
-Production uses `DATABASE_URL` and `SECRET_KEY_BASE`; see [Operations](docs/operations.md).
+Tests use a separate `__APP___test` database, `tmp/__APP___test.db` on SQLite, optionally
+suffixed with `MIX_TEST_PARTITION`. Never point tests at development or production data.
+SQLite tests run one module at a time, because SQLite allows one writer. The browser
+features run on SQLite alone. Production settings are in [Operations](docs/operations.md).
 
 ## Command reference
 
 | Command | Purpose |
 | --- | --- |
-| `mise run check` | Workflow audit, compilation, format check, Credo, xref, Sobelow, assets, tests |
-| `mise run test` | Tests with their test-database setup |
+| `mise run check` | Workflow audit, compilation, format check, Credo, xref, Sobelow, assets and tests on SQLite, then the tests on PostgreSQL |
+| `mise run test` | Tests on SQLite, with their test-database setup; takes a test path |
+| `mise run test:postgres` | The same tests on PostgreSQL, without the browser features |
 | `mise run format` | Explicit formatting |
 | `mise run credo` | Compile then strict Credo |
 | `mise run audit` | Dependency advisories and retired Hex packages |

@@ -2,6 +2,11 @@
 set -euo pipefail
 
 starter_root=$(cd "$(dirname "$0")/.." && pwd)
+# The SQLite release check reads the migrated file directly.
+if ! command -v sqlite3 >/dev/null; then
+  echo "The integration suite needs the sqlite3 command" >&2
+  exit 1
+fi
 fixture_root=$(mktemp -d "${TMPDIR:-/tmp}/ithibati-starter.XXXXXX")
 trap 'rm -rf "$fixture_root"' EXIT
 unset MIX_ENV
@@ -69,6 +74,7 @@ for profile in beans nobeans; do
       database="${app}_release_$$"
       manual="${app}_manual_$$"
       migrate_variable="$(printf '%s' "$app" | tr '[:lower:]' '[:upper:]')_MIGRATE_ON_START"
+      database_variable="$(printf '%s' "$app" | tr '[:lower:]' '[:upper:]')_DATABASE"
       server_pid=""
       createdb "$database"
       createdb "$manual"
@@ -128,6 +134,9 @@ for profile in beans nobeans; do
       export SMTP_USERNAME=smoke SMTP_PASSWORD=smoke MAIL_FROM=smoke@example.invalid
       cd "$fixture_root"
 
+      # One release serves both databases. PostgreSQL first, chosen explicitly.
+      export "$database_variable=postgres"
+
       # By default every start migrates, so the documented first step finds an empty database.
       use_database "$database"
       issue_setup_code
@@ -153,6 +162,20 @@ for profile in beans nobeans; do
       "$release/bin/migrate"
       issue_setup_code
       start_server
+      stop_server
+
+      # SQLite is the default. The file lives outside the release, in a directory that exists.
+      unset "$database_variable" "$migrate_variable" DATABASE_URL PGDATABASE
+      sqlite_dir=$(mktemp -d "$fixture_root/sqlite.XXXXXX")
+      export DATABASE_PATH="$sqlite_dir/$app.db"
+      issue_setup_code
+      applied=$(sqlite3 "$DATABASE_PATH" "select count(*) from schema_migrations" || echo 0)
+      if [[ "$applied" == 0 ]]; then
+        echo "Release did not migrate its SQLite database on start" >&2
+        exit 1
+      fi
+      start_server
+      "$release/bin/migrate"
     )
   )
 done

@@ -90,6 +90,8 @@ Dependency advisories run separately through `mise run audit`.
   migration and rollback commands remain, documented in the generated `docs/operations.md`.
 - **Auth cleanup**: `mix auth.cleanup` or `MyApp.AuthCleanup.run/0` removes expired
   sessions, abandoned challenges and expired, unaccepted invitations.
+- **SQLite or PostgreSQL from one build**: `MY_APP_DATABASE` chooses at runtime, SQLite by
+  default. `mise run check` tests against both.
 - Environment-based database configuration and a documented release workflow.
 
 Cleanup is explicit. The generated operations guide gives a recurring release
@@ -97,7 +99,8 @@ command; the starter installs no scheduler.
 
 ## Get started
 
-You'll need **mise**, **Elixir 1.20.4 / OTP 29.0.6** and **PostgreSQL 18**.
+You'll need **mise** and **Elixir 1.20.4 / OTP 29.0.6**. Development runs on SQLite;
+**PostgreSQL 18** is needed for the generated checks, which test against both databases.
 Chrome and a matching Chromedriver are required for the browser tests.
 Node.js is not required: Mix manages Tailwind and esbuild.
 

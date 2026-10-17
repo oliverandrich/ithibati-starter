@@ -10,6 +10,20 @@ defmodule __MODULE__.SetupSupport do
   end
 
   @doc """
+  Empties the shared rate limiter when the tests run on SQLite.
+
+  The sandbox rolls SQLite's id counter back after each test, so the next test's account gets the
+  same id. A budget counted against that id would carry over. PostgreSQL never reuses an id, and
+  its tests run concurrently, so its limiter is left alone.
+  """
+  def forget_rate_limits do
+    if Application.fetch_env!(:__APP__, :database) == :sqlite,
+      do: :sys.replace_state(__MODULE__.AuthRateLimiter, fn _ -> %{} end)
+
+    :ok
+  end
+
+  @doc """
   Sets one rate-limit budget for the length of the test, leaving every other group standing.
 
   `:auth_rate_limits` is one keyword list holding all of them, so writing it whole is how a test

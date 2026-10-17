@@ -61,7 +61,7 @@ have been rendered into a generated application. Keep aliases and embedded HTML
 modules compatible with the generated project's quality checks.
 
 Igniter is a required dependency; there is no optional-dependency build mode.
-The initial support floor is Elixir 1.20 / OTP 29 with Phoenix 1.8.14 and PostgreSQL.
+The initial support floor is Elixir 1.20 / OTP 29 with Phoenix 1.8.14, SQLite and PostgreSQL.
 
 ## Test real generated applications
 
@@ -87,8 +87,10 @@ The script installs the pinned generators and the local archive in an isolated
 archive directory, then uses `mix ithibati.new` to create disposable default and
 mail-enabled applications. It runs each application's full gate, checks that
 reapplying the same profile is a no-op and builds both production releases. Each
-release starts on an empty disposable database and migrates it. A second database
-covers the opt-out: migrations run twice by hand, then the release starts over HTTP.
+release starts on an empty disposable PostgreSQL database and migrates it. A second
+database covers the opt-out: migrations run twice by hand, then the release starts over
+HTTP. The same release then starts on a new SQLite file, migrates it and serves HTTP.
+The SQLite check needs the `sqlite3` command.
 It chooses a test database partition and cleans up its temporary project
 directory and release smoke databases. Cleanup of the partitioned test databases
 remains the responsibility of the local test environment. Never use a development
