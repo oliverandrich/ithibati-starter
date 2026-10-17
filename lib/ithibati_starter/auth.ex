@@ -53,6 +53,9 @@ defmodule IthibatiStarter.Auth do
     |> Config.configure("config.exs", :ithibati, [:initial_claim], :operator_code)
     |> Config.configure("test.exs", app, [endpoint, :server], true)
     |> Config.configure("test.exs", app, [:sql_sandbox], true)
+    # LiveViewTest's client stands in for the WebSocket process and has no clause for
+    # `:garbage_collect`. The hook's own test covers what it sends.
+    |> Config.configure("test.exs", app, [:collect_transport_garbage], false)
     # Browser features all arrive from loopback and otherwise share the production setup budget.
     |> Config.configure("test.exs", app, [:auth_rate_limits], setup: {1_000, 60})
     |> Config.configure("test.exs", :wallaby, [:otp_app], app)

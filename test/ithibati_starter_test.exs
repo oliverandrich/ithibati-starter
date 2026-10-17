@@ -254,6 +254,19 @@ defmodule IthibatiStarterTest do
     assert files["docs/operations.md"] =~ "LOG_LEVEL"
   end
 
+  test "a member page asks its WebSocket process to collect garbage after joining" do
+    files = installed_files()
+
+    assert files["lib/sample_web/transport_garbage.ex"] =~
+             "send(socket.transport_pid, :garbage_collect)"
+
+    assert files["test/sample_web/transport_garbage_test.exs"] =~ "SampleWeb.TransportGarbage"
+
+    assert [_, members] = String.split(files["lib/sample_web/router.ex"], "live_session :members")
+    assert members =~ "{SampleWeb.TransportGarbage, :collect}"
+    assert files["config/test.exs"] =~ "collect_transport_garbage: false"
+  end
+
   test "the check scans every commit for secrets" do
     files = installed_files()
 

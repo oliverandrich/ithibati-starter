@@ -128,6 +128,10 @@ formatter, the metadata allowlist and the `LOG_LEVEL` parser, tested in
 turns Phoenix's request log off. For operators: log lines change from text to JSON, and
 `LOG_LEVEL=debug` stops the boot.
 
+**Member pages release their WebSocket heap after joining.** `lib/my_app_web/transport_garbage.ex`
+is an `on_mount` hook of the `:members` live_session in the router. `config/test.exs` turns it
+off for `Phoenix.LiveViewTest`. `test/my_app_web/transport_garbage_test.exs` covers it.
+
 ### 0.6.0
 
 **The session cookie lasts as long as the session.** `lib/my_app_web/endpoint.ex`
