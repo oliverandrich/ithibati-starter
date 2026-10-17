@@ -94,6 +94,13 @@ feature that sets `@sessions` gets new sessions of its own.
 
 `mix ithibati.doctor` is part of the test-environment gate after schema setup.
 
+## Following the starter
+
+`test/__APP__/starter_drift_test.exs` compares every generated Elixir file with its template in
+the locked `ithibati_starter`. Formatting, comments, docs and alias order do not count. After
+`mix deps.update ithibati_starter`, it names the files the new version changed. Take the new
+version, or list the file in `@owned` once this application has taken it over.
+
 ## Translations
 
 With Ithibati, all auth/member screens, ceremony errors, clipboard messages and

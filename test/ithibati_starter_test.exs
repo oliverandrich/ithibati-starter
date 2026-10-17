@@ -137,6 +137,18 @@ defmodule IthibatiStarterTest do
     assert files["test/support/browser_pool.ex"] =~ "Storage.clearDataForOrigin"
   end
 
+  # A starter fix reaches an application only when somebody copies it. The drift test names the
+  # generated files a starter update changed.
+  test "an application compares its generated files with the starter's templates" do
+    files = installed_files()
+
+    assert files["test/sample/starter_drift_test.exs"] =~ "@owned []"
+    assert files["test/support/starter_drift.ex"] =~ "Code.string_to_quoted!"
+
+    # The placeholders are assembled from parts, so the installer leaves them alone.
+    assert files["test/support/starter_drift.ex"] =~ ~s("__" <> "MODULE" <> "__")
+  end
+
   test "generated protected claim and invitation table sit on the library's versions" do
     files = installed_files()
 

@@ -21,6 +21,7 @@ defmodule __MODULE__Web.CoreComponents do
   use Phoenix.Component
   use Gettext, backend: __MODULE__Web.Gettext
 
+  alias Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -247,7 +248,7 @@ defmodule __MODULE__Web.CoreComponents do
   def input(%{type: "checkbox"} = assigns) do
     assigns =
       assign_new(assigns, :checked, fn ->
-        Phoenix.HTML.Form.normalize_value("checkbox", assigns[:value])
+        Form.normalize_value("checkbox", assigns[:value])
       end)
 
     ~H"""
@@ -313,7 +314,7 @@ defmodule __MODULE__Web.CoreComponents do
             @errors != [] && (@error_class || "border-danger outline-danger")
           ]}
           {@rest}
-        >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
+        >{Form.normalize_value("textarea", @value)}</textarea>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -330,7 +331,7 @@ defmodule __MODULE__Web.CoreComponents do
           type={@type}
           name={@name}
           id={@id}
-          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          value={Form.normalize_value(@type, @value)}
           class={[
             @class || "block w-full rounded-control border bg-surface px-3 py-2 text-ink shadow-xs placeholder:text-muted focus:border-accent focus:outline-2 focus:outline-accent disabled:cursor-not-allowed disabled:opacity-50",
             @errors == [] && "border-edge",

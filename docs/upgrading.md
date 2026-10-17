@@ -148,6 +148,12 @@ invitations and issue new ones after the upgrade. Addressed instances keep the b
 `test/test_helper.exs` starts and stops it. `test/features/browser_pool_test.exs` checks the
 reset between features.
 
+**A test names the generated files that differ from the starter.** `test/support/starter_drift.ex`
+and `test/my_app/starter_drift_test.exs` are new. They compare every generated Elixir file with its
+template in the locked starter, as syntax trees. An application with changed files lists them in
+`@owned`. `lib/my_app_web/components/core_components.ex` and `layouts.ex` are now copied whole;
+their content is unchanged.
+
 **Member pages release their WebSocket heap after joining.** `lib/my_app_web/transport_garbage.ex`
 is an `on_mount` hook of the `:members` live_session in the router. `config/test.exs` turns it
 off for `Phoenix.LiveViewTest`. `test/my_app_web/transport_garbage_test.exs` covers it.

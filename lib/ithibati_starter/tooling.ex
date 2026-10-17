@@ -148,16 +148,6 @@ defmodule IthibatiStarter.Tooling do
   defp tidy_scaffold(igniter, b) do
     igniter
     |> Files.replace(
-      "lib/#{b.app}_web/components/core_components.ex",
-      "alias Phoenix.LiveView.JS",
-      "alias Phoenix.HTML.Form\n  alias Phoenix.LiveView.JS"
-    )
-    |> Files.replace(
-      "lib/#{b.app}_web/components/core_components.ex",
-      "Phoenix.HTML.Form.normalize_value",
-      "Form.normalize_value"
-    )
-    |> Files.replace(
       "lib/#{b.app}_web.ex",
       "alias Phoenix.LiveView.JS\n      alias #{b.module}Web.Layouts",
       Enum.join(

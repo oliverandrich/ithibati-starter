@@ -68,11 +68,6 @@ defmodule IthibatiStarter.Auth do
       on_exists: :overwrite
     )
     |> Files.replace(
-      "lib/#{b.app}_web/components/layouts.ex",
-      "embed_templates \"layouts/*\"",
-      "embed_templates \"layouts/*\"\n" <> Files.template("fragments/layout_helpers", b)
-    )
-    |> Files.replace(
       "lib/#{b.app}_web/endpoint.ex",
       "same_site: \"Lax\"",
       "same_site: \"Lax\",\n    encryption_salt: #{inspect(Base.encode64(:crypto.strong_rand_bytes(12)))}"
