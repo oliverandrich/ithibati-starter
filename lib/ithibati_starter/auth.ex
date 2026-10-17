@@ -145,6 +145,8 @@ defmodule IthibatiStarter.Auth do
     Application.put_env(:wallaby, :chromedriver, path: #{b.module}Web.BrowserDriver.path(), headless: true)
     Application.put_env(:wallaby, :base_url, #{b.module}Web.Endpoint.url())
     {:ok, _} = Application.ensure_all_started(:wallaby)
+    {:ok, _} = #{b.module}Web.BrowserPool.start()
+    ExUnit.after_suite(fn _ -> #{b.module}Web.BrowserPool.stop() end)
     """)
   end
 end

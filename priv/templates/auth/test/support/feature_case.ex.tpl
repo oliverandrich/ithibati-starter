@@ -17,16 +17,28 @@ defmodule __MODULE__Web.FeatureCase do
   # `assert_has/2` is a macro that expands into `execute_query/2` and both have to be in scope here.
   import Wallaby.Browser
 
-  alias Wallaby.Query
   alias Ithibati.Identity.Instance
+  alias Wallaby.Feature.Utils
+  alias Wallaby.Query
+  alias __MODULE__Web.BrowserPool
 
   using do
     quote do
-      use Wallaby.Feature
+      # Wallaby.Feature without its setup, which starts a new Chrome per feature. See sessions/1.
+      # `__ENV__.module`, because the installer replaces the module placeholder in templates.
+      ExUnit.Case.register_attribute(__ENV__.module, :sessions)
+      use Wallaby.DSL
+      import Wallaby.Feature
 
-      setup %{session: session} do
+      setup context, do: __MODULE__Web.FeatureCase.sessions(context)
+
+      # A feature has one `session`, or `sessions` when it asked for several.
+      setup context do
         __MODULE__.SetupSupport.forget_rate_limits()
-        __MODULE__Web.FeatureCase.language(session, "en")
+
+        for session <- List.wrap(context[:session] || context[:sessions]),
+            do: __MODULE__Web.FeatureCase.language(session, "en")
+
         :ok
       end
 
@@ -36,6 +48,46 @@ defmodule __MODULE__Web.FeatureCase do
       alias __MODULE__.Accounts.User
       alias __MODULE__.Repo
     end
+  end
+
+  @doc """
+  Setup callback that returns the browser session.
+
+  The default is the shared `__MODULE__Web.BrowserPool` session, reset.
+  A feature with `@sessions` gets new sessions with those capabilities.
+  """
+  def sessions(context) do
+    # The pooled session carries no sandbox metadata and relies on shared mode, which a
+    # concurrent feature would break.
+    if context[:async],
+      do: raise(ArgumentError, "browser features share one session and cannot run async")
+
+    metadata = Utils.maybe_checkout_repos(false)
+
+    case get_in(context, [:registered, :sessions]) do
+      nil ->
+        session = BrowserPool.checkout()
+        on_exit(&BrowserPool.checkin/0)
+        listed_for_screenshots(session)
+        %{session: session}
+
+      sessions ->
+        sessions
+        |> Utils.sessions_iterable()
+        # A count is as many sessions without capabilities.
+        |> Enum.map(&Utils.start_session(if(is_integer(&1), do: [], else: &1), metadata: metadata))
+        |> Utils.build_setup_return()
+    end
+  end
+
+  # Wallaby screenshots a failed feature's sessions, found by test pid in its session store.
+  # Registering the pooled session normally would make Wallaby end it with the test.
+  # So it goes into the public ETS table directly and leaves it on exit.
+  # This depends on Wallaby.SessionStore's table name and key shape.
+  defp listed_for_screenshots(session) do
+    key = {make_ref(), session.id, self()}
+    :ets.insert(:session_store, {key, session})
+    on_exit(fn -> :ets.delete(:session_store, key) end)
   end
 
   @doc """

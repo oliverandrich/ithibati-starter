@@ -143,6 +143,11 @@ follow the new flow. The German translation of the invitation mail subject now m
 For operators: links in the old form `/invite/TOKEN` stop working. Withdraw pending
 invitations and issue new ones after the upgrade. Addressed instances keep the bound address.
 
+**The browser features share one Chrome session.** `test/support/browser_pool.ex` is new.
+`test/support/feature_case.ex` takes the session from it instead of `use Wallaby.Feature`, and
+`test/test_helper.exs` starts and stops it. `test/features/browser_pool_test.exs` checks the
+reset between features.
+
 **Member pages release their WebSocket heap after joining.** `lib/my_app_web/transport_garbage.ex`
 is an `on_mount` hook of the `:members` live_session in the router. `config/test.exs` turns it
 off for `Phoenix.LiveViewTest`. `test/my_app_web/transport_garbage_test.exs` covers it.

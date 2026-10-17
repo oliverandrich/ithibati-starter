@@ -88,6 +88,10 @@ for direct `mise run test`, build them with `mix assets.build` first. Tests star
 an endpoint on port 4102; override PORT to isolate concurrent suites. Missing browser
 infrastructure fails instead of silently skipping coverage.
 
+The features share one Chrome session from `test/support/browser_pool.ex`. It is reset before each
+feature: blank page, cookies, the test origin's storage, emulation and virtual authenticators. A
+feature that sets `@sessions` gets new sessions of its own.
+
 `mix ithibati.doctor` is part of the test-environment gate after schema setup.
 
 ## Translations

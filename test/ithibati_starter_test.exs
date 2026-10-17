@@ -123,6 +123,20 @@ defmodule IthibatiStarterTest do
     assert files["assets/js/invitation_link.js"] =~ "history.replaceState"
   end
 
+  # Starting Chrome is most of a short feature's runtime, so the features share one session.
+  test "the browser features share one Chrome session" do
+    files = installed_files()
+
+    assert files["test/test_helper.exs"] =~ "{:ok, _} = SampleWeb.BrowserPool.start()"
+
+    assert files["test/test_helper.exs"] =~
+             "ExUnit.after_suite(fn _ -> SampleWeb.BrowserPool.stop() end)"
+
+    assert files["test/support/feature_case.ex"] =~ "BrowserPool.checkout()"
+    refute files["test/support/feature_case.ex"] =~ "use Wallaby.Feature"
+    assert files["test/support/browser_pool.ex"] =~ "Storage.clearDataForOrigin"
+  end
+
   test "generated protected claim and invitation table sit on the library's versions" do
     files = installed_files()
 
