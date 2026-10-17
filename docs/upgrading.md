@@ -86,7 +86,7 @@ Check the diff for these before deploying:
 
 Each entry names what changed in generated applications and what to do about it.
 
-### Unreleased
+### 0.7.0
 
 **Colours are named by role.** `assets/css/app.css` gains an `@theme` block with role
 tokens, their dark-mode values and a `text-link` utility. Every generated template
