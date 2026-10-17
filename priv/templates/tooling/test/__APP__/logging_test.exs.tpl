@@ -28,10 +28,10 @@ defmodule __MODULE__.LoggingTest do
     refute line =~ "grace_hopper"
   end
 
-  # Bandit attaches the conn to a crash report. A path may contain an invitation token.
+  # Bandit attaches the conn to a crash report. A path may hold identifiers or codes.
   test "a request that crashes reaches the line without its path, address or agent" do
     conn =
-      Plug.Test.conn(:get, "/invite/a-secret-token")
+      Plug.Test.conn(:get, "/account/confirm/a-secret-token")
       |> Plug.Conn.put_req_header("user-agent", "Probe/1")
 
     line =

@@ -20,6 +20,7 @@ defmodule __MODULE__.Invitations do
   alias Ithibati.Identity.Invitations
   alias __MODULE__.Accounts.Invitation
   alias __MODULE__.Accounts.User
+  alias __MODULE__.Identity
   alias __MODULE__.Repo
 
   @doc """
@@ -31,10 +32,13 @@ defmodule __MODULE__.Invitations do
 
   The plaintext token is on the returned struct and nowhere else: the row holds its digest, and
   anything read back later has an empty one.
+
+  Addressed, the invitation binds the address it is sent to. Named, it is open: the invitee
+  chooses the username.
   """
   def open(%User{} = inviter, attrs) do
     %Invitation{}
-    |> Invitation.changeset(attrs)
+    |> Invitation.changeset(attrs, addressed: Identity.email?())
     |> Changeset.put_change(:invited_by_id, inviter.id)
     |> Repo.insert()
   end

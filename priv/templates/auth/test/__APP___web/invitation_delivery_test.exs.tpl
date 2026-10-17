@@ -54,29 +54,44 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
 
   defp addressing, do: SetupSupport.put_identity(:email)
 
-  defp invite(conn, identifier) do
+  defp invite(conn, fields) do
     {:ok, view, _html} = live(conn, "/")
-    view |> form("#invitation-form", username: identifier) |> render_submit()
+    view |> form("#invitation-form", fields) |> render_submit()
     render(view)
   end
 
   test "a named guest is given a link and nothing is sent", %{conn: conn} do
-    html = conn |> signed_in("ada") |> invite("grace_hopper")
+    html = conn |> signed_in("ada") |> invite(note: "Grace")
 
-    assert html =~ "/invite/"
+    assert html =~ "/invite#"
     refute_email_sent()
   end
 
   test "an addressed guest is sent the link, and still shown it", %{conn: conn} do
     addressing()
-    html = conn |> signed_in("ada@example.test") |> invite("grace@example.test")
+    html =
+      conn
+      |> signed_in("ada@example.test")
+      |> invite(username: "grace@example.test", note: "From the meetup")
 
-    assert [link] = Regex.run(~r{https?://\S+/invite/[A-Za-z0-9_-]+}, html)
+    assert [link] = Regex.run(~r{https?://\S+/invite#[A-Za-z0-9_-]+}, html)
+    assert html =~ "From the meetup"
 
     assert_email_sent(fn email ->
       assert email.to == [{"", "grace@example.test"}]
       assert email.text_body =~ link
     end)
+  end
+
+  test "a German sender's guest gets a German subject", %{conn: conn} do
+    addressing()
+
+    conn
+    |> signed_in("ada@example.test")
+    |> put_req_header("accept-language", "de")
+    |> invite(username: "grace@example.test")
+
+    assert_email_sent(subject: "Deine Einladung zu __MODULE__")
   end
 
   # The invitation is already written by the time anything is sent, so a mail server that is down
@@ -85,9 +100,9 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
     addressing()
     SetupSupport.put_env(:__APP__, __MODULE__.Mailer, adapter: __MODULE__Web.FailingAdapter)
 
-    html = conn |> signed_in("ada@example.test") |> invite("grace@example.test")
+    html = conn |> signed_in("ada@example.test") |> invite(username: "grace@example.test")
 
-    assert html =~ "/invite/"
+    assert html =~ "/invite#"
     assert html =~ "could not be sent"
   end
 
@@ -98,9 +113,9 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
     addressing()
     SetupSupport.put_env(:__APP__, __MODULE__.Mailer, adapter: __MODULE__Web.RaisingAdapter)
 
-    html = conn |> signed_in("ada@example.test") |> invite("grace@example.test")
+    html = conn |> signed_in("ada@example.test") |> invite(username: "grace@example.test")
 
-    assert html =~ "/invite/"
+    assert html =~ "/invite#"
     assert html =~ "could not be sent"
   end
 
@@ -112,10 +127,11 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
     refute html =~ "Their username"
   end
 
-  test "and for a name when it is not", %{conn: conn} do
-    {:ok, _view, html} = live(signed_in(conn, "ada"), "/")
+  # Named, the guest chooses their own name, so the form asks only whom the link is for.
+  test "and only for a note when it is not", %{conn: conn} do
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
 
-    assert html =~ "Their username"
-    refute html =~ "Their email address"
+    assert has_element?(view, "#invitation-form input[name=note]")
+    refute has_element?(view, "#invitation-form input[name=username]")
   end
 end

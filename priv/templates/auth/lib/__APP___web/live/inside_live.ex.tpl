@@ -20,6 +20,7 @@ defmodule __MODULE__Web.InsideLive do
     socket =
       assign(socket,
         username: "",
+        note: "",
         link: nil,
         # Which invitation the link on screen belongs to. The link is the only copy of its token
         # — the row keeps a digest — so taking some other invitation back must not take it away,
@@ -35,20 +36,21 @@ defmodule __MODULE__Web.InsideLive do
   defp listed(socket), do: assign(socket, pending: Invitations.pending())
 
   @impl true
-  def handle_event("validate", %{"username" => username}, socket) do
-    {:noreply, assign(socket, username: username, error: nil)}
+  def handle_event("validate", params, socket) do
+    {:noreply,
+     assign(socket, username: params["username"] || "", note: params["note"] || "", error: nil)}
   end
 
-  def handle_event("invite", %{"username" => username}, socket) do
+  def handle_event("invite", params, socket) do
     {limit, seconds} = AuthRateLimiter.budget(:invite)
     key = AuthRateLimit.key(socket.assigns.current_account, :invite)
 
     with :ok <- AuthRateLimiter.check(key, limit, seconds),
          {:ok, invitation} <-
-           Invitations.open(socket.assigns.current_account, %{"username" => username}) do
+           Invitations.open(socket.assigns.current_account, Map.take(params, ["username", "note"])) do
       # The token is the only copy there will ever be: the row holds its sha256, and the virtual
       # field is empty on anything read back later. So it goes on the screen now or not at all.
-      link = url(~p"/invite/#{invitation.token}")
+      link = url(~p"/invite") <> "#" <> invitation.token
 
       {:noreply,
        socket
@@ -57,6 +59,7 @@ defmodule __MODULE__Web.InsideLive do
          link: link,
          link_id: invitation.id,
          username: "",
+         note: "",
          error: undelivered(invitation, link)
        )}
     else
@@ -131,6 +134,7 @@ defmodule __MODULE__Web.InsideLive do
   defp changeset_message(changeset, email?) do
     case changeset.errors do
       [{:username, error} | _rest] -> refusal(CoreComponents.translate_error(error), email?)
+      [{:note, error} | _rest] -> gettext("Note %{message}.", message: CoreComponents.translate_error(error))
       _other -> gettext("That invitation could not be written.")
     end
   end
@@ -150,7 +154,7 @@ defmodule __MODULE__Web.InsideLive do
       <h2 class="mt-8 text-lg font-semibold">{gettext("Invite somebody")}</h2>
 
       <p :if={not @email?} class="mt-2 text-sm text-muted">
-        {gettext("Choose a username for your guest, then send them their personal invitation link.")}
+        {gettext("Note whom the link is for, then send it to them. They choose their own username.")}
       </p>
 
       <p :if={@email?} class="mt-2 text-sm text-muted">
@@ -159,9 +163,18 @@ defmodule __MODULE__Web.InsideLive do
 
       <form id="invitation-form" phx-change="validate" phx-submit="invite" class="mt-4">
         <Layouts.identifier_input
+          :if={@email?}
           value={@username}
-          label={if @email?, do: gettext("Their email address"), else: gettext("Their username")}
-          placeholder={if @email?, do: "grace@example.org", else: "grace_hopper"}
+          label={gettext("Their email address")}
+          placeholder="grace@example.org"
+        />
+        <.input
+          name="note"
+          value={@note}
+          label={if @email?, do: gettext("Note (optional)"), else: gettext("Who is it for?")}
+          placeholder={gettext("Grace, from the meetup")}
+          maxlength="500"
+          required={not @email?}
         />
         <.button variant="primary">{gettext("Create a link")}</.button>
       </form>
@@ -191,7 +204,10 @@ defmodule __MODULE__Web.InsideLive do
           id={"invitation-#{invitation.id}"}
           class="flex flex-wrap items-center gap-x-4 gap-y-1 py-3"
         >
-          <span class="font-medium">{invitation.username}</span>
+          <span class="font-medium">{invitation.note || invitation.username}</span>
+          <span :if={invitation.note && invitation.username} class="text-sm text-muted">
+            {invitation.username}
+          </span>
 
           <span class="text-sm text-muted">
             <%= if invitation.invited_by do %>

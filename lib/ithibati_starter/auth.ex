@@ -15,7 +15,7 @@ defmodule IthibatiStarter.Auth do
     igniter
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    |> Deps.add_dep({:ithibati, "~> 0.7.1"}, yes?: true)
+    |> Deps.add_dep({:ithibati, "~> 0.8.1"}, yes?: true)
     |> Deps.add_dep({:wallaby, "~> 0.31.0", only: :test, runtime: false}, yes?: true)
     |> Deps.add_dep({:swoosh, "~> 1.28"}, yes?: true)
     |> Deps.add_dep({:gen_smtp, "~> 1.3"}, yes?: true)
@@ -115,12 +115,12 @@ defmodule IthibatiStarter.Auth do
     |> Files.replace(
       "assets/js/app.js",
       "import {Socket}",
-      "import \"./recovery_codes\"\nimport {hooks as ithibatiHooks} from \"ithibati\"\nimport {Socket}"
+      "import \"./recovery_codes\"\nimport {InvitationLink} from \"./invitation_link\"\nimport {hooks as ithibatiHooks} from \"ithibati\"\nimport {Socket}"
     )
     |> Files.replace(
       "assets/js/app.js",
       "hooks: {...colocatedHooks}",
-      "hooks: {...colocatedHooks, ...ithibatiHooks}"
+      "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink}"
     )
     |> Files.replace(
       "config/runtime.exs",

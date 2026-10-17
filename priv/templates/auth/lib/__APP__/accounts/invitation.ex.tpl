@@ -8,6 +8,8 @@ defmodule __MODULE__.Accounts.Invitation do
   """
   use Ecto.Schema
 
+  import Ecto.Changeset, only: [get_field: 2, validate_required: 2]
+
   alias Ithibati.Schema.Invitation
 
   # The same identifier the account schema is keyed by — the configuration refuses the pair when it
@@ -37,6 +39,12 @@ defmodule __MODULE__.Accounts.Invitation do
   skips minting a token and asking the accounts table for a value it has already refused. This
   used to unpick that order by hand, because the format could only be a literal.
   """
-  def changeset(invitation, attrs, opts \\ []),
-    do: invitation_changeset(invitation, attrs, opts)
+  def changeset(invitation, attrs, opts \\ []) do
+    changeset = invitation_changeset(invitation, attrs, opts)
+
+    # An open invitation names nobody, so its note is the only thing that tells it apart.
+    if get_field(changeset, :username),
+      do: changeset,
+      else: validate_required(changeset, [:note])
+  end
 end

@@ -128,6 +128,21 @@ formatter, the metadata allowlist and the `LOG_LEVEL` parser, tested in
 turns Phoenix's request log off. For operators: log lines change from text to JSON, and
 `LOG_LEVEL=debug` stops the boot.
 
+**A named invitee chooses the username, and invitation links carry the token after `#`.**
+`mix.exs` requires Ithibati 0.8.1. The new migration
+`priv/repo/migrations/20261017000000_open_invitations.exs` moves the invitation table to schema
+version 5. Named, `lib/my_app/invitations.ex` writes an open invitation with a required note.
+`lib/my_app_web/live/inside_live.ex` asks for that note and lists it. `lib/my_app_web/auth.ex`
+takes the name the invitee chose and refuses one that is malformed or taken before the challenge.
+The router serves `live "/invite", InviteLive`. `lib/my_app_web/live/invite_live.ex` waits for the
+token from the new `assets/js/invitation_link.js`, which `assets/js/app.js` imports and registers
+as the `InvitationLink` hook. `test/my_app_web/invite_live_test.exs` is new; `auth_test.exs`,
+`inside_live_test.exs`, `invitation_delivery_test.exs` and `test/features/invitation_test.exs`
+follow the new flow. The German translation of the invitation mail subject now matches its key.
+
+For operators: links in the old form `/invite/TOKEN` stop working. Withdraw pending
+invitations and issue new ones after the upgrade. Addressed instances keep the bound address.
+
 **Member pages release their WebSocket heap after joining.** `lib/my_app_web/transport_garbage.ex`
 is an `on_mount` hook of the `:members` live_session in the router. `config/test.exs` turns it
 off for `Phoenix.LiveViewTest`. `test/my_app_web/transport_garbage_test.exs` covers it.

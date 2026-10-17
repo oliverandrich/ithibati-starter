@@ -9,6 +9,7 @@ defmodule __MODULE__Web.Auth do
   """
   @behaviour Ithibati.Web.Handler
 
+  import Ecto.Query, only: [from: 2]
   import Phoenix.Controller, only: [json: 2]
   import Plug.Conn, only: [delete_session: 2, get_session: 2, put_session: 3]
 
@@ -35,33 +36,41 @@ defmodule __MODULE__Web.Auth do
   def registration_subject(conn, params) do
     if Instance.needs_setup?() do
       if Instance.authorized?(get_session(conn, :initial_setup_authorization)) do
-        first_account(params)
+        approved_name(params)
       else
         {:error, :setup_authorization_required}
       end
     else
-      invited(params["token"])
+      invited(params)
     end
   end
 
-  # The invitation says who this will be, so the browser is not asked. A form that let somebody
-  # type their own name here would be a form that lets them accept an invitation addressed to
-  # someone else — and `Invitations.accept/2` refuses that anyway, which is where the guarantee is.
-  defp invited(token) when is_binary(token) do
+  # An addressed invitation names the account, so the request's name is not read.
+  # An open invitation takes the invitee's name. A taken name is refused before the challenge.
+  # The unique index decides when two people choose one name at once.
+  defp invited(%{"token" => token} = params) when is_binary(token) do
     case Invitations.fetch(token) do
       nil -> {:error, :invitation_unknown}
-      invitation -> {:ok, invitation.username}
+      invitation -> if Invitations.open?(invitation), do: unclaimed(params), else: {:ok, invitation.username}
     end
   end
 
   defp invited(_missing), do: {:error, :invitation_required}
+
+  defp unclaimed(params) do
+    with {:ok, username} <- approved_name(params) do
+      if Repo.exists?(from u in User, where: u.username == ^username),
+        do: {:error, :username_taken},
+        else: {:ok, username}
+    end
+  end
 
   # Asked before a challenge is minted, so this is where a name the schema could never store has to
   # be refused: approving it means a passkey dialog, a credential the authenticator then keeps, and
   # a refusal only after all of that. The changeset is the authority on the format, so it answers
   # rather than a second copy of the pattern — and it answers with the *normalised* value, so the
   # name on the dialog is the name that will be stored.
-  defp first_account(%{"username" => username}) do
+  defp approved_name(%{"username" => username}) do
     %User{}
     |> User.changeset(%{"username" => username})
     |> Ecto.Changeset.apply_action(:insert)
@@ -71,7 +80,7 @@ defmodule __MODULE__Web.Auth do
     end
   end
 
-  defp first_account(_params), do: {:error, :username_required}
+  defp approved_name(_params), do: {:error, :username_required}
 
   @impl true
   def register(conn, key_attrs, %User{id: id} = account, params) do
@@ -119,21 +128,26 @@ defmodule __MODULE__Web.Auth do
       else: accept_invitation(Invitations.fetch(token), username, key_attrs)
   end
 
-  # The invitation has to be opened a second time, because only the identifier it named travelled
-  # with the challenge — and that identifier is what says whether this is the same invitation. One
-  # that opens somebody else's is refused here, and `accept/2` refuses it again inside the
-  # transaction, where a race cannot get past it.
-  defp accept_invitation(%{username: username} = invitation, username, key_attrs) do
-    Multi.new()
-    |> Multi.insert(:account, User.changeset(%User{}, Invitations.account_attrs(invitation)))
-    |> Invitations.accept(invitation)
-    |> Grant.with_key_and_codes(key_attrs)
-  end
+  # Only the identifier travelled with the challenge, so the invitation is fetched again.
+  # An addressed invitation must name that identifier; `accept/3` checks it again in the transaction.
+  # An open invitation names nobody, so the account takes the name approved with the challenge.
+  defp accept_invitation(%{username: nil} = invitation, username, key_attrs),
+    do: accepted(invitation, %{"username" => username}, key_attrs)
+
+  defp accept_invitation(%{username: username} = invitation, username, key_attrs),
+    do: accepted(invitation, Invitations.account_attrs(invitation), key_attrs)
 
   # Spent, expired, never real, or addressed to somebody else: one answer for all four, so that
   # nothing here tells a guesser which of their guesses was once a link.
   defp accept_invitation(_other, _username, _key_attrs),
     do: Multi.error(Multi.new(), :invitation, :invitation_unknown)
+
+  defp accepted(invitation, account_attrs, key_attrs) do
+    Multi.new()
+    |> Multi.insert(:account, User.changeset(%User{}, account_attrs))
+    |> Invitations.accept(invitation)
+    |> Grant.with_key_and_codes(key_attrs)
+  end
 
   # Nobody to invite the first person, so this is the one account that arrives without one — and
   # `claim/2` is what stops it from being the second as well. Before the grant, like `accept/2`

@@ -30,14 +30,16 @@ defmodule __MODULE__Web.InsideLiveTest do
   test "the page lists what is outstanding, by whom, and takes one back", %{conn: conn} do
     {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
 
-    view |> form("#invitation-form", username: "grace") |> render_submit()
+    view |> form("#invitation-form", note: "Grace, from the meetup") |> render_submit()
 
-    assert render(view) =~ "/invite/"
+    assert render(view) =~ "/invite#"
 
+    # Named, the invitee chooses the name; the note is only for whoever manages invitations.
     invitation = Repo.one(Invitation)
+    assert invitation.username == nil
+    assert invitation.note == "Grace, from the meetup"
 
-    assert has_element?(view, "#invitation-#{invitation.id}")
-    assert render(view) =~ "grace"
+    assert has_element?(view, "#invitation-#{invitation.id}", "Grace, from the meetup")
     assert render(view) =~ "ada"
 
     # The empty sentence first, then the absence: `assert_has` style waiting is what makes the
@@ -49,6 +51,15 @@ defmodule __MODULE__Web.InsideLiveTest do
 
     assert html =~ "Nothing is waiting to be accepted."
     refute has_element?(view, "#invitation-#{invitation.id}")
+    refute Repo.one(Invitation)
+  end
+
+  # The list shows the note and nothing else identifies an open invitation, so one without a note
+  # would be a row nobody can tell apart.
+  test "a named invitation needs a note", %{conn: conn} do
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
+
+    assert view |> form("#invitation-form", note: " ") |> render_submit() =~ "Note can&#39;t be blank."
     refute Repo.one(Invitation)
   end
 
@@ -69,13 +80,13 @@ defmodule __MODULE__Web.InsideLiveTest do
 
     for number <- 1..20 do
       view
-      |> form("#invitation-form", username: "guest#{number}")
+      |> form("#invitation-form", note: "guest#{number}")
       |> render_submit()
     end
 
     assert Repo.aggregate(Invitation, :count) == 20
 
-    html = view |> form("#invitation-form", username: "guest21") |> render_submit()
+    html = view |> form("#invitation-form", note: "guest21") |> render_submit()
 
     # Hours, because nobody reads tens of thousands of seconds as a waiting time.
     assert html =~ "Too many invitations. Try again in 24 hours."
@@ -87,7 +98,7 @@ defmodule __MODULE__Web.InsideLiveTest do
       |> put_req_header("accept-language", "de")
 
     {:ok, german_view, _html} = live(german_conn, "/")
-    german_html = german_view |> form("#invitation-form", username: "guest22") |> render_submit()
+    german_html = german_view |> form("#invitation-form", note: "guest22") |> render_submit()
     assert german_html =~ "Zu viele Einladungen. Versuche es in 24 Stunden erneut."
     assert Repo.aggregate(Invitation, :count) == 20
 
@@ -100,8 +111,8 @@ defmodule __MODULE__Web.InsideLiveTest do
 
     second_conn = Plug.Test.init_test_session(build_conn(), get_session(second_signed))
     {:ok, second_view, _html} = live(second_conn, "/")
-    second_view |> form("#invitation-form", username: "fresh_guest") |> render_submit()
+    second_view |> form("#invitation-form", note: "fresh_guest") |> render_submit()
 
-    assert Repo.get_by!(Invitation, username: "fresh_guest")
+    assert Repo.get_by!(Invitation, note: "fresh_guest")
   end
 end

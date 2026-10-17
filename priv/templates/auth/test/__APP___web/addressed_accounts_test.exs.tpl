@@ -41,6 +41,8 @@ defmodule __MODULE__Web.AddressedAccountsTest do
     assert CeremonyMessages.message("invalid_username", nil) =~ "email address"
     assert CeremonyMessages.message("username_taken", nil) =~ "address"
     assert CeremonyMessages.message("username_required", nil) =~ "address"
+    # The claim and an open invitation both ask for a name, so the sentence names neither.
+    refute CeremonyMessages.message("username_required", nil) =~ "claim"
     assert CeremonyMessages.message("identifier_mismatch", nil) =~ "address"
   end
 
@@ -48,6 +50,7 @@ defmodule __MODULE__Web.AddressedAccountsTest do
     assert CeremonyMessages.message("invalid_username", nil) =~ "underscores"
     assert CeremonyMessages.message("username_taken", nil) =~ "username"
     assert CeremonyMessages.message("username_required", nil) =~ "username"
+    refute CeremonyMessages.message("username_required", nil) =~ "claim"
     assert CeremonyMessages.message("identifier_mismatch", nil) =~ "username"
   end
 end

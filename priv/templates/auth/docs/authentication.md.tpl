@@ -1,6 +1,6 @@
 # Authentication
 
-The application pins Ithibati 0.7.1 and applies its schema version 4. On an empty
+The application pins Ithibati 0.8.1 and applies its schema version 5. On an empty
 database, an operator-issued code must unlock `/setup` before the first account
 can register a username and passkey. Issue
 the code after migration as described in [Operations](operations.md); enter it over
@@ -19,8 +19,16 @@ inside its delete.
 
 An account is named or addressed, which `__MODULE__.Identity` answers from
 `ACCOUNT_IDENTITY`. Named is the default: the link is shared through whatever
-channel its sender likes. Addressed means the invitee's identifier is an email
-address, the link is delivered to it, and that delivery is what proves the address.
+channel its sender likes. A named invitation is open: the inviting member writes a
+note that says whom it is for, and the invitee chooses the username on accepting.
+The name is checked for format and for an existing account before the passkey
+dialog opens. Addressed means the invitee's identifier is an email address, the link
+is delivered to it, and that delivery is what proves the address. An addressed
+invitation keeps its address and may carry a note as well.
+
+An invitation link is `/invite#TOKEN`. The token sits after `#`, which no request
+sends. `assets/js/invitation_link.js` removes it from the address before the
+page's socket joins and hands it to the page once it has joined.
 Both schemas leave Ithibati's `:format` off and take it from the mode instead,
 because the identifier field itself is fixed when the schema compiles. An instance
 that addresses accounts without a mail configuration does not start. A delivery

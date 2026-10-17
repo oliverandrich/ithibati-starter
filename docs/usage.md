@@ -111,7 +111,8 @@ field when a schema compiles, so the two modes are one column and the format is 
 whole difference; `MyApp.Identity` answers it, and both schemas ask.
 
 Named, an invitation is a link its maker passes on however they like. Nothing is
-sent and no mail is configured. The form allows 20 creations per signed-in account
+sent and no mail is configured. The maker writes a note that says whom the link is
+for, and the invitee chooses the username when accepting it. The form allows 20 creations per signed-in account
 per day per node, counted against the account rather than the browser. A day rather
 than an hour, because an addressed invitation spends the operator's mail
 credentials, and the risk is a held account dripping rather than a burst.
@@ -139,7 +140,7 @@ STARTTLS. Other providers can replace the Swoosh adapter.
 | `/setup` | Operator-code entry and first-account setup; closes after the instance is claimed |
 | `/login` | Passkey sign-in |
 | `/recover` | Recovery-code sign-in |
-| `/invite/:token` | Accept an invitation with a passkey |
+| `/invite` | Accept an invitation with a passkey; the link carries its token after `#` |
 | `/recovery-codes` | One-time code display and copying |
 | `/account/passkeys` | Passkey management and sign out on all devices |
 | `/account/recovery-codes` | Remaining code count and confirmed regeneration |

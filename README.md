@@ -5,7 +5,7 @@
 [![CI](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)
 [![Phoenix 1.8](https://img.shields.io/badge/Phoenix-1.8-orange.svg)](https://phoenixframework.org)
-[![Ithibati 0.7.1](https://img.shields.io/badge/Ithibati-0.7.1-violet.svg)](https://github.com/oliverandrich/ithibati)
+[![Ithibati 0.8.1](https://img.shields.io/badge/Ithibati-0.8.1-violet.svg)](https://github.com/oliverandrich/ithibati)
 
 An opinionated [Igniter](https://github.com/ash-project/igniter) installer for fresh
 Phoenix applications: passkeys, invitation-only accounts, vanilla Tailwind,
@@ -21,15 +21,16 @@ it without the starter as a runtime dependency.
 
 ### Authentication and account security
 
-Powered by **Ithibati 0.7.1**, with passkeys and accounts that are named or addressed:
+Powered by **Ithibati 0.8.1**, with passkeys and accounts that are named or addressed:
 
 - **Claim the site:** an operator-issued setup code authorizes the first account;
   subsequent registrations require an invitation.
 - **Named or addressed accounts:** `ACCOUNT_IDENTITY` decides whether an account
   is a username or an email address. One column, one format, chosen at runtime.
-- **Invitations:** signed-in members can create personal, expiring, single-use
-  links, limited to 20 per account per day. Addressed, the link is
-  delivered to the invitee and that delivery is what proves the address.
+- **Invitations:** signed-in members can create expiring, single-use links, limited
+  to 20 per account per day. Named, the inviter writes a note and the invitee chooses
+  the username. Addressed, the link is delivered to the invitee and that delivery is
+  what proves the address. The token travels after `#`, so no request carries it.
 - **Mail included:** every application ships a Swoosh mailer, a development mailbox
   and authenticated SMTP. An instance that addresses accounts without one does not start.
 - **Separate sign-in and recovery screens:** use a passkey, or a recovery code
@@ -94,7 +95,7 @@ Dependency advisories run separately through `mise run audit`.
 - **SQLite or PostgreSQL from one build**: `MY_APP_DATABASE` chooses at runtime, SQLite by
   default. `mise run check` tests against both.
 - **JSON logs in production**: one object per line at `LOG_LEVEL`, with allowlisted
-  metadata and no access log, which would record invitation tokens in paths.
+  metadata and no access log.
 - Environment-based database configuration and a documented release workflow.
 
 Cleanup is explicit. The generated operations guide gives a recurring release

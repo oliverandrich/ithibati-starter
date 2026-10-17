@@ -98,13 +98,29 @@ defmodule IthibatiStarterTest do
 
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.7.1"})
+    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.8.1"})
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
 
     refute diff(result, only: "mix.exs") =~ ":tidewave"
     refute diff(result, only: "lib/sample_web/endpoint.ex") =~ "plug Tidewave"
+  end
+
+  # A token in the path reaches access logs, browser history and the LiveView's join URL. The
+  # fragment reaches none of them.
+  test "an invitation link carries its token in the fragment" do
+    files = installed_files()
+
+    assert files["lib/sample_web/router.ex"] =~ ~s{live("/invite", InviteLive)}
+    refute files["lib/sample_web/router.ex"] =~ "/invite/:token"
+    assert files["lib/sample_web/live/inside_live.ex"] =~ ~S{url(~p"/invite") <> "#" <>}
+    assert files["assets/js/app.js"] =~ ~s(import {InvitationLink} from "./invitation_link")
+
+    assert files["assets/js/app.js"] =~
+             "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink}"
+
+    assert files["assets/js/invitation_link.js"] =~ "history.replaceState"
   end
 
   test "generated protected claim and invitation table sit on the library's versions" do
@@ -120,6 +136,12 @@ defmodule IthibatiStarterTest do
     # asks for and the table does not answer.
     assert files["priv/repo/migrations/20260913115900_create_invitations.exs"] =~
              "Ithibati.Migration.invitation_columns(version: 4)"
+
+    # Version 5 lets an invitation leave the name to the invitee. The table opens in a migration
+    # of its own, so an application generated earlier gains the same file.
+    opened = files["priv/repo/migrations/20261017000000_open_invitations.exs"]
+    assert opened =~ "Ithibati.Migration.open_invitations(version: 5)"
+    assert opened =~ "Ithibati.Migration.up(from: 3, version: 5)"
 
     refute Map.has_key?(
              files,

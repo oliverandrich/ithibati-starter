@@ -30,7 +30,7 @@ defmodule __MODULE__.Logging do
 
   @doc """
   Logger filter that removes `:conn` from event metadata, as attached to a crashed request.
-  The formatter would log its path, which may hold an invitation token, and the client's address
+  The formatter would log its path, which may hold identifiers or codes, and the client's address
   and user agent.
   """
   def drop_request(%{meta: meta} = event, _config), do: %{event | meta: Map.delete(meta, :conn)}

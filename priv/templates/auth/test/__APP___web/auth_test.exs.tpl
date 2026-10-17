@@ -43,6 +43,12 @@ defmodule __MODULE__Web.AuthTest do
     |> Repo.insert!()
   end
 
+  defp invite_open do
+    %Invitation{}
+    |> Invitation.changeset(%{"note" => "Grace, from the meetup"}, addressed: false)
+    |> Repo.insert!()
+  end
+
   describe "the first account" do
     test "cannot start or finish a claim without operator authorization" do
       assert {:error, :setup_authorization_required} =
@@ -131,6 +137,50 @@ defmodule __MODULE__Web.AuthTest do
 
       assert {:error, :invitation_unknown} =
                Auth.register(conn(), key_attrs(), "invitee", %{"token" => ctx.invitation.token})
+    end
+  end
+
+  # The invitee chooses the name. It is checked before the challenge, so a refusal costs no passkey.
+  describe "an open invitation" do
+    setup do
+      claim_instance("first_one")
+
+      %{invitation: invite_open()}
+    end
+
+    test "opens a registration for the name the invitee chose", ctx do
+      assert {:ok, "grace"} =
+               Auth.registration_subject(conn(), %{
+                 "token" => ctx.invitation.token,
+                 "username" => "  Grace "
+               })
+    end
+
+    test "refuses a name the schema refuses, or none at all", ctx do
+      assert {:error, :invalid_username} =
+               Auth.registration_subject(conn(), %{
+                 "token" => ctx.invitation.token,
+                 "username" => "Not A Name!"
+               })
+
+      assert {:error, :username_required} =
+               Auth.registration_subject(conn(), %{"token" => ctx.invitation.token})
+    end
+
+    test "refuses a name somebody already has", ctx do
+      assert {:error, :username_taken} =
+               Auth.registration_subject(conn(), %{
+                 "token" => ctx.invitation.token,
+                 "username" => "first_one"
+               })
+    end
+
+    test "creates the account under the chosen name and is spent", ctx do
+      assert {:ok, _conn} =
+               Auth.register(conn(), key_attrs(), "grace", %{"token" => ctx.invitation.token})
+
+      assert Repo.get_by(User, username: "grace")
+      assert Repo.get!(Invitation, ctx.invitation.id).accepted_at
     end
   end
 

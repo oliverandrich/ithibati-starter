@@ -16,63 +16,59 @@ msgstr ""
 msgid "A username is letters, digits and underscores, up to thirty characters."
 msgstr ""
 
-#: lib/__APP___web/live/invite_live.ex:71
+#: lib/__APP___web/live/invite_live.ex:100
+#: lib/__APP___web/live/invite_live.ex:113
 #, elixir-autogen, elixir-format
 msgid "Accept with a passkey"
 msgstr ""
 
-#: lib/__APP___web/components/core_components.ex:396
+#: lib/__APP___web/components/core_components.ex:433
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr ""
 
-#: lib/__APP___web/components/layouts.ex:297
-#: lib/__APP___web/components/layouts.ex:312
+#: lib/__APP___web/components/layouts.ex:293
+#: lib/__APP___web/components/layouts.ex:308
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:147
+#: lib/__APP___web/live/sign_in_live.ex:137
 #, elixir-autogen, elixir-format
 msgid "Back to passkey sign-in"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:155
-#, elixir-autogen, elixir-format
-msgid "Choose a username for your guest, then send them their personal invitation link."
-msgstr ""
-
-#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:23
+#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:24
 #, elixir-autogen, elixir-format
 msgid "Copy recovery codes"
 msgstr ""
 
-#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:21
+#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:22
 #, elixir-autogen, elixir-format
 msgid "Copying was blocked. Select the codes above and copy them manually."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:168
+#: lib/__APP___web/live/inside_live.ex:189
 #, elixir-autogen, elixir-format
 msgid "Create a link"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:128
+#: lib/__APP___web/live/sign_in_live.ex:121
 #, elixir-autogen, elixir-format
 msgid "Create your passkey"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:170
+#: lib/__APP___web/live/sign_in_live.ex:160
 #, elixir-autogen, elixir-format
 msgid "Enter one of the codes you saved when you set up your account. Each code works once."
 msgstr ""
 
-#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:39
+#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:37
 #, elixir-autogen, elixir-format
 msgid "I've saved my codes. Continue"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:152
+#: lib/__APP___web/live/inside_live.ex:164
 #, elixir-autogen, elixir-format
 msgid "Invite somebody"
 msgstr ""
@@ -87,12 +83,12 @@ msgstr ""
 msgid "Letters, digits and underscores, up to thirty"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:100
+#: lib/__APP___web/live/sign_in_live.ex:91
 #, elixir-autogen, elixir-format
 msgid "Lost your passkey? Use a recovery code"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:157
+#: lib/__APP___web/live/sign_in_live.ex:147
 #, elixir-autogen, elixir-format
 msgid "Make yourself at home"
 msgstr ""
@@ -102,18 +98,13 @@ msgstr ""
 msgid "No passkey is registered here yet."
 msgstr ""
 
-#: lib/__APP___web/ceremony_messages.ex:64
-#, elixir-autogen, elixir-format
-msgid "Pick a username to claim this instance."
-msgstr ""
-
-#: lib/__APP___web/live/sign_in_live.ex:136
-#: lib/__APP___web/live/verify_identity_live.ex:56
+#: lib/__APP___web/live/sign_in_live.ex:129
+#: lib/__APP___web/live/verify_identity_live.ex:54
 #, elixir-autogen, elixir-format
 msgid "Recovery code"
 msgstr ""
 
-#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:19
+#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:20
 #, elixir-autogen, elixir-format
 msgid "Recovery codes copied."
 msgstr ""
@@ -123,27 +114,27 @@ msgstr ""
 msgid "Save your recovery codes"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:94
+#: lib/__APP___web/live/sign_in_live.ex:88
 #, elixir-autogen, elixir-format
 msgid "Sign in"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:95
+#: lib/__APP___web/live/sign_in_live.ex:89
 #, elixir-autogen, elixir-format
 msgid "Sign in with a passkey"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:141
+#: lib/__APP___web/live/sign_in_live.ex:134
 #, elixir-autogen, elixir-format
 msgid "Sign in with a recovery code"
 msgstr ""
 
-#: lib/__APP___web/components/layouts.ex:192
+#: lib/__APP___web/components/layouts.ex:191
 #, elixir-autogen, elixir-format
 msgid "Sign out"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:148
+#: lib/__APP___web/live/inside_live.ex:160
 #, elixir-autogen, elixir-format
 msgid "Signed in as %{username}."
 msgstr ""
@@ -153,7 +144,7 @@ msgstr ""
 msgid "Somebody else has already claimed this instance."
 msgstr ""
 
-#: lib/__APP___web/components/layouts.ex:304
+#: lib/__APP___web/components/layouts.ex:300
 #, elixir-autogen, elixir-format
 msgid "Something went wrong!"
 msgstr ""
@@ -183,7 +174,7 @@ msgstr ""
 msgid "That did not check out. Start again."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:134
+#: lib/__APP___web/live/inside_live.ex:146
 #, elixir-autogen, elixir-format
 msgid "That invitation could not be written."
 msgstr ""
@@ -228,7 +219,7 @@ msgstr ""
 msgid "That username is taken."
 msgstr ""
 
-#: lib/__APP___web/live/invite_live.ex:45
+#: lib/__APP___web/live/invite_live.ex:86
 #, elixir-autogen, elixir-format
 msgid "The account will be called %{username}."
 msgstr ""
@@ -238,27 +229,22 @@ msgstr ""
 msgid "The passkey prompt was dismissed."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:165
-#, elixir-autogen, elixir-format
-msgid "Their username"
-msgstr ""
-
 #: lib/__APP___web/ceremony_messages.ex:38
 #, elixir-autogen, elixir-format
 msgid "This instance is invitation-only."
 msgstr ""
 
-#: lib/__APP___web/live/invite_live.ex:58
+#: lib/__APP___web/live/invite_live.ex:94
 #, elixir-autogen, elixir-format
 msgid "This invitation has been used already, or it has expired. Ask for a new link."
 msgstr ""
 
-#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:33
+#: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:34
 #, elixir-autogen, elixir-format
 msgid "This is the only time these codes will be shown."
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:158
+#: lib/__APP___web/live/sign_in_live.ex:148
 #, elixir-autogen, elixir-format
 msgid "Use a recovery code"
 msgstr ""
@@ -268,17 +254,17 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:139
+#: lib/__APP___web/live/inside_live.ex:151
 #, elixir-autogen, elixir-format
 msgid "Username %{message}."
 msgstr ""
 
-#: lib/__APP___web/components/layouts.ex:289
+#: lib/__APP___web/components/layouts.ex:285
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:146
+#: lib/__APP___web/live/inside_live.ex:158
 #, elixir-autogen, elixir-format
 msgid "Welcome home"
 msgstr ""
@@ -303,17 +289,17 @@ msgstr ""
 msgid "Your browser stopped partway through."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:185
+#: lib/__APP___web/live/inside_live.ex:195
 #, elixir-autogen, elixir-format
 msgid "Your invitation is ready. Send this link to your guest:"
 msgstr ""
 
-#: lib/__APP___web/live/invite_live.ex:42
+#: lib/__APP___web/live/invite_live.ex:77
 #, elixir-autogen, elixir-format
 msgid "You’re invited"
 msgstr ""
 
-#: lib/__APP___web/components/core_components.ex:76
+#: lib/__APP___web/components/core_components.ex:73
 #, elixir-autogen, elixir-format
 msgid "close"
 msgstr ""
@@ -323,34 +309,34 @@ msgstr ""
 msgid "your_username"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:91
-#: lib/__APP___web/live/account_security_live.ex:106
+#: lib/__APP___web/live/account_security_live.ex:87
+#: lib/__APP___web/live/account_security_live.ex:100
 #, elixir-autogen, elixir-format
 msgid "Add a passkey"
 msgstr ""
 
 #: lib/__APP___web/controllers/account_security_controller.ex:50
-#: lib/__APP___web/live/account_security_live.ex:88
+#: lib/__APP___web/live/account_security_live.ex:84
 #, elixir-autogen, elixir-format
 msgid "Add another passkey before removing your last one."
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:73
+#: lib/__APP___web/live/account_security_live.ex:69
 #, elixir-autogen, elixir-format
 msgid "Added %{date}"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:102
+#: lib/__APP___web/live/account_security_live.ex:96
 #, elixir-autogen, elixir-format
 msgid "For example: laptop or phone"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:138
+#: lib/__APP___web/live/account_security_live.ex:132
 #, elixir-autogen, elixir-format
 msgid "For your security, existing codes cannot be shown again. Generate a new set if you have lost them."
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:164
+#: lib/__APP___web/live/account_security_live.ex:158
 #, elixir-autogen, elixir-format
 msgid "Generate new recovery codes"
 msgstr ""
@@ -360,24 +346,24 @@ msgstr ""
 msgid "Give your passkeys recognizable names and keep a spare for another device."
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:162
+#: lib/__APP___web/live/account_security_live.ex:156
 #, elixir-autogen, elixir-format
 msgid "I understand that all my previous recovery codes will stop working."
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:126
+#: lib/__APP___web/live/account_security_live.ex:120
 #, elixir-autogen, elixir-format
 msgid "Keep your recovery codes somewhere safe, separate from your devices."
 msgstr ""
 
-#: lib/__APP___web/components/layouts.ex:183
+#: lib/__APP___web/components/layouts.ex:182
 #: lib/__APP___web/live/account_security_live.ex:52
 #, elixir-autogen, elixir-format
 msgid "Manage passkeys"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:68
-#: lib/__APP___web/live/account_security_live.ex:101
+#: lib/__APP___web/live/account_security_live.ex:64
+#: lib/__APP___web/live/account_security_live.ex:95
 #, elixir-autogen, elixir-format
 msgid "Passkey name"
 msgstr ""
@@ -402,23 +388,23 @@ msgstr ""
 msgid "Please sign in again before adding a passkey."
 msgstr ""
 
-#: lib/__APP___web/components/layouts.ex:187
-#: lib/__APP___web/live/account_security_live.ex:124
+#: lib/__APP___web/components/layouts.ex:186
+#: lib/__APP___web/live/account_security_live.ex:118
 #, elixir-autogen, elixir-format
 msgid "Recovery codes"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:83
+#: lib/__APP___web/live/account_security_live.ex:79
 #, elixir-autogen, elixir-format
 msgid "Remove passkey"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:81
+#: lib/__APP___web/live/account_security_live.ex:77
 #, elixir-autogen, elixir-format
 msgid "Remove this passkey? You will no longer be able to sign in with it."
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:75
+#: lib/__APP___web/live/account_security_live.ex:71
 #, elixir-autogen, elixir-format
 msgid "Save name"
 msgstr ""
@@ -428,19 +414,19 @@ msgstr ""
 msgid "This passkey is no longer available."
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:131
+#: lib/__APP___web/live/account_security_live.ex:125
 #, elixir-autogen, elixir-format
 msgid "You have %{count} unused recovery code."
 msgid_plural "You have %{count} unused recovery codes."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/__APP___web/components/layouts.ex:177
+#: lib/__APP___web/components/layouts.ex:176
 #, elixir-autogen, elixir-format
 msgid "Your account"
 msgstr ""
 
-#: lib/__APP___web/live/verify_identity_live.ex:66
+#: lib/__APP___web/live/verify_identity_live.ex:64
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr ""
@@ -450,7 +436,7 @@ msgstr ""
 msgid "Confirm with a passkey"
 msgstr ""
 
-#: lib/__APP___web/live/verify_identity_live.ex:60
+#: lib/__APP___web/live/verify_identity_live.ex:58
 #, elixir-autogen, elixir-format
 msgid "Confirm with a recovery code"
 msgstr ""
@@ -465,12 +451,12 @@ msgstr ""
 msgid "Confirm your identity"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:96
+#: lib/__APP___web/live/account_security_live.ex:88
 #, elixir-autogen, elixir-format
 msgid "Confirm your identity to add a passkey"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:146
+#: lib/__APP___web/live/account_security_live.ex:140
 #, elixir-autogen, elixir-format
 msgid "Confirm your identity to generate new codes"
 msgstr ""
@@ -480,22 +466,22 @@ msgstr ""
 msgid "Please confirm your identity again in your account settings."
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:110
+#: lib/__APP___web/live/account_security_live.ex:104
 #, elixir-autogen, elixir-format
 msgid "Sessions"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:115
+#: lib/__APP___web/live/account_security_live.ex:109
 #, elixir-autogen, elixir-format
 msgid "Sign out on all devices"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:115
+#: lib/__APP___web/live/account_security_live.ex:109
 #, elixir-autogen, elixir-format
 msgid "Sign out on all devices?"
 msgstr ""
 
-#: lib/__APP___web/live/account_security_live.ex:112
+#: lib/__APP___web/live/account_security_live.ex:106
 #, elixir-autogen, elixir-format
 msgid "Sign out on every device, including this one. Your passkeys will still work."
 msgstr ""
@@ -511,27 +497,27 @@ msgstr ""
 msgid "Use a passkey or recovery code belonging to your current account."
 msgstr ""
 
-#: lib/__APP___web/live/verify_identity_live.ex:50
+#: lib/__APP___web/live/verify_identity_live.ex:49
 #, elixir-autogen, elixir-format
 msgid "Use a recovery code instead"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:165
+#: lib/__APP___web/live/inside_live.ex:178
 #, elixir-autogen, elixir-format
 msgid "Their email address"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:114
+#: lib/__APP___web/live/sign_in_live.ex:107
 #, elixir-autogen
 msgid "Setup code"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:118
+#: lib/__APP___web/live/sign_in_live.ex:111
 #, elixir-autogen
 msgid "Unlock setup"
 msgstr ""
 
-#: lib/__APP___web/live/sign_in_live.ex:166
+#: lib/__APP___web/live/sign_in_live.ex:156
 #, elixir-autogen
 msgid "Enter the operator setup code, then choose your username and create a passkey."
 msgstr ""
@@ -551,22 +537,17 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:138
+#: lib/__APP___web/live/inside_live.ex:150
 #, elixir-autogen, elixir-format
 msgid "Email address %{message}."
 msgstr ""
 
-#: lib/__APP___web/ceremony_messages.ex:63
-#, elixir-autogen, elixir-format
-msgid "Enter the address that will claim this instance."
-msgstr ""
-
-#: lib/__APP___web/live/sign_in_live.ex:163
+#: lib/__APP___web/live/sign_in_live.ex:153
 #, elixir-autogen, elixir-format
 msgid "Enter the operator setup code, then your email address, and create a passkey."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:159
+#: lib/__APP___web/live/inside_live.ex:171
 #, elixir-autogen, elixir-format
 msgid "Enter your guest's email address. Their invitation link is sent there."
 msgstr ""
@@ -591,77 +572,122 @@ msgstr ""
 msgid "That is not an email address."
 msgstr ""
 
-#: lib/__APP___web/live/invite_live.ex:48
+#: lib/__APP___web/live/invite_live.ex:89
 #, elixir-autogen, elixir-format
 msgid "The account will belong to %{address}."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:127
+#: lib/__APP___web/live/inside_live.ex:133
 #, elixir-autogen, elixir-format
 msgid "The invitation could not be sent. Pass the link on yourself."
 msgstr ""
 
-#: lib/__APP___web/invitation_mail.ex:33
-#, elixir-autogen, elixir-format
-msgid "Your invitation to Gen"
-msgstr ""
-
-#: lib/__APP___web/live/inside_live.ex:115
+#: lib/__APP___web/live/inside_live.ex:121
 #, elixir-autogen, elixir-format
 msgid "Too many invitations. Try again in an hour."
 msgid_plural "Too many invitations. Try again in %{count} hours."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/__APP___web/live/inside_live.ex:107
+#: lib/__APP___web/live/inside_live.ex:113
 #, elixir-autogen, elixir-format
 msgid "Too many invitations. Try again in a minute."
 msgid_plural "Too many invitations. Try again in %{count} minutes."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/__APP___web/live/inside_live.ex:197
+#: lib/__APP___web/live/inside_live.ex:206
 #, elixir-autogen, elixir-format
 msgid "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:212
-#: lib/__APP___web/live/inside_live.ex:214
+#: lib/__APP___web/live/inside_live.ex:224
+#: lib/__APP___web/live/inside_live.ex:226
 #, elixir-autogen, elixir-format
 msgid "Invited by %{username}"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:193
+#: lib/__APP___web/live/inside_live.ex:202
 #, elixir-autogen, elixir-format
 msgid "Nothing is waiting to be accepted."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:190
+#: lib/__APP___web/live/inside_live.ex:199
 #, elixir-autogen, elixir-format
 msgid "Outstanding invitations"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:219
+#: lib/__APP___web/live/inside_live.ex:231
 #, elixir-autogen, elixir-format
 msgid "Runs out %{date}"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:228
+#: lib/__APP___web/live/inside_live.ex:240
 #, elixir-autogen, elixir-format
 msgid "Take it back"
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:79
+#: lib/__APP___web/live/inside_live.ex:85
 #, elixir-autogen, elixir-format
 msgid "That invitation is no longer there."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:94
+#: lib/__APP___web/live/inside_live.ex:100
 #, elixir-autogen, elixir-format
 msgid "That invitation is not waiting any more. Somebody accepted it, or took it back first."
 msgstr ""
 
-#: lib/__APP___web/live/inside_live.ex:214
+#: lib/__APP___web/live/inside_live.ex:226
 #, elixir-autogen, elixir-format
 msgid "Unknown"
+msgstr ""
+
+#: lib/__APP___web/live/invite_live.ex:110
+#, elixir-autogen, elixir-format
+msgid "Choose your username, then create a passkey."
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:185
+#, elixir-autogen, elixir-format
+msgid "Grace, from the meetup"
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:143
+#, elixir-autogen, elixir-format
+msgid "Note %{message}."
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:184
+#, elixir-autogen, elixir-format
+msgid "Note (optional)"
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:167
+#, elixir-autogen, elixir-format
+msgid "Note whom the link is for, then send it to them. They choose their own username."
+msgstr ""
+
+#: lib/__APP___web/live/invite_live.ex:81
+#, elixir-autogen, elixir-format
+msgid "Opening your invitation…"
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:184
+#, elixir-autogen, elixir-format
+msgid "Who is it for?"
+msgstr ""
+
+#: lib/__APP___web/invitation_mail.ex:33
+#, elixir-autogen, elixir-format
+msgid "Your invitation to __MODULE__"
+msgstr ""
+
+#: lib/__APP___web/ceremony_messages.ex:63
+#, elixir-autogen, elixir-format
+msgid "Enter an email address."
+msgstr ""
+
+#: lib/__APP___web/ceremony_messages.ex:64
+#, elixir-autogen, elixir-format
+msgid "Pick a username."
 msgstr ""

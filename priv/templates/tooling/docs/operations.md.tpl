@@ -53,13 +53,14 @@ A release writes one JSON object per line to stdout. The service manager collect
 line has `time`, `severity`, `message` and `metadata`. The metadata contains only Phoenix's
 `request_id`. `__MODULE__.Logging` holds that list; add a key there before logging it.
 
-The application writes no access log. Phoenix's request lines would name the path, and an
-invitation path holds its token. A reverse proxy can write an access log. Logging the
-`x-request-id` response header there matches its lines with `request_id`.
+The application writes no access log. A reverse proxy can write one. Logging the `x-request-id`
+response header there matches its lines with `request_id`. An invitation link carries its token
+after `#`, which no request sends, so no access log records it.
 
 A failed request is logged at `error` with its stack trace, without the request's path, address
-or user agent. A crashed LiveView process logs its last message and state, which can hold the
-page URL. Messages are not filtered, and a stack trace may contain other data.
+or user agent. A crashed LiveView process logs its last message and state. The invitation page
+holds the token once it has opened the invitation, so a crash there can log it. Messages are not
+filtered, and a stack trace may contain other data.
 `LOG_LEVEL=warning` drops `notice` and `info` lines. `debug` is not supported, because it logs
 sessions and query parameters.
 
