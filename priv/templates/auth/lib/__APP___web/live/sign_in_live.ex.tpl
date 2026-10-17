@@ -77,7 +77,7 @@ defmodule __MODULE__Web.SignInLive do
   def render(assigns) do
     ~H"""
     <Layouts.auth flash={@flash} title={title(@live_action)} subtitle={subtitle(@live_action, @email?)}>
-      <div :if={@error} role="alert" class="mb-6 rounded-control border border-danger bg-danger-surface p-4 text-label text-ink">{@error}</div>
+      <.alert :if={@error} class="mb-6">{@error}</.alert>
 
       <div :if={@live_action == :login}>
         <h1 class="sr-only">{gettext("Sign in")}</h1>

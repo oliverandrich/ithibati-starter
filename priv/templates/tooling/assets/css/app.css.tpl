@@ -30,7 +30,7 @@
   --color-on-accent: var(--color-white);
   --color-selection: var(--color-neutral-100);
   --color-signal: var(--color-__BRAND__-500);
-  /* For text, where the 500 shade has too little contrast on white. */
+  /* For text and link underlines, where the 500 shade has too little contrast on white. */
   --color-signal-strong: var(--color-__BRAND__-700);
   --color-danger: var(--color-red-700);
   --color-danger-surface: var(--color-red-50);
@@ -67,11 +67,12 @@
 }
 
 /* Links in running text get a brand-coloured underline; ink alone does not read as a link.
+   The underline takes the text shade: a 500 shade such as yellow is too light on white.
    On hover the underline takes the text colour. */
 @utility text-link {
   color: var(--color-ink);
   text-decoration-line: underline;
-  text-decoration-color: var(--color-signal);
+  text-decoration-color: var(--color-signal-strong);
   text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
   /* Skip-ink would break the coloured underline at every descender. */

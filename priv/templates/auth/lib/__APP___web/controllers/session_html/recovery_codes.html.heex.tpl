@@ -1,7 +1,7 @@
 <Layouts.auth title={gettext("Save your recovery codes")} subtitle={gettext("Keep these somewhere safe. Each code lets you sign in once if you lose access to your passkey.")}>
-  <ul id="recovery-codes" class="grid grid-cols-2 gap-2 rounded-xl bg-surface p-4 font-mono text-sm text-ink ring-1 ring-line">
+  <.card tag="ul" id="recovery-codes" class="grid grid-cols-2 gap-2 p-4 font-mono text-sm text-ink">
     <li :for={code <- @codes} class="rounded-md px-2 py-1.5 text-center">{code}</li>
-  </ul>
+  </.card>
   <div class="mt-5">
     <Layouts.auth_button type="button" data-copy-recovery data-copy-success={gettext("Recovery codes copied.")} data-copy-error={gettext("Copying was blocked. Select the codes above and copy them manually.")}>{gettext("Copy recovery codes")}</Layouts.auth_button>
     <p id="copy-status" role="status" aria-live="polite" class="mt-3 min-h-5 text-center text-sm text-signal-strong"></p>

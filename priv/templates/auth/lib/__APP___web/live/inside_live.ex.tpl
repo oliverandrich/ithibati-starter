@@ -166,14 +166,12 @@ defmodule __MODULE__Web.InsideLive do
         <.button variant="primary">{gettext("Create a link")}</.button>
       </form>
 
-      <div :if={@error} role="alert" class="mt-4 rounded-control border border-danger bg-danger-surface p-4 text-label text-ink"><span>{@error}</span></div>
+      <.alert :if={@error} class="mt-4">{@error}</.alert>
 
-      <div :if={@link} role="status" class="mt-4 rounded-control border border-line bg-surface p-4 text-label text-ink">
-        <span>
-          {gettext("Your invitation is ready. Send this link to your guest:")}
-          <code class="block mt-2 break-all">{@link}</code>
-        </span>
-      </div>
+      <.alert :if={@link} kind={:info} class="mt-4">
+        {gettext("Your invitation is ready. Send this link to your guest:")}
+        <code class="block mt-2 break-all">{@link}</code>
+      </.alert>
 
       <h2 class="mt-10 text-lg font-semibold">{gettext("Outstanding invitations")}</h2>
 

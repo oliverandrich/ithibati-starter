@@ -59,9 +59,8 @@ defmodule __MODULE__Web.CoreComponents do
       {@rest}
     >
       <div class={[
-        "flex w-80 max-w-full items-start gap-3 rounded-control border p-4 text-label shadow-lg sm:w-96",
-        @kind == :info && "border-line bg-surface text-ink",
-        @kind == :error && "border-danger bg-danger-surface text-ink"
+        "flex w-80 max-w-full items-start gap-3 shadow-lg sm:w-96",
+        box(@kind)
       ]}>
         <Lucideicons.info :if={@kind == :info} aria-hidden="true" class="size-5 shrink-0" />
         <Lucideicons.circle_alert :if={@kind == :error} aria-hidden="true" class="size-5 shrink-0" />
@@ -75,6 +74,54 @@ defmodule __MODULE__Web.CoreComponents do
         </button>
       </div>
     </div>
+    """
+  end
+
+  @doc """
+  Renders a message box in the page flow. An error is announced as an alert, info as a status.
+
+  ## Examples
+
+      <.alert :if={@error}>{@error}</.alert>
+      <.alert kind={:info} class="mt-4">Saved.</.alert>
+  """
+  attr :kind, :atom, values: [:info, :error], default: :error
+  attr :class, :any, default: nil, doc: "added to the box's own classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def alert(assigns) do
+    ~H"""
+    <div role={if @kind == :error, do: "alert", else: "status"} class={[box(@kind), @class]} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  # Flash notices and alerts share one look per kind.
+  defp box(kind), do: ["rounded-control border p-4 text-label text-ink", box_colors(kind)]
+
+  defp box_colors(:info), do: "border-line bg-surface"
+  defp box_colors(:error), do: "border-danger bg-danger-surface"
+
+  @doc """
+  Renders a raised area. Callers set the padding through `class`.
+
+  ## Examples
+
+      <.card class="p-6">...</.card>
+      <.card tag="ul" class="grid grid-cols-2 p-4">...</.card>
+  """
+  attr :tag, :string, default: "div"
+  attr :class, :any, default: nil, doc: "added to the card's own classes"
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def card(assigns) do
+    ~H"""
+    <.dynamic_tag tag_name={@tag} class={["rounded-xl bg-surface ring-1 ring-line", @class]} {@rest}>
+      {render_slot(@inner_block)}
+    </.dynamic_tag>
     """
   end
 

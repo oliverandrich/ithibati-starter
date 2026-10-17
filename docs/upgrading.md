@@ -93,10 +93,13 @@ tokens, their dark-mode values and a `text-link` utility. Every generated templa
 under `lib/` uses those tokens instead of `zinc`, `violet`, `indigo`, `red`, `sky` and
 `emerald` classes. Neutral greys replace zinc, and primary buttons use ink. The brand
 colour marks the wordmark dot, link underlines and the copy status of recovery codes. The auth layout
-drops its radial gradient. `Layouts.wordmark/1` is new.
-`test/features/tailwind_test.exs` expects the `ground` colour as the
-light page background. `test/my_app_web/components/core_components_test.exs` checks
-`border-danger` and `border-edge`. `.ithibati-starter` gains a `brand=` line.
+drops its radial gradient. `Layouts.wordmark/1` is new. `CoreComponents.alert/1` and
+`CoreComponents.card/1` replace the copied error boxes and cards. Link underlines use
+`signal-strong`, which keeps them visible for light palettes such as yellow.
+`test/features/tailwind_test.exs` compares the light and dark page backgrounds
+instead of expecting white. `test/my_app_web/components/core_components_test.exs`
+checks `border-danger` and `border-edge`, and adds tests for `alert/1` and `card/1`.
+`.ithibati-starter` gains a `brand=` line.
 
 Applying this by hand touches most templates. Take the diff of the files you have not
 changed, and keep your own colours in the files you have.

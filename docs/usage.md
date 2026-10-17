@@ -161,11 +161,12 @@ once in `@theme` and again for dark mode under `prefers-color-scheme`:
 | `line`, `edge` | Dividers, and the borders of inputs and secondary buttons |
 | `accent`, `on-accent` | Primary buttons and focus outlines, and the text on them |
 | `selection` | Hover and selected rows |
-| `signal`, `signal-strong` | The brand colour, and its shade for text |
+| `signal`, `signal-strong` | The brand colour, and its shade for text and link underlines |
 | `danger`, `danger-surface` | Errors and destructive actions |
 
 Use them as Tailwind utilities, for example `bg-surface` or `text-muted`. The
-`text-link` utility underlines a link in the brand colour.
+`text-link` utility underlines a link in `signal-strong`. `<.alert>` renders an error
+or info box, and `<.card>` a raised area.
 
 `--brand` accepts Tailwind's chromatic palettes:
 

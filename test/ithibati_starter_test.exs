@@ -108,8 +108,7 @@ defmodule IthibatiStarterTest do
   end
 
   test "generated protected claim and invitation table sit on the library's versions" do
-    files =
-      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+    files = installed_files()
 
     assert files["config/config.exs"] =~ "initial_claim: :operator_code"
 
@@ -132,8 +131,7 @@ defmodule IthibatiStarterTest do
   end
 
   test "an unsupported claim mode stops the boot instead of offering a field nobody can satisfy" do
-    files =
-      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+    files = installed_files()
 
     assert files["lib/sample/claim.ex"] =~ "Config.initial_claim_mode()"
     assert files["lib/sample/claim.ex"] =~ ":operator_code"
@@ -146,8 +144,7 @@ defmodule IthibatiStarterTest do
   end
 
   test "a request forwarded by a trusted proxy is counted against the visitor" do
-    files =
-      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+    files = installed_files()
 
     client_ip = files["lib/sample_web/client_ip.ex"]
     assert client_ip =~ ":trusted_proxies"
@@ -190,8 +187,7 @@ defmodule IthibatiStarterTest do
   end
 
   test "a release migrates before it serves, unless the operator opts out" do
-    files =
-      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+    files = installed_files()
 
     assert [_, after_repo] = String.split(files["lib/sample/application.ex"], "Sample.Repo,")
     assert [_, after_migrator] = String.split(after_repo, "{Ecto.Migrator,")
@@ -462,32 +458,47 @@ defmodule IthibatiStarterTest do
   end
 
   test "the brand colour is named once, in the stylesheet's tokens" do
-    files =
-      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+    files = installed_files()
 
     assert files["assets/css/app.css"] =~ "--color-signal: var(--color-violet-500);"
     assert files["assets/css/app.css"] =~ "--color-signal: var(--color-violet-400);"
     assert files[".ithibati-starter"] =~ "brand=violet\n"
 
-    files =
-      project()
-      |> IthibatiStarter.install(brand: "amber")
-      |> apply_igniter!()
-      |> then(& &1.assigns.test_files)
+    files = installed_files(brand: "amber")
 
     assert files["assets/css/app.css"] =~ "--color-signal: var(--color-amber-500);"
     refute files["assets/css/app.css"] =~ "violet"
   end
 
   test "templates name colours by role, never by hue" do
-    files =
-      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+    files = installed_files()
 
     hue =
       ~r/\b(?:bg|text|border|ring|ring-offset|inset-ring|outline|accent|caret|divide|decoration|placeholder|fill|stroke|shadow|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)\b/
 
     for {path, source} <- files, String.starts_with?(path, "lib/") do
       refute source =~ hue, "#{path} names a hue: #{inspect(Regex.run(hue, source))}"
+    end
+  end
+
+  # A 500 shade underline is below 3:1 on white for yellow, lime and amber.
+  test "a link's underline uses the shade meant for text" do
+    files = installed_files()
+
+    [_, text_link] = String.split(files["assets/css/app.css"], "@utility text-link")
+    assert text_link =~ "text-decoration-color: var(--color-signal-strong);"
+  end
+
+  test "alerts and cards are components, not copied class lists" do
+    files = installed_files()
+
+    components = "lib/sample_web/components/core_components.ex"
+    assert files[components] =~ "def alert(assigns)"
+    assert files[components] =~ "def card(assigns)"
+
+    for {path, source} <- files, String.starts_with?(path, "lib/"), path != components do
+      refute source =~ ~r/(?<![\w:-])bg-danger-surface/, "#{path} copies the alert classes"
+      refute source =~ "ring-1 ring-line", "#{path} copies the card classes"
     end
   end
 
@@ -511,5 +522,12 @@ defmodule IthibatiStarterTest do
 
     assert diff(result, only: "lib/sample_web/components/layouts/root.html.heex") =~
              "assigns[:locale]"
+  end
+
+  defp installed_files(opts \\ []) do
+    project()
+    |> IthibatiStarter.install(opts)
+    |> apply_igniter!()
+    |> then(& &1.assigns.test_files)
   end
 end
