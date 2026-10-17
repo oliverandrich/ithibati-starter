@@ -22,6 +22,7 @@ for the deployment, `TRUSTED_PROXIES` when a reverse proxy runs on another host,
 | `DATABASE_PATH` | The SQLite file, as an absolute path; required with `sqlite` |
 | `DATABASE_URL` | The PostgreSQL connection, `ecto://USER:PASS@HOST/DATABASE`; required with `postgres` |
 | `POOL_SIZE` | Database connections; 5 for SQLite and 10 for PostgreSQL by default |
+| `LOG_LEVEL` | `info` by default, or `notice`, `warning`, `error`, `critical`, `alert`, `emergency`; any other value, `debug` included, stops the boot |
 | `ACCOUNT_IDENTITY` | `username` (the default) or `email`; anything else stops the boot. `email` requires the mail settings below |
 | `MAIL_ENABLED` | `true` to deliver invitations; required by `ACCOUNT_IDENTITY=email` |
 | `MAIL_FROM` | The address invitations come from |
@@ -45,6 +46,22 @@ exist before the first start.
 
 Development and tests read the same variable. `mise run check` runs every check on
 SQLite and the tests again on PostgreSQL.
+
+## Logs
+
+A release writes one JSON object per line to stdout. The service manager collects it. Each
+line has `time`, `severity`, `message` and `metadata`. The metadata contains only Phoenix's
+`request_id`. `__MODULE__.Logging` holds that list; add a key there before logging it.
+
+The application writes no access log. Phoenix's request lines would name the path, and an
+invitation path holds its token. A reverse proxy can write an access log. Logging the
+`x-request-id` response header there matches its lines with `request_id`.
+
+A failed request is logged at `error` with its stack trace, without the request's path, address
+or user agent. A crashed LiveView process logs its last message and state, which can hold the
+page URL. Messages are not filtered, and a stack trace may contain other data.
+`LOG_LEVEL=warning` drops `notice` and `info` lines. `debug` is not supported, because it logs
+sessions and query parameters.
 
 ## Naming or addressing accounts
 

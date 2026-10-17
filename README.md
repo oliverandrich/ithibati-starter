@@ -93,6 +93,8 @@ Dependency advisories run separately through `mise run audit`.
   sessions, abandoned challenges and expired, unaccepted invitations.
 - **SQLite or PostgreSQL from one build**: `MY_APP_DATABASE` chooses at runtime, SQLite by
   default. `mise run check` tests against both.
+- **JSON logs in production**: one object per line at `LOG_LEVEL`, with allowlisted
+  metadata and no access log, which would record invitation tokens in paths.
 - Environment-based database configuration and a documented release workflow.
 
 Cleanup is explicit. The generated operations guide gives a recurring release

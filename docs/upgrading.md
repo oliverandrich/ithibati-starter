@@ -122,6 +122,12 @@ over the history, the staged and the unstaged changes. `.gitleaks.toml` allows t
 and test `secret_key_base`. The CI checkout fetches the full history with `fetch-depth: 0`. An
 application with history may need further exceptions in `.gitleaks.toml`, each with its reason.
 
+**A release logs JSON.** `mix.exs` adds `logger_json`. `lib/my_app/logging.ex` holds the
+formatter, the metadata allowlist and the `LOG_LEVEL` parser, tested in
+`test/my_app/logging_test.exs`. `config/runtime.exs` sets them for `:prod`. `config/prod.exs`
+turns Phoenix's request log off. For operators: log lines change from text to JSON, and
+`LOG_LEVEL=debug` stops the boot.
+
 ### 0.6.0
 
 **The session cookie lasts as long as the session.** `lib/my_app_web/endpoint.ex`

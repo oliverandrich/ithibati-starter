@@ -241,6 +241,19 @@ defmodule IthibatiStarterTest do
     assert files["README.md"] =~ "SAMPLE_DATABASE=postgres"
   end
 
+  test "a release logs JSON lines at LOG_LEVEL, without request paths" do
+    files = installed_files()
+
+    assert files["mix.exs"] =~ ~s({:logger_json,)
+    assert files["lib/sample/logging.ex"] =~ "def drop_request("
+    assert files["test/sample/logging_test.exs"] =~ "Sample.Logging"
+    assert files["config/runtime.exs"] =~ ~s{Sample.Logging.level(System.get_env("LOG_LEVEL"))}
+    assert files["config/runtime.exs"] =~ "formatter: Sample.Logging.formatter()"
+    assert files["config/runtime.exs"] =~ "filters: Sample.Logging.filters()"
+    assert files["config/prod.exs"] =~ "config :phoenix, :logger, false"
+    assert files["docs/operations.md"] =~ "LOG_LEVEL"
+  end
+
   test "the check scans every commit for secrets" do
     files = installed_files()
 

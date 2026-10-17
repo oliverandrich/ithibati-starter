@@ -53,6 +53,7 @@ defmodule IthibatiStarter.Tooling do
       "config/runtime.exs",
       Files.template("fragments/migrate_on_start_runtime", bindings)
     )
+    |> logging(bindings)
     |> tidy_scaffold(bindings)
     |> maybe_beans(bindings, opts)
     |> Files.append(".gitignore", "\n/mise.local.toml\n/screenshots/\n")
@@ -130,6 +131,18 @@ defmodule IthibatiStarter.Tooling do
       password: "postgres",
       hostname: "localhost",
     """
+  end
+
+  defp logging(igniter, b) do
+    igniter
+    |> Deps.add_dep({:logger_json, "~> 7.0"}, yes?: true)
+    |> Files.replace("config/prod.exs", "config :logger, level: :info\n", """
+    config :logger, level: :info
+
+    # No access log: an invitation path holds its token. See docs/operations.md.
+    config :phoenix, :logger, false
+    """)
+    |> Files.append("config/runtime.exs", Files.template("fragments/logging_runtime", b))
   end
 
   defp tidy_scaffold(igniter, b) do
