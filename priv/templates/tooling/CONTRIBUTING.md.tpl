@@ -40,7 +40,7 @@ features run on SQLite alone. Production settings are in [Operations](docs/opera
 
 | Command | Purpose |
 | --- | --- |
-| `mise run check` | Workflow audit, compilation, format check, Credo, xref, Sobelow, assets and tests on SQLite, then the tests on PostgreSQL |
+| `mise run check` | Workflow audit, secret scan, compilation, format check, Credo, xref, Sobelow, assets and tests on SQLite, then the tests on PostgreSQL |
 | `mise run test` | Tests on SQLite, with their test-database setup; takes a test path |
 | `mise run test:postgres` | The same tests on PostgreSQL, without the browser features |
 | `mise run format` | Explicit formatting |
@@ -52,6 +52,12 @@ features run on SQLite alone. Production settings are in [Operations](docs/opera
 | `mise run reset` | Drop and recreate the development database, migrate and seed |
 | `mise run debugserver` | IEx Phoenix server |
 | `mise run release` | Build a production release for the current OS and architecture |
+
+`mise run check` runs gitleaks over every commit and over staged and unstaged changes. It
+does not read untracked files until they are staged. A secret removed in a later commit still
+fails the check. Rotate a leaked secret, since the old commit stays public. `.gitleaks.toml`
+allows only the development and test `secret_key_base`. Add an exception there with its
+reason beside it.
 
 Keep migration history unchanged. Credo scans source, tests and all migrations;
 Jump inspects inline HEEx and files reached through embed_templates. ExSlop and

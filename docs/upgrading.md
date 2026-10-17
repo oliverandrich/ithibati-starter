@@ -117,6 +117,11 @@ For operators: **an existing PostgreSQL installation must set `MY_APP_DATABASE=p
 Without it the updated release starts on SQLite and stops for want of `DATABASE_PATH`.
 Moving existing data between the databases is not covered.
 
+**The check scans for secrets.** `mise.toml` pins gitleaks and runs `gitleaks git` in `check`
+over the history, the staged and the unstaged changes. `.gitleaks.toml` allows the development
+and test `secret_key_base`. The CI checkout fetches the full history with `fetch-depth: 0`. An
+application with history may need further exceptions in `.gitleaks.toml`, each with its reason.
+
 ### 0.6.0
 
 **The session cookie lasts as long as the session.** `lib/my_app_web/endpoint.ex`

@@ -74,6 +74,7 @@ Powered by **Ithibati 0.7.1**, with passkeys and accounts that are named or addr
 | mise | Pins Elixir, Erlang/OTP and workflow-audit tooling; provides setup, dev and check tasks |
 | Credo | Strict checks, with selected ExSlop, Jump and migration checks |
 | Sobelow | Security analysis in the application check gate |
+| gitleaks | Secret scan over every commit and the staged and unstaged changes in the check gate |
 | ExUnit + Wallaby | Application tests and real browser/WebAuthn flows using virtual authenticators |
 | GitHub Actions | Check workflows plus a separate dependency-audit workflow |
 | Dependabot | Grouped dependency and Actions updates |

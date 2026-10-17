@@ -2,6 +2,7 @@
 elixir = "1.20.4-otp-29"
 erlang = "29.0.6"
 zizmor = "1.30.0"
+gitleaks = "8.30.1"
 
 [tasks.setup]
 description = "Install dependencies, create the development database and build assets"
@@ -31,6 +32,9 @@ env.MIX_ENV = "test"
 description = "Check workflows, compile, format, lint, security, assets and tests on both databases"
 run = [
   "zizmor .github/",
+  "gitleaks git --redact --no-banner",
+  "gitleaks git --staged --redact --no-banner",
+  "gitleaks git --pre-commit --redact --no-banner",
   "__APP_UPCASE___DATABASE=sqlite mix precommit",
   "__APP_UPCASE___DATABASE=postgres mix test",
 ]

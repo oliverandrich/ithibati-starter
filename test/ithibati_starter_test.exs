@@ -241,6 +241,18 @@ defmodule IthibatiStarterTest do
     assert files["README.md"] =~ "SAMPLE_DATABASE=postgres"
   end
 
+  test "the check scans every commit for secrets" do
+    files = installed_files()
+
+    assert files["mise.toml"] =~ ~r/^gitleaks = "\d+\.\d+\.\d+"$/m
+    assert files["mise.toml"] =~ "gitleaks git --redact --no-banner"
+    assert files["mise.toml"] =~ "gitleaks git --staged --redact --no-banner"
+    assert files["mise.toml"] =~ "gitleaks git --pre-commit --redact --no-banner"
+    assert files[".github/workflows/ci.yml"] =~ "fetch-depth: 0"
+    assert files[".gitleaks.toml"] =~ "useDefault = true"
+    assert files["CONTRIBUTING.md"] =~ "gitleaks"
+  end
+
   @tag :command_contract
   test "mise exposes development, reset and release commands" do
     result = project() |> IthibatiStarter.install()
