@@ -253,11 +253,12 @@ defmodule IthibatiStarterTest do
     end
   end
 
-  test "there is one profile left, and Beans is the only thing still optional" do
+  test "there is one profile left; Beans and the brand colour are the only choices" do
     info = Install.info([], nil)
     refute Keyword.has_key?(info.schema, :with_mail)
     refute Keyword.has_key?(info.schema, :without_ithibati)
     assert info.schema[:without_beans] == :boolean
+    assert info.schema[:brand] == :string
 
     result = project() |> IthibatiStarter.install(without_beans: true)
     assert_creates(result, "lib/sample/accounts/user.ex")
@@ -391,7 +392,7 @@ defmodule IthibatiStarterTest do
   test "template aliases remain ordered for application names before Ithibati" do
     source = "  alias Ithibati.Identity.Grant\n  alias __MODULE__.Repo\n"
 
-    assert IthibatiStarter.Files.render(source, %{app: "acme", module: "Acme"}) ==
+    assert IthibatiStarter.Files.render(source, %{app: "acme", module: "Acme", brand: "violet"}) ==
              "  alias Acme.Repo\n  alias Ithibati.Identity.Grant\n"
   end
 
@@ -455,7 +456,49 @@ defmodule IthibatiStarterTest do
       end
 
       assert files["lib/sample_web/components/core_components.ex"] =~ "focus-visible:"
-      assert files["lib/sample_web/components/layouts/root.html.heex"] =~ "dark:bg-"
+      assert files["lib/sample_web/components/layouts/root.html.heex"] =~ "bg-ground"
+      assert files["assets/css/app.css"] =~ "@media (prefers-color-scheme: dark)"
+    end
+  end
+
+  test "the brand colour is named once, in the stylesheet's tokens" do
+    files =
+      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+
+    assert files["assets/css/app.css"] =~ "--color-signal: var(--color-violet-500);"
+    assert files["assets/css/app.css"] =~ "--color-signal: var(--color-violet-400);"
+    assert files[".ithibati-starter"] =~ "brand=violet\n"
+
+    files =
+      project()
+      |> IthibatiStarter.install(brand: "amber")
+      |> apply_igniter!()
+      |> then(& &1.assigns.test_files)
+
+    assert files["assets/css/app.css"] =~ "--color-signal: var(--color-amber-500);"
+    refute files["assets/css/app.css"] =~ "violet"
+  end
+
+  test "templates name colours by role, never by hue" do
+    files =
+      project() |> IthibatiStarter.install() |> apply_igniter!() |> then(& &1.assigns.test_files)
+
+    hue =
+      ~r/\b(?:bg|text|border|ring|ring-offset|inset-ring|outline|accent|caret|divide|decoration|placeholder|fill|stroke|shadow|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)\b/
+
+    for {path, source} <- files, String.starts_with?(path, "lib/") do
+      refute source =~ hue, "#{path} names a hue: #{inspect(Regex.run(hue, source))}"
+    end
+  end
+
+  test "an unknown brand colour is refused before making changes" do
+    project = project()
+
+    for brand <- ["zinc", "notacolour", "violet-500"] do
+      project
+      |> IthibatiStarter.install(brand: brand)
+      |> assert_has_issue(&String.contains?(&1, "brand"))
+      |> assert_unchanged()
     end
   end
 

@@ -4,6 +4,7 @@ defmodule IthibatiNew do
   @starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.6.0"
   @switches [
     without_beans: :boolean,
+    brand: :string,
     yes: :boolean,
     starter: :string
   ]
@@ -17,7 +18,7 @@ defmodule IthibatiNew do
           path
 
         _ ->
-          Mix.raise("Usage: mix ithibati.new PATH [--without-beans] [--no-yes]")
+          Mix.raise("Usage: mix ithibati.new PATH [--brand COLOUR] [--without-beans] [--no-yes]")
       end
 
     [
@@ -29,6 +30,7 @@ defmodule IthibatiNew do
       "--only",
       "dev"
     ] ++
+      if(opts[:brand], do: ["--brand", opts[:brand]], else: []) ++
       if(opts[:without_beans], do: ["--without-beans"], else: []) ++
       if(Keyword.get(opts, :yes, true), do: ["--yes"], else: [])
   end

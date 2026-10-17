@@ -7,8 +7,11 @@ defmodule __MODULE__Web.TailwindTest do
     |> open("/")
     |> execute_script("localStorage.setItem('phx:theme', 'dark')")
     |> open("/")
+    # Chrome's serialisation of an oklch colour varies by version, so the light value is read
+    # from the page and compared with itself rather than written out here.
     |> execute_script("return getComputedStyle(document.body).backgroundColor", fn color ->
-      assert color == "rgb(255, 255, 255)"
+      refute color == "rgba(0, 0, 0, 0)"
+      send(self(), {:light, color})
     end)
     |> refute_has(css("[data-phx-theme]"))
     |> execute_script("return getComputedStyle(document.querySelector('#setup-code-form button')).display", fn display ->
@@ -19,11 +22,13 @@ defmodule __MODULE__Web.TailwindTest do
       assert scheme == "dark"
     end)
     |> execute_script("return getComputedStyle(document.body).backgroundColor", fn color ->
-      refute color in ["rgb(255, 255, 255)", "rgba(0, 0, 0, 0)"]
+      assert_received {:light, light}
+      refute color in [light, "rgba(0, 0, 0, 0)"]
+      send(self(), {:light, light})
     end)
     |> system_scheme("light")
     |> execute_script("return getComputedStyle(document.body).backgroundColor", fn color ->
-      assert color == "rgb(255, 255, 255)"
+      assert_received {:light, ^color}
     end)
   end
 

@@ -58,7 +58,9 @@ Powered by **Ithibati 0.7.1**, with passkeys and accounts that are named or addr
 
 - **Vanilla Tailwind CSS 4** and **[Lucide SVG components](https://github.com/zoedsoupe/lucide_icons)**.
   No DaisyUI or Heroicons plugin.
-- Centered auth screens with the project name, a violet accent and responsive layouts.
+- Centered auth screens with the project name as a wordmark and responsive layouts.
+- Colour tokens named by role. Neutral greys and ink carry the interface; one brand
+  colour, violet unless `--brand` names another Tailwind palette, marks the wordmark and links.
 - A protected home page, project name on the left and username menu on the right.
 - Light/dark styling follows the operating system, without a theme switch or stored override.
 - **English and German** auth screens, validation messages and ceremony feedback.

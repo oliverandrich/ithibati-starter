@@ -40,12 +40,12 @@ defmodule __MODULE__Web.AccountSecurityLive do
         <.header>{gettext("Manage passkeys")}
           <:subtitle>{gettext("Give your passkeys recognizable names and keep a spare for another device.")}</:subtitle>
         </.header>
-        <p :if={@error} role="alert" class="my-4 text-sm text-red-700 dark:text-red-400">{@error}</p>
+        <p :if={@error} role="alert" class="my-4 text-label text-danger">{@error}</p>
         <div class="mt-6 space-y-4">
-          <article :for={key <- @keys} id={"key-#{key.id}"} class="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+          <article :for={key <- @keys} id={"key-#{key.id}"} class="rounded-xl bg-surface p-5 ring-1 ring-line">
             <.form for={%{}} action={~p"/account/passkeys/#{key.id}"} method="patch" class="space-y-3">
               <.input name="label" value={key.label} label={gettext("Passkey name")} maxlength="100" required />
-              <p class="text-xs text-zinc-500 dark:text-zinc-400">{gettext("Added %{date}", date: Calendar.strftime(key.inserted_at, "%Y-%m-%d"))}</p>
+              <p class="text-meta text-muted">{gettext("Added %{date}", date: Calendar.strftime(key.inserted_at, "%Y-%m-%d"))}</p>
               <.button>{gettext("Save name")}</.button>
             </.form>
             <.form for={%{}} action={~p"/account/passkeys/#{key.id}"} method="delete" class="mt-3">
@@ -53,18 +53,18 @@ defmodule __MODULE__Web.AccountSecurityLive do
             </.form>
           </article>
         </div>
-        <p :if={length(@keys) == 1} class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">{gettext("Add another passkey before removing your last one.")}</p>
-        <div class="mt-8 rounded-2xl border border-violet-200 bg-violet-50 p-6 dark:border-violet-900 dark:bg-violet-950/30">
+        <p :if={length(@keys) == 1} class="mt-3 text-sm text-muted">{gettext("Add another passkey before removing your last one.")}</p>
+        <div class="mt-8 rounded-xl bg-surface p-6 ring-1 ring-line">
           <h2 class="mb-4 text-lg font-semibold">{gettext("Add a passkey")}</h2>
-          <.link :if={!@confirmed} href={~p"/account/confirm/passkeys"} class="font-medium text-violet-600 dark:text-violet-400">{gettext("Confirm your identity to add a passkey")}</.link>
+          <.link :if={!@confirmed} href={~p"/account/confirm/passkeys"} class="text-link font-medium">{gettext("Confirm your identity to add a passkey")}</.link>
           <form :if={@confirmed} id="add-passkey-form" phx-change="validate" phx-submit="add-passkey">
             <.input name="label" value={@label} label={gettext("Passkey name")} placeholder={gettext("For example: laptop or phone")} maxlength="100" required />
             <Layouts.auth_button type="submit">{gettext("Add a passkey")}</Layouts.auth_button>
           </form>
         </div>
-        <section class="mt-8 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <section class="mt-8 border-t border-line pt-6">
           <h2 class="text-lg font-semibold">{gettext("Sessions")}</h2>
-          <p class="my-3 text-sm text-zinc-600 dark:text-zinc-400">{gettext("Sign out on every device, including this one. Your passkeys will still work.")}</p>
+          <p class="my-3 text-sm text-muted">{gettext("Sign out on every device, including this one. Your passkeys will still work.")}</p>
           <.form for={%{}} action={~p"/account/sessions"} method="delete">
             <.button data-confirm={gettext("Sign out on all devices?")}>{gettext("Sign out on all devices")}</.button>
           </.form>
@@ -75,13 +75,13 @@ defmodule __MODULE__Web.AccountSecurityLive do
         <.header>{gettext("Recovery codes")}
           <:subtitle>{gettext("Keep your recovery codes somewhere safe, separate from your devices.")}</:subtitle>
         </.header>
-        <div class="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+        <div class="mt-6 rounded-xl bg-surface p-6 ring-1 ring-line">
           <p class="text-lg font-semibold">{ngettext("You have %{count} unused recovery code.", "You have %{count} unused recovery codes.", @remaining)}</p>
-          <p class="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{gettext("For your security, existing codes cannot be shown again. Generate a new set if you have lost them.")}</p>
-          <.link :if={!@confirmed} href={~p"/account/confirm/recovery-codes"} class="mt-6 block font-medium text-violet-600 dark:text-violet-400">{gettext("Confirm your identity to generate new codes")}</.link>
+          <p class="mt-3 text-sm leading-6 text-muted">{gettext("For your security, existing codes cannot be shown again. Generate a new set if you have lost them.")}</p>
+          <.link :if={!@confirmed} href={~p"/account/confirm/recovery-codes"} class="text-link mt-6 inline-block font-medium">{gettext("Confirm your identity to generate new codes")}</.link>
           <.form :if={@confirmed} for={%{}} id="regenerate-codes-form" action={~p"/account/recovery-codes"} class="mt-6">
             <label class="mb-6 flex items-start gap-3 text-sm leading-6">
-              <input type="checkbox" name="confirm" value="true" required class="mt-1 size-4 accent-violet-600" />
+              <input type="checkbox" name="confirm" value="true" required class="mt-1 size-4 accent-accent" />
               <span>{gettext("I understand that all my previous recovery codes will stop working.")}</span>
             </label>
             <Layouts.auth_button type="submit">{gettext("Generate new recovery codes")}</Layouts.auth_button>

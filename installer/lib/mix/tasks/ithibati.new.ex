@@ -8,6 +8,7 @@ defmodule Mix.Tasks.Ithibati.New do
   Install the Phoenix 1.8.14 and igniter_new 0.5.34 archives first.
   Ithibati authentication and invitation delivery are always included. Options:
 
+    * `--brand COLOUR` names the Tailwind palette for the brand colour; `violet` by default.
     * `--without-beans` omits local Beans configuration.
     * `--yes` accepts the generator's installation prompts (the default).
     * `--no-yes` restores interactive installation and diff prompts.

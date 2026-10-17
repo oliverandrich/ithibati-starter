@@ -85,6 +85,16 @@
   end
 
 
+  @doc "Renders the project name with its brand-coloured dot, for the auth and member layouts."
+  def wordmark(assigns) do
+    ~H"""
+    __MODULE__<span
+      aria-hidden="true"
+      class="ml-[0.12em] inline-block size-[0.28em] rounded-full bg-signal align-baseline ring-[0.1em] ring-signal/25"
+    ></span>
+    """
+  end
+
   @doc "A compact, shared layout for authentication and first-account setup."
   attr :flash, :map, default: %{}
   attr :title, :string, default: nil
@@ -93,20 +103,17 @@
 
   def auth(assigns) do
     ~H"""
-    <div class="relative isolate min-h-svh bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-100">
-      <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[85svh] bg-[radial-gradient(ellipse_at_top,var(--color-violet-100),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top,var(--color-violet-950),transparent_70%)]" />
-      <main id="auth-main" class="flex min-h-svh items-center justify-center px-6 py-20">
-        <div class="w-full max-w-sm">
-          <p id="project-name" class="mb-10 text-center text-4xl font-semibold tracking-tight text-violet-600 break-words dark:text-violet-400">__MODULE__</p>
-          <div :if={@title} class="mb-8 text-center">
-            <h1 class="text-xl font-semibold tracking-tight">{@title}</h1>
-            <p :if={@subtitle} class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{@subtitle}</p>
-          </div>
-          {render_slot(@inner_block)}
+    <main id="auth-main" class="flex min-h-svh items-center justify-center px-6 py-20">
+      <div class="w-full max-w-sm">
+        <p id="project-name" class="mb-10 text-center text-4xl font-semibold tracking-tight break-words"><.wordmark /></p>
+        <div :if={@title} class="mb-8 text-center">
+          <h1 class="text-title font-semibold">{@title}</h1>
+          <p :if={@subtitle} class="mt-2 text-muted">{@subtitle}</p>
         </div>
-      </main>
-      <.flash_group flash={@flash} />
-    </div>
+        {render_slot(@inner_block)}
+      </div>
+    </main>
+    <.flash_group flash={@flash} />
     """
   end
 
@@ -116,7 +123,7 @@
 
   def auth_button(assigns) do
     ~H"""
-    <button class="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-violet-500 dark:hover:bg-violet-400" {@rest}>
+    <button class="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control bg-accent px-3 py-2 text-sm font-semibold text-on-accent shadow-xs transition-colors hover:bg-accent/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50" {@rest}>
       {render_slot(@inner_block)}
     </button>
     """
@@ -129,18 +136,18 @@
 
   def member(assigns) do
     ~H"""
-    <div class="min-h-svh bg-zinc-50 dark:bg-zinc-950">
-      <header class="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <div class="min-h-svh">
+      <header class="border-b border-line bg-surface">
         <div class="flex items-center justify-between gap-4 px-6 py-5">
-          <.link navigate={~p"/"} class="min-w-0 truncate text-xl font-semibold tracking-tight text-violet-600 dark:text-violet-400">__MODULE__</.link>
+          <.link navigate={~p"/"} class="min-w-0 truncate text-xl font-semibold tracking-tight"><.wordmark /></.link>
           <details id="user-menu" class="group relative shrink-0" phx-click-away={JS.remove_attribute("open", to: "#user-menu")} phx-window-keydown={JS.remove_attribute("open", to: "#user-menu")} phx-key="Escape">
-            <summary class="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-violet-500 dark:hover:bg-zinc-800">
+            <summary class="flex cursor-pointer list-none items-center gap-2 rounded-control px-3 py-2 text-sm font-semibold hover:bg-selection focus-visible:outline-2 focus-visible:outline-accent">
               <span class="max-w-32 truncate" title={@current_account.username}>{@current_account.username}</span><Lucideicons.chevron_down aria-hidden="true" class="size-4 shrink-0 transition" />
             </summary>
-            <nav aria-label={gettext("Your account")} class="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-              <.link navigate={~p"/account/passkeys"} class="block rounded-lg px-3 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">{gettext("Manage passkeys")}</.link>
-              <.link navigate={~p"/account/recovery-codes"} class="block rounded-lg px-3 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">{gettext("Recovery codes")}</.link>
-              <.link href={~p"/session"} method="delete" class="mt-1 block rounded-lg border-t border-zinc-100 px-3 py-2 text-sm text-red-700 hover:bg-red-50 dark:border-zinc-800 dark:text-red-400 dark:hover:bg-zinc-800">{gettext("Sign out")}</.link>
+            <nav aria-label={gettext("Your account")} class="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-line bg-surface p-2 shadow-lg">
+              <.link navigate={~p"/account/passkeys"} class="block rounded-control px-3 py-2 text-sm hover:bg-selection">{gettext("Manage passkeys")}</.link>
+              <.link navigate={~p"/account/recovery-codes"} class="block rounded-control px-3 py-2 text-sm hover:bg-selection">{gettext("Recovery codes")}</.link>
+              <.link href={~p"/session"} method="delete" class="mt-1 block rounded-control border-t border-line px-3 py-2 text-sm text-danger hover:bg-danger-surface">{gettext("Sign out")}</.link>
             </nav>
           </details>
         </div>

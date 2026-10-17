@@ -40,7 +40,7 @@ defmodule __MODULE__Web.InviteLive do
   def render(assigns) do
     ~H"""
     <Layouts.auth flash={@flash} title={gettext("You’re invited")}>
-      <p :if={@invitation} class="mb-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p :if={@invitation} class="mb-6 text-center text-sm text-muted">
         <span :if={not @email?}>
           {gettext("The account will be called %{username}.", username: @invitation.username)}
         </span>
@@ -49,13 +49,13 @@ defmodule __MODULE__Web.InviteLive do
         </span>
       </p>
 
-      <div :if={is_nil(@invitation)} role="alert" class="rounded-lg border p-4 border-red-300 bg-red-50 text-red-950 dark:border-red-700 dark:bg-red-950 dark:text-red-100 mt-6">
+      <div :if={is_nil(@invitation)} role="alert" class="mt-6 rounded-control border border-danger bg-danger-surface p-4 text-label text-ink">
         <span>
           {gettext("This invitation has been used already, or it has expired. Ask for a new link.")}
         </span>
       </div>
 
-      <div :if={@error} role="alert" class="rounded-lg border p-4 border-red-300 bg-red-50 text-red-950 dark:border-red-700 dark:bg-red-950 dark:text-red-100 mt-6"><span>{@error}</span></div>
+      <div :if={@error} role="alert" class="mt-6 rounded-control border border-danger bg-danger-surface p-4 text-label text-ink"><span>{@error}</span></div>
 
       <p :if={@invitation} class="mt-6">
         <Layouts.auth_button phx-click="accept">{gettext("Accept with a passkey")}</Layouts.auth_button>

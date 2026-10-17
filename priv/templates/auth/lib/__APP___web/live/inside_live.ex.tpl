@@ -149,11 +149,11 @@ defmodule __MODULE__Web.InsideLive do
 
       <h2 class="mt-8 text-lg font-semibold">{gettext("Invite somebody")}</h2>
 
-      <p :if={not @email?} class="mt-2 text-sm opacity-70">
+      <p :if={not @email?} class="mt-2 text-sm text-muted">
         {gettext("Choose a username for your guest, then send them their personal invitation link.")}
       </p>
 
-      <p :if={@email?} class="mt-2 text-sm opacity-70">
+      <p :if={@email?} class="mt-2 text-sm text-muted">
         {gettext("Enter your guest's email address. Their invitation link is sent there.")}
       </p>
 
@@ -166,9 +166,9 @@ defmodule __MODULE__Web.InsideLive do
         <.button variant="primary">{gettext("Create a link")}</.button>
       </form>
 
-      <div :if={@error} role="alert" class="rounded-lg border p-4 border-red-300 bg-red-50 text-red-950 dark:border-red-700 dark:bg-red-950 dark:text-red-100 mt-4"><span>{@error}</span></div>
+      <div :if={@error} role="alert" class="mt-4 rounded-control border border-danger bg-danger-surface p-4 text-label text-ink"><span>{@error}</span></div>
 
-      <div :if={@link} role="status" class="rounded-lg border p-4 border-emerald-300 bg-emerald-50 text-emerald-950 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-100 mt-4">
+      <div :if={@link} role="status" class="mt-4 rounded-control border border-line bg-surface p-4 text-label text-ink">
         <span>
           {gettext("Your invitation is ready. Send this link to your guest:")}
           <code class="block mt-2 break-all">{@link}</code>
@@ -177,17 +177,17 @@ defmodule __MODULE__Web.InsideLive do
 
       <h2 class="mt-10 text-lg font-semibold">{gettext("Outstanding invitations")}</h2>
 
-      <p :if={@pending == []} class="mt-2 text-sm opacity-70">
+      <p :if={@pending == []} class="mt-2 text-sm text-muted">
         {gettext("Nothing is waiting to be accepted.")}
       </p>
 
-      <p :if={@pending != []} class="mt-2 text-sm opacity-70">
+      <p :if={@pending != []} class="mt-2 text-sm text-muted">
         {gettext(
           "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
         )}
       </p>
 
-      <ul :if={@pending != []} id="pending-invitations" class="mt-4 divide-y">
+      <ul :if={@pending != []} id="pending-invitations" class="mt-4 divide-y divide-line">
         <li
           :for={invitation <- @pending}
           id={"invitation-#{invitation.id}"}
@@ -195,7 +195,7 @@ defmodule __MODULE__Web.InsideLive do
         >
           <span class="font-medium">{invitation.username}</span>
 
-          <span class="text-sm opacity-70">
+          <span class="text-sm text-muted">
             <%= if invitation.invited_by do %>
               {gettext("Invited by %{username}", username: invitation.invited_by.username)}
             <% else %>
@@ -203,7 +203,7 @@ defmodule __MODULE__Web.InsideLive do
             <% end %>
           </span>
 
-          <span class="text-sm opacity-70">
+          <span class="text-sm text-muted">
             {gettext("Runs out %{date}", date: Calendar.strftime(invitation.expires_at, "%Y-%m-%d"))}
           </span>
 
@@ -211,7 +211,7 @@ defmodule __MODULE__Web.InsideLive do
             type="button"
             phx-click="withdraw"
             phx-value-id={invitation.id}
-            class="ml-auto text-sm underline underline-offset-4"
+            class="text-link ml-auto text-sm"
           >
             {gettext("Take it back")}
           </button>

@@ -11,6 +11,7 @@ defmodule IthibatiStarter.Files do
     |> String.replace("__MODULE__", bindings.module)
     |> String.replace("__APP__", bindings.app)
     |> String.replace("__APP_UPCASE__", String.upcase(bindings.app))
+    |> String.replace("__BRAND__", bindings.brand)
     |> sort_aliases()
   end
 

@@ -35,7 +35,7 @@ defmodule __MODULE__Web.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 px-4 py-4 dark:border-zinc-800 sm:px-6 lg:px-8">
+    <header class="flex flex-wrap items-center justify-between gap-4 border-b border-line px-4 py-4 sm:px-6 lg:px-8">
       <div class="flex-1">
         <a href="/" class="flex-1 flex w-fit items-center gap-2">
           <img src={~p"/images/logo.svg"} width="36" alt="Phoenix" />
@@ -45,15 +45,15 @@ defmodule __MODULE__Web.Layouts do
       <div class="flex-none">
         <ul class="flex flex-wrap items-center gap-3 px-1">
           <li>
-            <a href="https://phoenixframework.org/" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-400">Website</a>
+            <a href="https://phoenixframework.org/" class="rounded-control px-3 py-2 text-sm font-medium hover:bg-selection focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Website</a>
           </li>
           <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-400">GitHub</a>
+            <a href="https://github.com/phoenixframework/phoenix" class="rounded-control px-3 py-2 text-sm font-medium hover:bg-selection focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">GitHub</a>
           </li>
           <li>
-            <a href="https://phoenix.hexdocs.pm/overview.html" class="inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-400 bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400">
+            <.button href="https://phoenix.hexdocs.pm/overview.html" variant="primary">
               Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
+            </.button>
           </li>
         </ul>
       </div>

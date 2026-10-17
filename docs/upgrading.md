@@ -15,6 +15,9 @@ auth=true
 beans=true
 ```
 
+From the next version on, a fourth line records the brand colour, for example
+`brand=violet`.
+
 The `ithibati_starter` entry in `mix.lock` records the exact commit.
 
 ## Compare two reference applications
@@ -32,7 +35,9 @@ mkdir old new
 diff -ruN -x deps -x _build -x mix.lock -x .git old/my_app new/my_app > upgrade.diff
 ```
 
-Add `--without-beans` to both commands if the profile says `beans=false`.
+Add `--without-beans` to both commands if the profile says `beans=false`. Add
+`--brand COLOUR` to the target command if the application should keep a colour other
+than violet.
 
 The diff contains changes that are not upgrades. Skip these hunks:
 
@@ -60,9 +65,11 @@ Reapplying the installer is then a no-op again.
 
 ## Profile changes
 
-The installer refuses to change a profile. Beans is the only remaining choice. To add
-or remove it, generate reference applications of both profiles at the installed
-version and apply their diff. Then update the `beans=` line in `.ithibati-starter`.
+The installer refuses to change a profile. Beans and the brand colour are the
+remaining choices. To add or remove Beans, generate reference applications of both
+profiles at the installed version and apply their diff. Then update the `beans=` line
+in `.ithibati-starter`. To change the brand colour, edit the `signal` tokens in
+`assets/css/app.css` and the `brand=` line.
 
 ## Changes that need operator review
 
@@ -78,6 +85,21 @@ Check the diff for these before deploying:
 ## Version notes
 
 Each entry names what changed in generated applications and what to do about it.
+
+### Unreleased
+
+**Colours are named by role.** `assets/css/app.css` gains an `@theme` block with role
+tokens, their dark-mode values and a `text-link` utility. Every generated template
+under `lib/` uses those tokens instead of `zinc`, `violet`, `indigo`, `red`, `sky` and
+`emerald` classes. Neutral greys replace zinc, and primary buttons use ink. The brand
+colour marks the wordmark dot, link underlines and the copy status of recovery codes. The auth layout
+drops its radial gradient. `Layouts.wordmark/1` is new.
+`test/features/tailwind_test.exs` expects the `ground` colour as the
+light page background. `test/my_app_web/components/core_components_test.exs` checks
+`border-danger` and `border-edge`. `.ithibati-starter` gains a `brand=` line.
+
+Applying this by hand touches most templates. Take the diff of the files you have not
+changed, and keep your own colours in the files you have.
 
 ### 0.6.0
 

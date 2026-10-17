@@ -37,6 +37,13 @@ defmodule IthibatiNewTest do
     assert Enum.count(args, &(&1 == "phx.new")) == 1
   end
 
+  # The starter validates the name, so this archive keeps no list of colours of its own.
+  test "a brand colour is passed on to the starter" do
+    args = IthibatiNew.arguments(["my_app", "--brand", "amber"])
+    assert Enum.chunk_every(args, 2, 1, :discard) |> Enum.member?(["--brand", "amber"])
+    refute "--brand" in IthibatiNew.arguments(["my_app"])
+  end
+
   test "an option this archive no longer has is refused" do
     assert_raise OptionParser.ParseError, fn ->
       IthibatiNew.arguments(["my_app", "--with-mail"])

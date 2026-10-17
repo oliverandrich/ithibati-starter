@@ -13,29 +13,46 @@ defmodule IthibatiStarter do
 
   @marker ".ithibati-starter"
 
-  @doc "Plans an installation. Options: `:without_beans`."
+  # Tailwind's chromatic palettes. A grey brand would be indistinguishable from the ink.
+  @brands ~w(red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink rose)
+
+  @doc "Plans an installation. Options: `:without_beans`, `:brand`."
   def install(igniter, opts \\ []) do
-    profile = "0.6.0\nauth=true\nbeans=#{!opts[:without_beans]}\n"
+    brand = Keyword.get(opts, :brand, "violet")
+    profile = "0.6.0\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\n"
 
-    if Igniter.exists?(igniter, @marker) do
-      {igniter, current} = Files.read(igniter, @marker)
+    cond do
+      brand not in @brands ->
+        Igniter.add_issue(
+          igniter,
+          "Unknown brand colour #{inspect(brand)}; use one of: #{Enum.join(@brands, ", ")}."
+        )
 
-      if current == profile,
-        do: igniter,
-        else:
-          Igniter.add_issue(
-            igniter,
-            "Installed starter version/profile differs; automatic conversion is unsupported."
-          )
-    else
-      install_new(igniter, opts, profile)
+      Igniter.exists?(igniter, @marker) ->
+        reapply(igniter, profile)
+
+      true ->
+        install_new(igniter, opts, profile, brand)
     end
   end
 
-  defp install_new(igniter, opts, profile) do
+  defp reapply(igniter, profile) do
+    {igniter, current} = Files.read(igniter, @marker)
+
+    if current == profile,
+      do: igniter,
+      else:
+        Igniter.add_issue(
+          igniter,
+          "Installed starter version/profile differs; automatic conversion is unsupported. " <>
+            "Installed: #{inspect(current)}. Requested: #{inspect(profile)}."
+        )
+  end
+
+  defp install_new(igniter, opts, profile, brand) do
     app = ProjectApplication.app_name(igniter)
     module = ProjectModule.module_name_prefix(igniter)
-    bindings = %{app: to_string(app), module: inspect(module)}
+    bindings = %{app: to_string(app), module: inspect(module), brand: brand}
     router = "lib/#{app}_web/router.ex"
 
     if Igniter.exists?(igniter, router) and Igniter.exists?(igniter, "lib/#{app}/repo.ex") do

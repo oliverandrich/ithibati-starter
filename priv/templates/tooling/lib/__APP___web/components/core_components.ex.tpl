@@ -59,9 +59,9 @@ defmodule __MODULE__Web.CoreComponents do
       {@rest}
     >
       <div class={[
-        "flex w-80 max-w-full items-start gap-3 rounded-lg border p-4 text-sm shadow-lg sm:w-96",
-        @kind == :info && "border-sky-300 bg-sky-50 text-sky-950 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-100",
-        @kind == :error && "border-red-300 bg-red-50 text-red-950 dark:border-red-700 dark:bg-red-950 dark:text-red-100"
+        "flex w-80 max-w-full items-start gap-3 rounded-control border p-4 text-label shadow-lg sm:w-96",
+        @kind == :info && "border-line bg-surface text-ink",
+        @kind == :error && "border-danger bg-danger-surface text-ink"
       ]}>
         <Lucideicons.info :if={@kind == :info} aria-hidden="true" class="size-5 shrink-0" />
         <Lucideicons.circle_alert :if={@kind == :error} aria-hidden="true" class="size-5 shrink-0" />
@@ -93,11 +93,11 @@ defmodule __MODULE__Web.CoreComponents do
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{"primary" => "bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400", nil => "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950 dark:text-indigo-200 dark:hover:bg-indigo-900"}
+    variants = %{"primary" => "bg-accent text-on-accent hover:bg-accent/85", nil => "border border-edge bg-surface text-ink hover:bg-ground"}
 
     assigns =
       assign_new(assigns, :class, fn ->
-        ["inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-400", Map.fetch!(variants, assigns[:variant])]
+        ["inline-flex min-h-11 items-center justify-center gap-2 rounded-control px-3 py-2 text-sm font-semibold shadow-xs transition-colors sm:min-h-9 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent", Map.fetch!(variants, assigns[:variant])]
       end)
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
@@ -213,14 +213,14 @@ defmodule __MODULE__Web.CoreComponents do
           disabled={@rest[:disabled]}
           form={@rest[:form]}
         />
-        <span class="inline-flex items-center gap-2 text-sm font-medium">
+        <span class="inline-flex items-center gap-2 text-label font-semibold">
           <input
             type="checkbox"
             id={@id}
             name={@name}
             value="true"
             checked={@checked}
-            class={@class || "size-4 rounded border-zinc-400 accent-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-400"}
+            class={@class || "size-4 rounded border-edge accent-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"}
             {@rest}
           />{@label}
         </span>
@@ -234,12 +234,12 @@ defmodule __MODULE__Web.CoreComponents do
     ~H"""
     <div class="mb-4 space-y-1">
       <label for={@id}>
-        <span :if={@label} class="mb-1 block text-sm font-medium">{@label}</span>
+        <span :if={@label} class="mb-1 block text-label font-semibold">{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "block w-full rounded-md border bg-white px-3 py-2 text-zinc-950 shadow-sm placeholder:text-zinc-500 focus:border-indigo-600 focus:outline-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-indigo-400 dark:focus:outline-indigo-400", @errors == [] && "border-zinc-400 dark:border-zinc-600",
-            @errors != [] && (@error_class || "border-red-600 outline-red-600 dark:border-red-400 dark:outline-red-400")]}
+          class={[@class || "block w-full rounded-control border bg-surface px-3 py-2 text-ink shadow-xs placeholder:text-muted focus:border-accent focus:outline-2 focus:outline-accent disabled:cursor-not-allowed disabled:opacity-50", @errors == [] && "border-edge",
+            @errors != [] && (@error_class || "border-danger outline-danger")]}
           multiple={@multiple}
           {@rest}
         >
@@ -256,14 +256,14 @@ defmodule __MODULE__Web.CoreComponents do
     ~H"""
     <div class="mb-4 space-y-1">
       <label for={@id}>
-        <span :if={@label} class="mb-1 block text-sm font-medium">{@label}</span>
+        <span :if={@label} class="mb-1 block text-label font-semibold">{@label}</span>
         <textarea
           id={@id}
           name={@name}
           class={[
-            @class || "block w-full rounded-md border bg-white px-3 py-2 text-zinc-950 shadow-sm placeholder:text-zinc-500 focus:border-indigo-600 focus:outline-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-indigo-400 dark:focus:outline-indigo-400 min-h-28",
-            @errors == [] && "border-zinc-400 dark:border-zinc-600",
-            @errors != [] && (@error_class || "border-red-600 outline-red-600 dark:border-red-400 dark:outline-red-400")
+            @class || "block w-full rounded-control border bg-surface px-3 py-2 text-ink shadow-xs placeholder:text-muted focus:border-accent focus:outline-2 focus:outline-accent disabled:cursor-not-allowed disabled:opacity-50 min-h-28",
+            @errors == [] && "border-edge",
+            @errors != [] && (@error_class || "border-danger outline-danger")
           ]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
@@ -278,16 +278,16 @@ defmodule __MODULE__Web.CoreComponents do
     ~H"""
     <div class="mb-4 space-y-1">
       <label for={@id}>
-        <span :if={@label} class="mb-1 block text-sm font-medium">{@label}</span>
+        <span :if={@label} class="mb-1 block text-label font-semibold">{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            @class || "block w-full rounded-md border bg-white px-3 py-2 text-zinc-950 shadow-sm placeholder:text-zinc-500 focus:border-indigo-600 focus:outline-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-indigo-400 dark:focus:outline-indigo-400",
-            @errors == [] && "border-zinc-400 dark:border-zinc-600",
-            @errors != [] && (@error_class || "border-red-600 outline-red-600 dark:border-red-400 dark:outline-red-400")
+            @class || "block w-full rounded-control border bg-surface px-3 py-2 text-ink shadow-xs placeholder:text-muted focus:border-accent focus:outline-2 focus:outline-accent disabled:cursor-not-allowed disabled:opacity-50",
+            @errors == [] && "border-edge",
+            @errors != [] && (@error_class || "border-danger outline-danger")
           ]}
           {@rest}
         />
@@ -300,7 +300,7 @@ defmodule __MODULE__Web.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-red-700 dark:text-red-400">
+    <p class="mt-1.5 flex gap-2 items-center text-label text-danger">
       <Lucideicons.circle_alert aria-hidden="true" class="size-5" />
       {render_slot(@inner_block)}
     </p>
@@ -321,7 +321,7 @@ defmodule __MODULE__Web.CoreComponents do
         <h1 class="text-lg font-semibold leading-8">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="text-sm text-zinc-600 dark:text-zinc-400">
+        <p :if={@subtitle != []} class="text-sm text-muted">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -362,7 +362,7 @@ defmodule __MODULE__Web.CoreComponents do
       end
 
     ~H"""
-    <table class="w-full text-left text-sm [&_th]:px-4 [&_th]:py-3 [&_th]:font-semibold [&_td]:px-4 [&_td]:py-3 [&_tbody_tr:nth-child(odd)]:bg-zinc-100 dark:[&_tbody_tr:nth-child(odd)]:bg-zinc-900">
+    <table class="w-full text-left text-sm [&_th]:px-4 [&_th]:py-3 [&_th]:font-semibold [&_td]:px-4 [&_td]:py-3 [&_tbody_tr:nth-child(odd)]:bg-selection">
       <thead>
         <tr>
           <th :for={col <- @col}>{col[:label]}</th>
@@ -409,7 +409,7 @@ defmodule __MODULE__Web.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="divide-y divide-zinc-200 dark:divide-zinc-800">
+    <ul class="divide-y divide-line">
       <li :for={item <- @item} class="flex gap-4 py-4">
         <div class="min-w-0 flex-1">
           <div class="font-bold">{item.title}</div>

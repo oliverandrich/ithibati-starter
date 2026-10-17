@@ -87,7 +87,7 @@ mix ithibati.new my_app \
 
 </details>
 
-## One profile, one choice left to the operator
+## One profile, two choices left to the operator
 
 Every generated application gets the same thing: the Phoenix tooling, checks and CI,
 vanilla Tailwind with Lucide and browser locale detection, passkeys with invitations
@@ -95,9 +95,12 @@ and account security, a Swoosh mailer with a local mailbox preview, and the
 healthcheck, release helpers and auth cleanup. What an account is called is not
 chosen when you generate it but when you run it.
 
-**`--without-beans`** is the only switch, and it omits local tracking. Beans itself is
-installed separately and is not needed to compile, test or run the app. Neither RTK
-nor personal AI skills are required by generated applications.
+**`--brand COLOUR`** names the Tailwind palette for the brand colour, `violet` by
+default. Grey palettes are refused. See [Colours](#colours) for the accepted names.
+
+**`--without-beans`** omits local tracking. Beans itself is installed separately and
+is not needed to compile, test or run the app. Neither RTK nor personal AI skills are
+required by generated applications.
 
 ## Naming or addressing accounts
 
@@ -144,7 +147,33 @@ STARTTLS. Other providers can replace the Swoosh adapter.
 | `/dev/mailbox` | Development mail preview |
 
 Customize `Layouts.auth/1` and `Layouts.member/1` to change the shared appearance.
-Auth components use the project's module name as their wordmark.
+`Layouts.wordmark/1` renders the project's module name with a dot in the brand colour.
+
+## Colours
+
+Templates name colours by role, never by hue. `assets/css/app.css` defines the roles
+once in `@theme` and again for dark mode under `prefers-color-scheme`:
+
+| Token | Role |
+| --- | --- |
+| `ground`, `surface` | Page background and raised areas such as cards and inputs |
+| `ink`, `muted` | Text and secondary text |
+| `line`, `edge` | Dividers, and the borders of inputs and secondary buttons |
+| `accent`, `on-accent` | Primary buttons and focus outlines, and the text on them |
+| `selection` | Hover and selected rows |
+| `signal`, `signal-strong` | The brand colour, and its shade for text |
+| `danger`, `danger-surface` | Errors and destructive actions |
+
+Use them as Tailwind utilities, for example `bg-surface` or `text-muted`. The
+`text-link` utility underlines a link in the brand colour.
+
+`--brand` accepts Tailwind's chromatic palettes:
+
+`red` `orange` `amber` `yellow` `lime` `green` `emerald` `teal` `cyan` `sky` `blue`
+`indigo` `violet` `purple` `fuchsia` `pink` `rose`
+
+The brand palette appears only in the `signal` tokens. To change it later, replace
+the palette name in those four lines.
 
 ## Deliberate defaults
 

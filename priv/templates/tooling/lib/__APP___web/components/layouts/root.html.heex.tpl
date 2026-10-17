@@ -9,7 +9,7 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
     </script>
   </head>
-  <body class="min-h-screen bg-white text-zinc-950 antialiased scheme-light dark:bg-zinc-950 dark:text-zinc-100 dark:scheme-dark">
+  <body class="min-h-screen bg-ground text-body text-ink antialiased scheme-light dark:scheme-dark">
     {@inner_content}
   </body>
 </html>

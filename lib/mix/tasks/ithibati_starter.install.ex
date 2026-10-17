@@ -6,6 +6,7 @@ defmodule Mix.Tasks.IthibatiStarter.Install do
       mix igniter.install ithibati_starter --only dev
 
   Options:
+  * `--brand COLOUR`: the Tailwind palette for the brand colour, `violet` by default.
   * `--without-beans`: omit local Beans tracking configuration and commands.
 
   Use Igniter's `--dry-run` to preview changes. No database is migrated by installation.
@@ -16,7 +17,7 @@ defmodule Mix.Tasks.IthibatiStarter.Install do
   def info(_argv, _source) do
     %Igniter.Mix.Task.Info{
       group: :ithibati_starter,
-      schema: [without_beans: :boolean],
+      schema: [without_beans: :boolean, brand: :string],
       defaults: [without_beans: false]
     }
   end

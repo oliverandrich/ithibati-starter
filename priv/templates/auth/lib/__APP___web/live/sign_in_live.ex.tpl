@@ -77,13 +77,13 @@ defmodule __MODULE__Web.SignInLive do
   def render(assigns) do
     ~H"""
     <Layouts.auth flash={@flash} title={title(@live_action)} subtitle={subtitle(@live_action, @email?)}>
-      <div :if={@error} role="alert" class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">{@error}</div>
+      <div :if={@error} role="alert" class="mb-6 rounded-control border border-danger bg-danger-surface p-4 text-label text-ink">{@error}</div>
 
       <div :if={@live_action == :login}>
         <h1 class="sr-only">{gettext("Sign in")}</h1>
         <Layouts.auth_button phx-click="sign-in">{gettext("Sign in with a passkey")}</Layouts.auth_button>
         <p class="mt-6 text-center text-sm">
-          <.link navigate={~p"/recover"} class="text-violet-600 underline-offset-4 hover:underline dark:text-violet-400">{gettext("Lost your passkey? Use a recovery code")}</.link>
+          <.link navigate={~p"/recover"} class="text-link">{gettext("Lost your passkey? Use a recovery code")}</.link>
         </p>
       </div>
 
@@ -103,7 +103,7 @@ defmodule __MODULE__Web.SignInLive do
           <Layouts.auth_button>{gettext("Sign in with a recovery code")}</Layouts.auth_button>
         </form>
         <p class="mt-6 text-center text-sm">
-          <.link navigate={~p"/login"} class="text-violet-600 underline-offset-4 hover:underline dark:text-violet-400">{gettext("Back to passkey sign-in")}</.link>
+          <.link navigate={~p"/login"} class="text-link">{gettext("Back to passkey sign-in")}</.link>
         </p>
       </div>
 
