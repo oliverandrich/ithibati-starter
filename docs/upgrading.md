@@ -86,6 +86,13 @@ Check the diff for these before deploying:
 
 Each entry names what changed in generated applications and what to do about it.
 
+### Unreleased
+
+**The copy hook ignores a copy that finishes after the hook is destroyed.** LiveView can destroy a
+hook while its element stays on the page; `assets/js/copy_text.js` checks for that as well.
+`test/features/invitation_test.exs` copies a second link and checks that its button starts without
+a check.
+
 ### 0.8.0
 
 **The invitation page starts a ceremony only for an open invitation.**

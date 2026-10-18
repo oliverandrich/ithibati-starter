@@ -14,8 +14,8 @@ export async function copyText(text) {
 // `data-copy-status` and the two sentences in `data-copy-success` and `data-copy-error`. The
 // status line carries `phx-update="ignore"`, so a patch keeps the sentence. After a copy the
 // button carries `data-copied` for two seconds, which shows a check instead of the copy icon.
-// Attributes go through `js()`, so a patch that arrives meanwhile keeps them. Give each text its
-// own button id, so a new text mounts a new hook without the last one's check.
+// Attributes go through `js()`, so a patch that arrives meanwhile keeps them. Each text needs its
+// own button id. A new text then mounts a new hook without the last check.
 export const CopyText = {
   mounted() {
     this.onClick = async () => {
@@ -23,8 +23,8 @@ export const CopyText = {
 
       this.js().setAttribute(this.el, "disabled", "")
       const copied = await copyText(text)
-      // The button may have been removed while the clipboard answered.
-      if (!this.el.isConnected) return
+      // The button or its hook may be gone by the time the `writeText` promise settles.
+      if (this.gone || !this.el.isConnected) return
       this.js().removeAttribute(this.el, "disabled")
 
       const status = document.getElementById(copyStatus)
@@ -39,6 +39,7 @@ export const CopyText = {
     this.el.addEventListener("click", this.onClick)
   },
   destroyed() {
+    this.gone = true
     clearTimeout(this.reset)
     this.el.removeEventListener("click", this.onClick)
   }

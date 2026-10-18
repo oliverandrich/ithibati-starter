@@ -156,8 +156,9 @@ defmodule __MODULE__Web.InvitationTest do
     |> refute_has(css("#claim-form"))
   end
 
-  # Headless Chrome may refuse the clipboard, so the page records what it would write.
-  feature "the copy button puts the new link on the clipboard", %{session: session} do
+  # Headless Chrome may refuse the clipboard, so the page records what it would write. A new link
+  # mounts a new button, so the last link's check does not carry over.
+  feature "the copy button puts each new link on the clipboard", %{session: session} do
     virtual_authenticator(session)
 
     claim(session, "ada")
@@ -173,6 +174,20 @@ defmodule __MODULE__Web.InvitationTest do
     |> assert_has(css("[id^=copy-link-status-]", text: "Link copied."))
     |> assert_has(css("[phx-hook=CopyText][data-copied]"))
     |> execute_script("return window.copiedText", fn copied -> assert copied == link end)
+    |> fill_in(css("input[name=note]"), with: "Ada")
+    |> click(button("Create a link"))
+    |> assert_has(css("[phx-hook=CopyText]:not([data-copy-text='#{link}'])"))
+    # Read once, not awaited: the old check clears itself after two seconds.
+    |> execute_script(
+      "return document.querySelector(`[phx-hook=CopyText]:not([data-copy-text='#{link}'])`).hasAttribute('data-copied')",
+      fn copied -> refute copied end
+    )
+    |> click(button("Copy link"))
+    |> assert_has(css("[phx-hook=CopyText][data-copied]"))
+    |> execute_script("return window.copiedText", fn copied ->
+      assert copied =~ "/invite#"
+      refute copied == link
+    end)
     |> execute_script("""
     navigator.clipboard.writeText = async () => { throw new Error('permission denied') }
     """)

@@ -1,6 +1,6 @@
 defmodule __MODULE__Web.ProdConfigTest do
   @moduledoc """
-  Production redirects HTTP to HTTPS. Plug then marks the session cookie `Secure`.
+  Production redirects HTTP to HTTPS and sends HSTS.
   """
   use ExUnit.Case, async: true
 
