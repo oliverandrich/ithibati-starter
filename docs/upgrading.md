@@ -86,7 +86,7 @@ Check the diff for these before deploying:
 
 Each entry names what changed in generated applications and what to do about it.
 
-### Unreleased
+### 0.8.1
 
 **The copy hook ignores a copy that finishes after the hook is destroyed.** LiveView can destroy a
 hook while its element stays on the page; `assets/js/copy_text.js` checks for that as well.
