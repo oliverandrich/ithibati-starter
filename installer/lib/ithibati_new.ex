@@ -1,7 +1,8 @@
 defmodule IthibatiNew do
   @moduledoc "Builds the Igniter invocation for an opinionated Phoenix project."
 
-  @starter "ithibati_starter@github:oliverandrich/ithibati-starter@v0.8.1"
+  # The archive and the starter share one version.
+  @starter "ithibati_starter@#{Mix.Project.config()[:version]}"
   @switches [
     without_beans: :boolean,
     brand: :string,

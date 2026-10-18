@@ -12,7 +12,7 @@ Install the pinned generators and the starter archive once:
 ```sh
 mix archive.install hex phx_new 1.8.14
 mix archive.install hex igniter_new 0.5.34
-mix archive.install github oliverandrich/ithibati-starter tag v0.8.1 --sparse installer
+mix archive.install hex ithibati_new 0.9.0
 ```
 
 Create a Phoenix app with the starter:
@@ -22,10 +22,10 @@ mix ithibati.new my_app
 cd my_app
 ```
 
-The `ithibati_new` 0.8.1 archive selects Starter tag `v0.8.1` by default. Check
-the `ithibati_starter` entry in the generated `mix.lock` to identify the exact
-resolved commit. `--starter` accepts another tag, commit or local checkout. The
-0.8.1 tag generates applications with Ithibati 0.8.1 and schema version 5.
+The `ithibati_new` 0.9.0 archive installs `ithibati_starter` 0.9.0 from Hex by
+default. The `ithibati_starter` entry in the generated `mix.lock` records its version
+and checksum. `--starter` accepts another version, a Git revision or a local checkout.
+Starter 0.9.0 generates applications with Ithibati 0.9.0 and schema version 5.
 
 Start developing:
 
@@ -48,10 +48,10 @@ and installs the starter as a development-only dependency. Installation prompts,
 including Igniter's large-diff preview prompt, are accepted automatically. Pass
 `--no-yes` to restore interactive confirmation.
 
-The archive and Starter use the same release tag. To reproduce a generated
-application later, keep the release tag, the Starter commit from `mix.lock`, the
-selected profile and your dependency lockfile. Installation does not require a
-Hex release.
+The archive and Starter share one version. To reproduce a generated application
+later, keep the Starter version from `mix.lock`, the selected profile and your
+dependency lockfile. Versions before 0.9.0 are not on Hex. Install them from their
+Git tag, for example `--starter ithibati_starter@github:oliverandrich/ithibati-starter@v0.8.1`.
 
 <details>
 <summary>Use Igniter directly</summary>
@@ -61,7 +61,7 @@ After installing the generators above:
 ```sh
 mix igniter.new my_app \
   --with phx.new \
-  --install ithibati_starter@github:oliverandrich/ithibati-starter@v0.8.1 \
+  --install ithibati_starter@0.9.0 \
   --only dev
 ```
 
@@ -76,7 +76,7 @@ Build the archive from the checkout's `installer/` directory:
 
 ```sh
 mix archive.build
-mix archive.install ithibati_new-0.8.1.ez
+mix archive.install ithibati_new-0.9.0.ez
 ```
 
 Then, from the directory where the new project should live:

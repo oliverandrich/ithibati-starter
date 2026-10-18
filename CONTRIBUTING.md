@@ -30,6 +30,7 @@ running database or browser. The integration suite does; see below.
 | `mise run integration` | Generate and check both real Phoenix profiles, including browser tests and production release builds and HTTP smoke checks |
 | `mise run audit` | Dependency advisories and retired Hex packages, separate from the check gate |
 | `mise exec -- mix hex.build` | Build a local package without publishing it |
+| `mise run release-check` | Refuse a release that is not the commit a pushed version tag points at |
 
 The archive shares the root mise runtimes, Credo rules, formatting, CI, audits and
 Beans tracking. It has no dependencies of its own. `mise run check` additionally
@@ -113,8 +114,9 @@ port **43129** in the integration script. Override `PORT` if it is occupied.
    both profiles and preserve reapplication behavior.
 4. **Update documentation.** Explain new defaults, commands and operational
    limits. Preserve upstream attribution and keep the generated documentation
-   aligned with the source templates. When generated behavior changes, add a note
-   under an Unreleased heading in [Upgrading](docs/upgrading.md#version-notes).
+   aligned with the source templates. When behavior changes, add an entry under
+   `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md). Name the changed generated
+   files and what an existing application or its operator has to do.
    The release commit renames that heading to the version.
 5. **Review before committing.** Look for regressions, security issues and
    unnecessary complexity. Use Conventional Commits, such as
@@ -149,13 +151,47 @@ creating a ticket, update progress, finish with a **Summary of Changes**, and ru
 beans check
 ```
 
-## Licensing and publication
+## Release a version
 
-For a new Starter release, align the library and archive versions, generated
-version marker and README, and the archive's default Starter tag. After checks
-pass, tag the reviewed commit with `vVERSION` and install the archive from that
-tag. Never move a published tag; use a new version for later changes. The
-generated application's `mix.lock` records the tag's resolved commit.
+One tag publishes both packages to Hex. `.github/workflows/release.yml` runs the release.
+
+1. Set the version in `mix.exs`, `installer/mix.exs`, the generated README and the
+   docs. The archive's default starter and the version marker follow `mix.exs`.
+   The tests pin each of these.
+2. Rename `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) to `## [VERSION] - DATE`.
+   Add a new empty `## [Unreleased]` and the compare links at the end.
+3. Run `mise run check` and `mise run integration`. Commit as
+   `chore(release): VERSION` and push `main`.
+4. Tag that commit and push the tag:
+
+   ```sh
+   git tag -a vVERSION -m vVERSION
+   git push origin vVERSION
+   ```
+
+5. The workflow runs `mise run release-check` and the CI gate without caches.
+   The `publish` job then waits for approval in the `hex` environment.
+6. After approval, `publish` releases `ithibati_starter` first and `ithibati_new`
+   second. The archive installs that starter version. `announce` then creates the
+   GitHub release from the changelog section.
+
+If `publish` fails after `ithibati_starter` is on Hex, re-run the failed job.
+Each publish step skips a version that is already on Hex. hex.pm allows reverting a
+version only shortly after publication; retire a broken version with `mix hex.retire`.
+Never move a published tag; use a new version for later changes.
+
+A `workflow_dispatch` run never publishes. Its `tag` job refuses unless HEAD carries
+the version tag; on a tagged commit the CI gate runs as well.
+
+The repository needs this setup once:
+
+- A `hex` environment with the maintainer as required reviewer and a deployment
+  policy that admits only `v*` tags.
+- The environment secret `HEX_API_KEY`. Create the key under Keys in the hex.pm
+  dashboard with API write permission. Hex 2.5 has no command for keys.
+- A tag ruleset on `refs/tags/v*` that blocks deletion and force updates.
+
+## Licensing and publication
 
 Contributions are included under the [MIT license](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE). Preserve [NOTICE](https://github.com/oliverandrich/ithibati-starter/blob/main/NOTICE)
 and [THIRD_PARTY_LICENSES.md](https://github.com/oliverandrich/ithibati-starter/blob/main/THIRD_PARTY_LICENSES.md) when adapting upstream code.

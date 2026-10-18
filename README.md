@@ -5,7 +5,7 @@
 [![CI](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)
 [![Phoenix 1.8](https://img.shields.io/badge/Phoenix-1.8-orange.svg)](https://phoenixframework.org)
-[![Ithibati 0.8.1](https://img.shields.io/badge/Ithibati-0.8.1-violet.svg)](https://github.com/oliverandrich/ithibati)
+[![Ithibati 0.9.0](https://img.shields.io/badge/Ithibati-0.9.0-violet.svg)](https://github.com/oliverandrich/ithibati)
 
 An opinionated [Igniter](https://github.com/ash-project/igniter) installer for fresh
 Phoenix applications: passkeys, invitation-only accounts, vanilla Tailwind,
@@ -15,13 +15,14 @@ The installer writes ordinary application code. You own it, customize it, and ru
 it without the starter as a runtime dependency.
 
 [Get started](#get-started) · [What's included](#whats-included) ·
-[Profiles](docs/usage.md#choose-your-profile) · [Contributing](CONTRIBUTING.md)
+[Profiles](docs/usage.md#choose-your-profile) · [Changelog](CHANGELOG.md) ·
+[Contributing](CONTRIBUTING.md)
 
 ## What's included
 
 ### Authentication and account security
 
-Powered by **Ithibati 0.8.1**, with passkeys and accounts that are named or addressed:
+Powered by **Ithibati 0.9.0**, with passkeys and accounts that are named or addressed:
 
 - **Claim the site:** an operator-issued setup code authorizes the first account;
   subsequent registrations require an invitation.
@@ -113,7 +114,7 @@ Install the pinned generators and the starter archive once:
 ```sh
 mix archive.install hex phx_new 1.8.14
 mix archive.install hex igniter_new 0.5.34
-mix archive.install github oliverandrich/ithibati-starter tag v0.8.1 --sparse installer
+mix archive.install hex ithibati_new 0.9.0
 ```
 
 Create a Phoenix app with the starter:
@@ -123,10 +124,10 @@ mix ithibati.new my_app
 cd my_app
 ```
 
-The `ithibati_new` 0.8.1 archive selects Starter tag `v0.8.1` by default. The
-generated `mix.lock` records the tag's resolved commit. Use `--starter` to choose
-a local checkout or another revision. Starter 0.8.1 generates applications with
-Ithibati 0.8.1 and schema version 5.
+The `ithibati_new` 0.9.0 archive installs `ithibati_starter` 0.9.0 from Hex by
+default. The generated `mix.lock` records its version and checksum. Use `--starter`
+to choose a local checkout or another version. Starter 0.9.0 generates applications
+with Ithibati 0.9.0 and schema version 5.
 
 Start developing:
 

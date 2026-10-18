@@ -13,8 +13,8 @@ defmodule Mix.Tasks.Ithibati.New do
     * `--yes` accepts the generator's installation prompts (the default).
     * `--no-yes` restores interactive installation and diff prompts.
     * `--starter SOURCE` selects a local or pinned Igniter package specification;
-      defaults to the Starter release tag pinned by this archive. See the usage
-      guide for the tag and how to inspect its resolved commit.
+      defaults to the Starter version of this archive, installed from Hex. See the
+      usage guide for other versions and Git revisions.
 
   This archive belongs to ithibati-starter, not the Ithibati authentication package.
   """

@@ -15,6 +15,9 @@ run = "mix format"
 run = ["mix compile --warnings-as-errors", "mix credo --strict"]
 [tasks.audit]
 run = ["mix deps.audit", "mix hex.audit"]
+[tasks.release-check]
+description = "Refuse a release that is not the commit a pushed version tag points at"
+run = "bash scripts/release-check.sh"
 [tasks.beans]
 run = "beans list --no-status completed --no-status scrapped"
 

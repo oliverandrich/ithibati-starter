@@ -1,6 +1,6 @@
 defmodule IthibatiStarter do
   @moduledoc """
-  Opinionated Phoenix 1.8/PostgreSQL starter with invitation-only Ithibati 0.8.1.
+  Opinionated Phoenix 1.8/PostgreSQL starter with invitation-only Ithibati 0.9.0.
 
   Call `install/2` from an Igniter task. This installer targets fresh applications;
   it is not an upgrade tool. Reapplying the same profile preserves all user edits.
@@ -12,6 +12,7 @@ defmodule IthibatiStarter do
   alias IthibatiStarter.Tooling
 
   @marker ".ithibati-starter"
+  @version Mix.Project.config()[:version]
 
   # Tailwind's chromatic palettes. A grey brand would be indistinguishable from the ink.
   @brands ~w(red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink rose)
@@ -19,7 +20,7 @@ defmodule IthibatiStarter do
   @doc "Plans an installation. Options: `:without_beans`, `:brand`."
   def install(igniter, opts \\ []) do
     brand = Keyword.get(opts, :brand, "violet")
-    profile = "0.8.1\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\n"
+    profile = "#{@version}\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\n"
 
     cond do
       brand not in @brands ->

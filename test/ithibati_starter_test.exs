@@ -43,12 +43,13 @@ defmodule IthibatiStarterTest do
       assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
       assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
+      assert files["docs/authentication.md"] =~ "pins Ithibati 0.9.0"
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["CONTRIBUTING.md"] =~ "Chrome"
       refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
       refute files["CONTRIBUTING.md"] =~ "## Health, releases"
       assert files["README.md"] =~ "docs/operations.md"
-      assert files["README.md"] =~ "Ithibati Starter 0.8.1"
+      assert files["README.md"] =~ "Ithibati Starter 0.9.0"
       assert files["README.md"] =~ "mise run setup-code"
       assert files["AGENTS.md"] =~ "Documentation structure"
       refute Map.has_key?(files, "docs/development.md")
@@ -81,10 +82,10 @@ defmodule IthibatiStarterTest do
 
   test "default profile installs pinned invitation authentication and tooling" do
     result = project() |> IthibatiStarter.install()
-    assert Mix.Project.config()[:version] == "0.8.1"
+    assert Mix.Project.config()[:version] == "0.9.0"
 
     assert_creates(result, ".ithibati-starter", fn text ->
-      assert String.starts_with?(text, "0.8.1\n")
+      assert String.starts_with?(text, "0.9.0\n")
     end)
 
     assert_has_task(result, "format", [])
@@ -98,7 +99,7 @@ defmodule IthibatiStarterTest do
 
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.8.1"})
+    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.9.0"})
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
@@ -483,7 +484,7 @@ defmodule IthibatiStarterTest do
     project()
     |> IthibatiStarter.install()
     |> apply_igniter!()
-    |> IthibatiStarter.Files.replace(".ithibati-starter", "0.8.1", "0.3.0")
+    |> IthibatiStarter.Files.replace(".ithibati-starter", "0.9.0", "0.3.0")
     |> apply_igniter!()
     |> IthibatiStarter.install()
     |> assert_has_issue(&String.contains?(&1, "profile"))

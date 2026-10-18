@@ -3,11 +3,14 @@ on:
   pull_request:
   push:
     branches: [main]
+  # The release workflow runs this gate on its tag, without caches, because that result ships.
+  workflow_call:
 permissions:
   contents: read
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A run on a tag is the release gate, which a newer run must not cancel.
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -23,7 +26,10 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          cache: ${{ github.ref_type != 'tag' }}
+      - if: ${{ github.ref_type != 'tag' }}
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             deps
@@ -56,5 +62,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3
+        with:
+          cache: ${{ github.ref_type != 'tag' }}
       - run: mix deps.get --check-locked
       - run: mise run integration

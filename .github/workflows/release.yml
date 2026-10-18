@@ -1,0 +1,98 @@
+name: Release
+# Only a version tag reaches the job that holds the Hex key.
+on:
+  push:
+    tags: ["v*"]
+  # Never publishes. release-check refuses unless HEAD carries the version tag.
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  REF_NAME: ${{ github.ref_name }}
+# No cancel-in-progress: a cancelled hex.publish can burn a version number.
+concurrency:
+  group: release-${{ github.ref }}
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # release-check reads the tags, and a shallow checkout has none.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3
+        with:
+          cache: false
+      - run: mise run release-check
+  verify:
+    needs: tag
+    uses: ./.github/workflows/ci.yml # zizmor: ignore[self-repository]
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: verify
+    if: github.event_name == 'push'
+    # The environment has a required reviewer and the only copy of HEX_API_KEY.
+    environment: hex
+    env:
+      MIX_ENV: dev
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3
+        with:
+          cache: false
+      # Pinned, because this job sends HEX_API_KEY through it.
+      - run: |
+          mix local.hex 2.5.1 --force
+          mix local.rebar --force
+          mix deps.get --check-locked
+      # Checked again beside the key, after the approval wait.
+      - run: mise run release-check
+      - name: Publish both packages
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+        run: |
+          # A re-run skips a version that is already on Hex.
+          publish() {
+            if mix hex.info "$1" "${REF_NAME#v}" >/dev/null 2>&1; then
+              echo "$1 ${REF_NAME#v} is already on Hex"
+            else
+              (cd "$2" && mix hex.publish "${@:3}" --yes)
+            fi
+          }
+          # The archive installs this starter version, so the starter goes first.
+          publish ithibati_starter .
+          # The archive has no ex_doc dependency, so it publishes the package without docs.
+          publish ithibati_new installer package
+  # A separate job, because contents: write must not sit beside HEX_API_KEY.
+  announce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: publish
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      # A redirect, not a pipe: the default shell has no pipefail.
+      - name: Extract the release notes from the changelog
+        run: |
+          bash scripts/release-notes.sh "${REF_NAME#v}" > release-notes.md
+          cat release-notes.md
+      # A re-run updates the notes of a release that already exists.
+      - name: Create the GitHub release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$REF_NAME" --repo "$REPO" >/dev/null 2>&1; then
+            gh release edit "$REF_NAME" --repo "$REPO" --notes-file release-notes.md
+          else
+            gh release create "$REF_NAME" --repo "$REPO" --notes-file release-notes.md
+          fi

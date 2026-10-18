@@ -4,7 +4,7 @@ defmodule IthibatiStarter.MixProject do
   def project do
     [
       app: :ithibati_starter,
-      version: "0.8.1",
+      version: "0.9.0",
       elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -25,12 +25,18 @@ defmodule IthibatiStarter.MixProject do
           "Ithibati" => "https://github.com/oliverandrich/ithibati"
         },
         files:
-          ~w(lib priv docs mix.exs README.md CONTRIBUTING.md LICENSE NOTICE THIRD_PARTY_LICENSES.md),
+          ~w(lib priv docs mix.exs README.md CHANGELOG.md CONTRIBUTING.md LICENSE NOTICE THIRD_PARTY_LICENSES.md),
         licenses: ["MIT"]
       ],
       docs: [
         main: "readme",
-        extras: ["README.md", "CONTRIBUTING.md", "docs/usage.md", "docs/upgrading.md"]
+        extras: [
+          "README.md",
+          "CHANGELOG.md",
+          "CONTRIBUTING.md",
+          "docs/usage.md",
+          "docs/upgrading.md"
+        ]
       ]
     ]
   end
