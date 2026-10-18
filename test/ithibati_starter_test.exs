@@ -239,6 +239,14 @@ defmodule IthibatiStarterTest do
     assert endpoint =~ "websocket: [connect_info: [session: @session_options]]"
   end
 
+  # Phoenix already forces HTTPS in config/prod.exs, so the runtime advice to add it misleads.
+  test "the runtime config no longer advises forcing HTTPS, and a test pins it" do
+    files = installed_files()
+
+    refute files["config/runtime.exs"] =~ "We also recommend setting `force_ssl`"
+    assert files["test/sample_web/prod_config_test.exs"] =~ "force_ssl"
+  end
+
   test "a release migrates before it serves, unless the operator opts out" do
     files = installed_files()
 

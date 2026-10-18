@@ -95,6 +95,11 @@ A page opened without a link now asks for the link instead of calling it used or
 `lib/my_app_web/live/inside_live.ex` reports a missing address before a missing note.
 `test/my_app_web/invite_live_test.exs` and `invitation_delivery_test.exs` cover these.
 
+**A test pins HTTPS in production.** `test/my_app_web/prod_config_test.exs` checks that
+`config/prod.exs` forces HTTPS with HSTS, trusts `X-Forwarded-Proto` and exempts local hosts.
+`config/runtime.exs` drops the scaffold's comment that recommends `force_ssl`.
+`docs/operations.md` says to reach the application only through the TLS proxy.
+
 **A new invitation link has a copy button.** `lib/my_app_web/live/inside_live.ex` shows a copy
 icon beside the link and a status line below the box. The new `assets/js/copy_text.js` holds
 `copyText` and the `CopyText` hook. Import `CopyText` in `assets/js/app.js` and add it to the

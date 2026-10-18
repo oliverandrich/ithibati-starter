@@ -114,6 +114,12 @@ A name that is neither stops the boot
 rather than being dropped quietly, so an instance exposed directly still counts the
 address it actually sees.
 
+A production release redirects plain HTTP to HTTPS and sends HSTS. Over HTTPS, Plug marks
+the session cookie `Secure`, so browsers never send it over plain HTTP. The proxy terminates
+TLS and must set `X-Forwarded-Proto`. `config/prod.exs` trusts that header from any client,
+so make the application reachable only through the proxy. Requests whose `Host` header is
+`localhost` or `127.0.0.1` are not redirected.
+
 The application refuses to start unless `config :ithibati, initial_claim: :operator_code`
 is set. An unprotected claim would hand the instance to the first stranger who finds the
 host, so this is a refusal to boot rather than a setup page nobody can satisfy.

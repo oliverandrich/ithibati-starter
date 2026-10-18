@@ -147,6 +147,21 @@ defmodule IthibatiStarter.Tooling do
 
   defp tidy_scaffold(igniter, b) do
     igniter
+    # config/prod.exs already forces HTTPS, so the scaffold's advice to add it is stale.
+    |> Files.replace(
+      "config/runtime.exs",
+      """
+        #
+        # We also recommend setting `force_ssl` in your config/prod.exs,
+        # ensuring no data is ever sent via http, always redirecting to https:
+        #
+        #     config :#{b.app}, #{b.module}Web.Endpoint,
+        #       force_ssl: [hsts: true]
+        #
+        # Check `Plug.SSL` for all available options in `force_ssl`.
+      """,
+      ""
+    )
     |> Files.replace(
       "lib/#{b.app}_web.ex",
       "alias Phoenix.LiveView.JS\n      alias #{b.module}Web.Layouts",
