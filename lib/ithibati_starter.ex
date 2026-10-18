@@ -19,7 +19,7 @@ defmodule IthibatiStarter do
   @doc "Plans an installation. Options: `:without_beans`, `:brand`."
   def install(igniter, opts \\ []) do
     brand = Keyword.get(opts, :brand, "violet")
-    profile = "0.7.0\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\n"
+    profile = "0.8.0\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\n"
 
     cond do
       brand not in @brands ->

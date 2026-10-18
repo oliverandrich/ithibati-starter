@@ -86,7 +86,7 @@ Check the diff for these before deploying:
 
 Each entry names what changed in generated applications and what to do about it.
 
-### Unreleased
+### 0.8.0
 
 **The invitation page starts a ceremony only for an open invitation.**
 `lib/my_app_web/live/invite_live.ex` ignores `accept` until a token has opened an invitation.
