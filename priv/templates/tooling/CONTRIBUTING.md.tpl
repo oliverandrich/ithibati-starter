@@ -109,6 +109,15 @@ German catalogs live under `priv/gettext/de/LC_MESSAGES`. Use
 `mix gettext.extract --merge` after adding `gettext` calls, then fill in the PO
 translations. Clipboard messages are translated on the server, not duplicated in JS.
 
+## License markers
+
+Every source file states the application's license in its first five lines, as
+`SPDX-License-Identifier` in the comment syntax of its language. A copied file keeps its terms
+without the `LICENSE` file. `mix.exs` names the license.
+`test/__APP__/license_marker_test.exs` checks every file under the paths it lists. Add the line
+to each new file, including one that `mix phx.gen.*` writes. Third-party code under `vendor/`
+keeps its own terms.
+
 ## Making changes
 
 Use focused regression tests for behavior changes and run `mise check` before

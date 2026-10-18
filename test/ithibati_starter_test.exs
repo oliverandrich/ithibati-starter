@@ -8,7 +8,7 @@ defmodule IthibatiStarterTest do
   # the same path.
   @fixtures ["test/fixtures/phoenix", "test/fixtures/phoenix_mailer"]
 
-  defp project do
+  defp project(extra \\ %{}) do
     files =
       Enum.reduce(@fixtures, %{}, fn root, acc ->
         root
@@ -26,7 +26,7 @@ defmodule IthibatiStarterTest do
         "[locals_without_parens: [embed_templates: 1, plug: 1, plug: 2], inputs: [\"**/*.{ex,exs}\"]]"
       )
 
-    test_project(app_name: :sample, files: files)
+    test_project(app_name: :sample, files: Map.merge(files, extra))
   end
 
   for opts <- [[], [without_beans: true]] do
@@ -450,9 +450,10 @@ defmodule IthibatiStarterTest do
     assert files["config/test.exs"] =~ "Swoosh.Adapters.Test"
     assert files["config/dev.exs"] =~ "mail_enabled: true"
 
-    # Phoenix wrote the module and the starter leaves it exactly as it found it.
+    # Phoenix wrote the module and the starter leaves it as it found it, below the license line.
     assert files["lib/sample/mailer.ex"] ==
-             original.assigns.test_files["lib/sample/mailer.ex"]
+             "# SPDX-License-Identifier: MIT\n\n" <>
+               original.assigns.test_files["lib/sample/mailer.ex"]
 
     assert files["config/prod.exs"] =~ "api_client: false"
     refute files["config/prod.exs"] =~ "Swoosh.ApiClient.Req"
@@ -726,6 +727,90 @@ defmodule IthibatiStarterTest do
       |> assert_has_issue(&String.contains?(&1, "profile"))
     end
 
+    test "every source file states its license in its own comment syntax" do
+      files = installed_files()
+      marker = "SPDX-License-Identifier: MIT"
+
+      assert files["lib/sample_web/router.ex"] =~ ~r/\A# #{marker}\n/
+      assert files["mix.exs"] =~ ~r/\A# #{marker}\n/
+      assert files["assets/js/app.js"] =~ ~r/\A\/\/ #{marker}\n/
+      assert files["assets/css/app.css"] =~ ~r/\A\/\* #{marker} \*\/\n/
+
+      assert files["lib/sample_web/controllers/page_html/home.html.heex"] =~
+               ~r/\A<%!-- #{marker} --%>\n/
+
+      # A doctype and a shebang must stay first.
+      assert files["lib/sample_web/components/layouts/root.html.heex"] =~
+               ~r/\A<!DOCTYPE html>\n<%!-- #{marker} --%>\n/
+
+      assert files["rel/overlays/bin/server"] =~ ~r/\A#!\/bin\/sh\n# #{marker}\n/
+
+      for {path, source} <- files, licensed?(path) do
+        assert source |> String.split("\n") |> Enum.take(5) |> Enum.join("\n") =~ marker,
+               "#{path} does not state its license"
+      end
+
+      assert files["test/sample/license_marker_test.exs"] =~ ~r/\A# #{marker}\n/
+
+      # The generated check covers exactly what the installer marks.
+      check = files["test/sample/license_marker_test.exs"]
+      assert check =~ "@paths ~w(#{Enum.join(IthibatiStarter.License.paths(), " ")})"
+      assert check =~ "@extensions ~w(#{Enum.join(IthibatiStarter.License.extensions(), " ")})"
+    end
+
+    test "third-party code keeps its own terms, even under a checked directory" do
+      files =
+        %{"assets/js/vendor/chart.js" => "export default {}\n"}
+        |> project()
+        |> install()
+        |> apply_igniter!()
+        |> then(& &1.assigns.test_files)
+
+      assert files["assets/js/vendor/chart.js"] == "export default {}\n"
+      refute files["assets/vendor/topbar.js"] =~ "SPDX"
+    end
+
+    # A file type without a known comment syntax is left alone rather than broken.
+    test "only files with a known comment syntax are marked" do
+      untouched = %{
+        "test/support/fixtures/data.json" => ~s({"a": 1}\n),
+        "lib/sample_web/.DS_Store" => <<0, 0, 0, 1, 66, 117, 100, 49>>,
+        "assets/js/chart.ts" => "export const a = 1\n",
+        "rel/overlays/bin/README" => "Start commands.\n"
+      }
+
+      marked = %{
+        "assets/js/lazy.mjs" => "export default 1\n",
+        "rel/overlays/bin/backup" => "#!/bin/sh",
+        "lib/sample_web/components/layouts/plain.html.heex" => "<!doctype html>"
+      }
+
+      files =
+        untouched
+        |> Map.merge(marked)
+        |> project()
+        |> install()
+        |> apply_igniter!()
+        |> then(& &1.assigns.test_files)
+
+      for {path, content} <- untouched, do: assert(files[path] == content, path)
+
+      assert files["assets/js/lazy.mjs"] =~ ~r/\A\/\/ SPDX-License-Identifier: MIT\n/
+
+      # Without a trailing newline, and with a lowercase doctype, the first line still stays first.
+      assert files["rel/overlays/bin/backup"] == "#!/bin/sh\n# SPDX-License-Identifier: MIT\n"
+
+      assert files["lib/sample_web/components/layouts/plain.html.heex"] ==
+               "<!doctype html>\n<%!-- SPDX-License-Identifier: MIT --%>\n"
+    end
+
+    test "an AGPL application marks its files as AGPL" do
+      files = installed_files(license: "agpl", source_url: "https://example.com/sample")
+
+      assert files["lib/sample_web/router.ex"] =~
+               ~r/\A# SPDX-License-Identifier: AGPL-3.0-or-later\n/
+    end
+
     @tag :tmp_dir
     test "the holder falls back to the git user name", %{tmp_dir: tmp_dir} do
       config = Path.join(tmp_dir, "gitconfig")
@@ -747,6 +832,15 @@ defmodule IthibatiStarterTest do
 
     assert diff(result, only: "lib/sample_web/components/layouts/root.html.heex") =~
              "assigns[:locale]"
+  end
+
+  # The files the generated license check covers; gettext catalogs are regenerated, vendor code is not ours.
+  defp licensed?(path) do
+    (String.match?(path, ~r{\A(lib|test|config|priv/repo|assets/js|assets/css|rel)/}) or
+       path in ~w(mix.exs .formatter.exs .credo.exs .igniter.exs)) and
+      not String.contains?(path, "/vendor/") and
+      (Path.extname(path) in ~w(.ex .exs .heex .js .mjs .css) or
+         String.starts_with?(path, "rel/overlays/bin/"))
   end
 
   # Generation needs a copyright holder; the Mix task falls back to git, these tests name one.

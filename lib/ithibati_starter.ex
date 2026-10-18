@@ -132,6 +132,7 @@ defmodule IthibatiStarter do
           |> Auth.install(bindings)
           |> License.install(bindings, opts)
           |> Igniter.create_new_file(@marker, profile)
+          |> License.mark(opts[:license])
           |> Igniter.add_task("format", [])
           |> Igniter.add_notice(
             "Starter installed. Review CONTRIBUTING.md, then run mise trust, mise install and mise run setup."

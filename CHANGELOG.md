@@ -32,6 +32,14 @@ Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is neede
   translation.
 
   An existing application has no `LICENSE` file. Add one, and the README section, by hand.
+- Every source file states its license as `SPDX-License-Identifier` in its first five lines.
+  The installer marks Elixir, HEEx, JavaScript and CSS files and the release start commands.
+  It covers `lib`, `test`, `config`, `priv/repo`, `assets/js`, `assets/css` and `rel`.
+  It also covers `mix.exs`, `.formatter.exs`, `.credo.exs` and `.igniter.exs`.
+  Files under `vendor/` keep their own terms.
+  The new `test/my_app/license_marker_test.exs` checks the same files.
+  `CONTRIBUTING.md` explains the rule.
+  An existing application adds the lines before it adopts the test.
 
 ### Changed
 

@@ -105,6 +105,9 @@ installer writes `LICENSE` and a license section in the README. `agpl` means
 source code. Every layout then links to it, as AGPL §13 requires. Generated `docs/operations.md`
 describes `SOURCE_URL`, which a deployment of modified code sets to its own source.
 
+Every source file of the application gets an `SPDX-License-Identifier` line for that license,
+and a generated test keeps new files in line. Third-party code under `vendor/` is left alone.
+
 **`--copyright NAME`** names the copyright holder, with the current year, in the README's
 license section and in an MIT `LICENSE`. Without it the installer takes git's `user.name`, and refuses when that is unset.
 
