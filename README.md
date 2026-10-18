@@ -98,6 +98,8 @@ Dependency advisories run separately through `mise run audit`.
 - **JSON logs in production**: one object per line at `LOG_LEVEL`, with allowlisted
   metadata and no access log.
 - Environment-based database configuration and a documented release workflow.
+- **MIT or AGPL**: `--license` writes `LICENSE` and the README's license section. An AGPL
+  application links its source code from every layout, as AGPL §13 requires.
 
 Cleanup is explicit. The generated operations guide gives a recurring release
 command; the starter installs no scheduler.

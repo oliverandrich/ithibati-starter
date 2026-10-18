@@ -54,6 +54,10 @@ defmodule IthibatiStarter.Tooling do
       Files.template("fragments/migrate_on_start_runtime", bindings)
     )
     |> logging(bindings)
+    |> Files.append(
+      "config/runtime.exs",
+      Files.template("fragments/source_url_runtime", bindings)
+    )
     |> tidy_scaffold(bindings)
     |> maybe_beans(bindings, opts)
     |> Files.append(".gitignore", "\n/mise.local.toml\n/screenshots/\n")

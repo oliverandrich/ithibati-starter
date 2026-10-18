@@ -33,7 +33,7 @@ defmodule IthibatiStarterTest do
     @documentation_opts opts
     @tag :documentation
     test "documentation separates contribution workflow from application guides for #{inspect(opts)}" do
-      result = project() |> IthibatiStarter.install(@documentation_opts) |> apply_igniter!()
+      result = project() |> install(@documentation_opts) |> apply_igniter!()
       files = result.assigns.test_files
 
       assert files["docs/operations.md"] =~ "bin/migrate"
@@ -76,12 +76,12 @@ defmodule IthibatiStarterTest do
         assert Map.has_key?(files, target), "#{path} links to missing #{target}"
       end
 
-      result |> IthibatiStarter.install(@documentation_opts) |> assert_unchanged()
+      result |> install(@documentation_opts) |> assert_unchanged()
     end
   end
 
   test "default profile installs pinned invitation authentication and tooling" do
-    result = project() |> IthibatiStarter.install()
+    result = project() |> install()
     assert Mix.Project.config()[:version] == "0.9.0"
 
     assert_creates(result, ".ithibati-starter", fn text ->
@@ -228,7 +228,7 @@ defmodule IthibatiStarterTest do
   test "the session cookie lasts as long as the session it carries" do
     endpoint =
       project()
-      |> IthibatiStarter.install()
+      |> install()
       |> apply_igniter!()
       |> then(& &1.assigns.test_files["lib/sample_web/endpoint.ex"])
 
@@ -343,7 +343,7 @@ defmodule IthibatiStarterTest do
 
   @tag :command_contract
   test "mise exposes development, reset and release commands" do
-    result = project() |> IthibatiStarter.install()
+    result = project() |> install()
 
     assert_creates(result, "mise.toml", fn text ->
       assert text =~ "[tasks.setup-code]"
@@ -362,7 +362,7 @@ defmodule IthibatiStarterTest do
 
   @tag :command_contract
   test "release launchers start the server, migrate and issue setup codes from any directory" do
-    result = project() |> IthibatiStarter.install() |> apply_igniter!()
+    result = project() |> install() |> apply_igniter!()
     files = result.assigns.test_files
 
     directory =
@@ -391,21 +391,24 @@ defmodule IthibatiStarterTest do
     end
   end
 
-  test "there is one profile left; Beans and the brand colour are the only choices" do
+  test "there is one profile left; Beans, the brand colour and the license are the choices" do
     info = Install.info([], nil)
     refute Keyword.has_key?(info.schema, :with_mail)
     refute Keyword.has_key?(info.schema, :without_ithibati)
     assert info.schema[:without_beans] == :boolean
     assert info.schema[:brand] == :string
+    assert info.schema[:license] == :string
+    assert info.schema[:copyright] == :string
+    assert info.schema[:source_url] == :string
 
-    result = project() |> IthibatiStarter.install(without_beans: true)
+    result = project() |> install(without_beans: true)
     assert_creates(result, "lib/sample/accounts/user.ex")
     refute_creates(result, ".beans.yml")
     refute diff(result, only: "mise.toml") =~ "beans list"
   end
 
   test "an account is named or addressed, and the instance decides at runtime" do
-    result = project() |> IthibatiStarter.install()
+    result = project() |> install()
     assert_creates(result, "lib/sample/identity.ex")
     assert_creates(result, "lib/sample_web/invitation_mail.ex")
     assert_creates(result, "test/sample/identity_test.exs")
@@ -435,7 +438,7 @@ defmodule IthibatiStarterTest do
 
   test "every application ships the mailer, and the Phoenix one is adopted rather than replaced" do
     original = project()
-    result = IthibatiStarter.install(original)
+    result = install(original)
     assert diff(result, only: "mix.exs") =~ ":swoosh"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "MailboxPreview"
 
@@ -458,7 +461,7 @@ defmodule IthibatiStarterTest do
              1
 
     assert length(Regex.scan(~r/\{:swoosh,/, files["mix.exs"])) == 1
-    installed |> IthibatiStarter.install() |> assert_unchanged()
+    installed |> install() |> assert_unchanged()
   end
 
   test "a customized router with a Phoenix mailbox is still refused" do
@@ -469,29 +472,29 @@ defmodule IthibatiStarterTest do
       "PageController, :custom"
     )
     |> apply_igniter!()
-    |> IthibatiStarter.install()
+    |> install()
     |> assert_has_issue(&String.contains?(&1, "router"))
     |> assert_unchanged()
   end
 
   test "reapplying the same profile preserves user edits and produces no changes" do
-    installed = project() |> IthibatiStarter.install() |> apply_igniter!()
-    result = installed |> IthibatiStarter.install()
+    installed = project() |> install() |> apply_igniter!()
+    result = installed |> install()
     assert_unchanged(result)
   end
 
   test "an installed profile from another version is not converted in silence" do
     project()
-    |> IthibatiStarter.install()
+    |> install()
     |> apply_igniter!()
     |> IthibatiStarter.Files.replace(".ithibati-starter", "0.9.0", "0.3.0")
     |> apply_igniter!()
-    |> IthibatiStarter.install()
+    |> install()
     |> assert_has_issue(&String.contains?(&1, "profile"))
   end
 
   test "non-Phoenix projects are refused before making changes" do
-    result = test_project() |> IthibatiStarter.install()
+    result = test_project() |> install()
     assert_has_issue(result, &String.contains?(&1, "Phoenix"))
     assert_unchanged(result)
   end
@@ -501,7 +504,7 @@ defmodule IthibatiStarterTest do
       project()
       |> Igniter.create_new_file("mise.toml", "# My existing tooling\n")
       |> apply_igniter!()
-      |> IthibatiStarter.install()
+      |> install()
 
     assert_has_issue(result, &String.contains?(&1, "existing tooling"))
     assert_unchanged(result)
@@ -515,14 +518,14 @@ defmodule IthibatiStarterTest do
         "\nconfig :sample, generators: [binary_id: true]\n"
       )
       |> apply_igniter!()
-      |> IthibatiStarter.install()
+      |> install()
 
     assert_has_issue(result, &String.contains?(&1, "binary_id"))
     assert_unchanged(result)
   end
 
   test "applying the installer keeps HTML modules beside their embedded templates" do
-    result = project() |> IthibatiStarter.install() |> apply_igniter!()
+    result = project() |> install() |> apply_igniter!()
     assert Map.has_key?(result.assigns.test_files, "lib/sample_web/controllers/session_html.ex")
     assert Map.has_key?(result.assigns.test_files, "test/features/invitation_test.exs")
   end
@@ -543,14 +546,14 @@ defmodule IthibatiStarterTest do
         "get \"/custom\", PageController, :home"
       )
       |> apply_igniter!()
-      |> IthibatiStarter.install()
+      |> install()
 
     assert_has_issue(result, &String.contains?(&1, "router"))
     assert_unchanged(result)
   end
 
   test "checks explicitly select the test environment even when the shell selects dev" do
-    result = project() |> IthibatiStarter.install()
+    result = project() |> install()
 
     assert_creates(result, "mise.toml", fn text ->
       assert text =~ "env.MIX_ENV = \"test\""
@@ -560,7 +563,7 @@ defmodule IthibatiStarterTest do
   for opts <- [[], [without_beans: true]] do
     @profile_opts opts
     test "Lucide replaces Heroicons in profile #{inspect(opts)}" do
-      planned = project() |> IthibatiStarter.install(@profile_opts)
+      planned = project() |> install(@profile_opts)
       assert_has_task(planned, "deps.unlock", ["daisyui", "heroicons"])
       installed = apply_igniter!(planned)
       files = installed.assigns.test_files
@@ -577,7 +580,7 @@ defmodule IthibatiStarterTest do
     end
 
     test "vanilla Tailwind replaces DaisyUI in profile #{inspect(opts)}" do
-      installed = project() |> IthibatiStarter.install(@profile_opts) |> apply_igniter!()
+      installed = project() |> install(@profile_opts) |> apply_igniter!()
       files = installed.assigns.test_files
       refute files["mix.exs"] =~ ":daisyui"
       refute files["assets/css/app.css"] =~ "daisyui"
@@ -649,14 +652,94 @@ defmodule IthibatiStarterTest do
 
     for brand <- ["zinc", "notacolour", "violet-500"] do
       project
-      |> IthibatiStarter.install(brand: brand)
+      |> install(brand: brand)
       |> assert_has_issue(&String.contains?(&1, "brand"))
       |> assert_unchanged()
     end
   end
 
+  describe "license" do
+    test "MIT is the default, with the year and the copyright holder" do
+      files = installed_files()
+      year = Date.utc_today().year
+
+      assert files["LICENSE"] =~ "MIT License"
+      assert files["LICENSE"] =~ "Copyright (c) #{year} Sample Author"
+      assert files["README.md"] =~ "## License"
+      assert files["README.md"] =~ "`MIT`"
+      assert files["README.md"] =~ "Copyright (c) #{year} Sample Author"
+      assert files[".ithibati-starter"] =~ "license=mit\n"
+      refute files["config/config.exs"] =~ "source_url"
+    end
+
+    test "AGPL ships the license text and its source code link" do
+      files = installed_files(license: "agpl", source_url: "https://example.com/sample")
+
+      assert files["LICENSE"] == File.read!("priv/templates/licenses/agpl.tpl")
+      assert files["LICENSE"] =~ "GNU AFFERO GENERAL PUBLIC LICENSE"
+      assert files["README.md"] =~ "`AGPL-3.0-or-later`"
+      assert files["README.md"] =~ "Copyright (c) #{Date.utc_today().year} Sample Author"
+      assert files[".ithibati-starter"] =~ "license=agpl\n"
+      assert files["config/config.exs"] =~ ~s(source_url: "https://example.com/sample")
+      assert files["config/runtime.exs"] =~ "SOURCE_URL"
+      assert files["docs/operations.md"] =~ "`SOURCE_URL`"
+    end
+
+    # The component exists for both licenses, so the Elixir templates do not differ between them.
+    test "every layout can render the source code link" do
+      files = installed_files()
+      layouts = files["lib/sample_web/components/layouts.ex"]
+
+      assert layouts =~ "def source_offer(assigns)"
+      assert layouts =~ "Application.get_env(:sample, :source_url)"
+      assert Regex.scan(~r/<\.source_offer/, layouts) |> length() == 3
+      # Without an address no wrapper renders, so an MIT application keeps its spacing.
+      assert Regex.scan(~r/<\w+ :if=\{source_url\(\)\}/, layouts) |> length() == 3
+    end
+
+    test "an unknown license, a missing holder or a bad source URL is refused before changes" do
+      project = project()
+
+      for {opts, word} <- [
+            {[license: "gpl"], "license"},
+            {[license: "agpl"], "--source-url"},
+            {[license: "agpl", source_url: "example.com/sample"], "--source-url"},
+            {[license: "agpl", source_url: "ftp://example.com/sample"], "--source-url"},
+            {[source_url: "https://example.com/sample"], "--source-url"},
+            {[copyright: nil], "--copyright"},
+            {[copyright: "  "], "--copyright"}
+          ] do
+        project
+        |> install(opts)
+        |> assert_has_issue(&String.contains?(&1, word))
+        |> assert_unchanged()
+      end
+    end
+
+    test "reapplying needs no holder, and another license is not converted" do
+      installed = project() |> install() |> apply_igniter!()
+
+      installed |> IthibatiStarter.install([]) |> assert_unchanged()
+
+      installed
+      |> install(license: "agpl", source_url: "https://example.com/sample")
+      |> assert_has_issue(&String.contains?(&1, "profile"))
+    end
+
+    @tag :tmp_dir
+    test "the holder falls back to the git user name", %{tmp_dir: tmp_dir} do
+      config = Path.join(tmp_dir, "gitconfig")
+      env = [{"GIT_CONFIG_GLOBAL", config}, {"GIT_CONFIG_NOSYSTEM", "1"}]
+
+      assert IthibatiStarter.git_user_name(cd: tmp_dir, env: env) == nil
+
+      File.write!(config, "[user]\n  name = Git Author\n")
+      assert IthibatiStarter.git_user_name(cd: tmp_dir, env: env) == "Git Author"
+    end
+  end
+
   test "locale support is wired in" do
-    result = project() |> IthibatiStarter.install()
+    result = project() |> install()
     assert_creates(result, "lib/sample_web/locale.ex")
     assert diff(result, only: "config/config.exs") =~ "locales:"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "plug SampleWeb.Locale"
@@ -666,9 +749,14 @@ defmodule IthibatiStarterTest do
              "assigns[:locale]"
   end
 
+  # Generation needs a copyright holder; the Mix task falls back to git, these tests name one.
+  defp install(igniter, opts \\ []) do
+    IthibatiStarter.install(igniter, Keyword.put_new(opts, :copyright, "Sample Author"))
+  end
+
   defp installed_files(opts \\ []) do
     project()
-    |> IthibatiStarter.install(opts)
+    |> install(opts)
     |> apply_igniter!()
     |> then(& &1.assigns.test_files)
   end

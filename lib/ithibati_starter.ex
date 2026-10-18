@@ -9,6 +9,7 @@ defmodule IthibatiStarter do
   alias Igniter.Project.Module, as: ProjectModule
   alias IthibatiStarter.Auth
   alias IthibatiStarter.Files
+  alias IthibatiStarter.License
   alias IthibatiStarter.Tooling
 
   @marker ".ithibati-starter"
@@ -17,10 +18,18 @@ defmodule IthibatiStarter do
   # Tailwind's chromatic palettes. A grey brand would be indistinguishable from the ink.
   @brands ~w(red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink rose)
 
-  @doc "Plans an installation. Options: `:without_beans`, `:brand`."
+  @doc """
+  Plans an installation.
+
+  Options: `:without_beans`, `:brand`, `:license`, `:copyright` and `:source_url`.
+  """
   def install(igniter, opts \\ []) do
     brand = Keyword.get(opts, :brand, "violet")
-    profile = "#{@version}\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\n"
+    opts = opts |> Keyword.put_new(:license, "mit") |> Keyword.update(:copyright, "", &trim/1)
+    license = opts[:license]
+
+    profile =
+      "#{@version}\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\nlicense=#{license}\n"
 
     cond do
       brand not in @brands ->
@@ -29,13 +38,41 @@ defmodule IthibatiStarter do
           "Unknown brand colour #{inspect(brand)}; use one of: #{Enum.join(@brands, ", ")}."
         )
 
+      issue = License.issue(license, opts[:source_url]) ->
+        Igniter.add_issue(igniter, issue)
+
       Igniter.exists?(igniter, @marker) ->
         reapply(igniter, profile)
+
+      # Checked after reapply, which writes no LICENSE and so needs no holder.
+      opts[:copyright] == "" ->
+        Igniter.add_issue(
+          igniter,
+          "Name the copyright holder with --copyright, or set git's user.name."
+        )
 
       true ->
         install_new(igniter, opts, profile, brand)
     end
   end
+
+  @doc "Returns git's `user.name`, the copyright holder when `--copyright` is absent."
+  def git_user_name(opts \\ []) do
+    # stderr stays apart, so a warning cannot become part of the name.
+    case System.cmd("git", ["config", "user.name"], opts) do
+      {name, 0} -> name |> trim() |> blank_to_nil()
+      _ -> nil
+    end
+  rescue
+    # No git executable.
+    ErlangError -> nil
+  end
+
+  defp blank_to_nil(""), do: nil
+  defp blank_to_nil(text), do: text
+
+  defp trim(nil), do: ""
+  defp trim(text), do: String.trim(text)
 
   defp reapply(igniter, profile) do
     {igniter, current} = Files.read(igniter, @marker)
@@ -93,6 +130,7 @@ defmodule IthibatiStarter do
           igniter
           |> Tooling.install(bindings, opts)
           |> Auth.install(bindings)
+          |> License.install(bindings, opts)
           |> Igniter.create_new_file(@marker, profile)
           |> Igniter.add_task("format", [])
           |> Igniter.add_notice(

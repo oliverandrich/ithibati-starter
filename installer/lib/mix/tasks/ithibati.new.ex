@@ -9,6 +9,9 @@ defmodule Mix.Tasks.Ithibati.New do
   Ithibati authentication and invitation delivery are always included. Options:
 
     * `--brand COLOUR` names the Tailwind palette for the brand colour; `violet` by default.
+    * `--license mit|agpl` selects MIT (the default) or AGPL-3.0-or-later.
+    * `--copyright NAME` names the copyright holder; git's `user.name` by default.
+    * `--source-url URL` is the address of the source code; required with `agpl`.
     * `--without-beans` omits local Beans configuration.
     * `--yes` accepts the generator's installation prompts (the default).
     * `--no-yes` restores interactive installation and diff prompts.

@@ -6,6 +6,9 @@ defmodule IthibatiNew do
   @switches [
     without_beans: :boolean,
     brand: :string,
+    license: :string,
+    copyright: :string,
+    source_url: :string,
     yes: :boolean,
     starter: :string
   ]
@@ -19,7 +22,10 @@ defmodule IthibatiNew do
           path
 
         _ ->
-          Mix.raise("Usage: mix ithibati.new PATH [--brand COLOUR] [--without-beans] [--no-yes]")
+          Mix.raise(
+            "Usage: mix ithibati.new PATH [--brand COLOUR] [--license mit|agpl] " <>
+              "[--copyright NAME] [--source-url URL] [--without-beans] [--no-yes]"
+          )
       end
 
     [
@@ -31,7 +37,17 @@ defmodule IthibatiNew do
       "--only",
       "dev"
     ] ++
-      if(opts[:brand], do: ["--brand", opts[:brand]], else: []) ++
+      Enum.flat_map(
+        [
+          brand: "--brand",
+          license: "--license",
+          copyright: "--copyright",
+          source_url: "--source-url"
+        ],
+        fn {key, flag} ->
+          if opts[key], do: [flag, opts[key]], else: []
+        end
+      ) ++
       if(opts[:without_beans], do: ["--without-beans"], else: []) ++
       if(Keyword.get(opts, :yes, true), do: ["--yes"], else: [])
   end

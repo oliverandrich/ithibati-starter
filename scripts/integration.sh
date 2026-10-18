@@ -31,13 +31,15 @@ mix archive.install hex igniter_new 0.5.34 --force
 (cd "$starter_root/installer" && mix archive.build -o "$fixture_root/ithibati_new.ez")
 mix archive.install "$fixture_root/ithibati_new.ez" --force
 
-# One profile. Beans is the only thing still optional, so it is the only variation left.
+# One profile. Beans and the license are the variations; the second application varies both.
+# The holder is named, because a CI runner has no git user.name to fall back to.
+source_url="https://example.com/starter_nobeans"
 for profile in beans nobeans; do
   app="starter_${profile}"
   target="$fixture_root/$app"
-  options=(--yes)
+  options=(--yes --copyright "Integration Suite")
   if [[ "$profile" == nobeans ]]; then
-    options=(--yes --without-beans)
+    options+=(--without-beans --license agpl --source-url "$source_url")
   fi
 
   (cd "$fixture_root" && mix ithibati.new "$target" --starter "ithibati_starter@path:$starter_root" "${options[@]}")
@@ -61,6 +63,9 @@ for profile in beans nobeans; do
     test -e "test/${app}_web/invitation_delivery_test.exs"
     if [[ "$profile" == nobeans ]]; then
       test ! -e .beans.yml
+      grep -q "GNU AFFERO GENERAL PUBLIC LICENSE" LICENSE
+    else
+      grep -q "Copyright (c) [0-9]* Integration Suite" LICENSE
     fi
     mise release
     release="$target/_build/prod/rel/$app"
@@ -145,6 +150,15 @@ for profile in beans nobeans; do
         exit 1
       fi
       start_server
+      # An AGPL application links its source from the sign-in page; an MIT one names none.
+      login=$(curl --fail --silent --show-error --location -H 'x-forwarded-proto: https' "http://localhost:$PORT/login")
+      if [[ "$profile" == nobeans ]] && ! grep -qF "href=\"$source_url\"" <<<"$login"; then
+        echo "The AGPL release does not link its source code" >&2
+        exit 1
+      elif [[ "$profile" == beans ]] && grep -qF 'target="_blank" rel="noopener noreferrer"' <<<"$login"; then
+        echo "The MIT release links a source it was not given" >&2
+        exit 1
+      fi
       # Nothing is left to apply, so the explicit command is a no-op.
       "$release/bin/migrate"
       stop_server

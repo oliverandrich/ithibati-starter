@@ -66,6 +66,29 @@ defmodule IthibatiNewTest do
     refute "--brand" in IthibatiNew.arguments(["my_app"])
   end
 
+  # The starter validates them, so this archive keeps no list of licenses of its own.
+  test "the license options are passed on to the starter" do
+    args =
+      IthibatiNew.arguments([
+        "my_app",
+        "--license",
+        "agpl",
+        "--copyright",
+        "Jane Doe",
+        "--source-url",
+        "https://example.com/my_app"
+      ])
+
+    pairs = Enum.chunk_every(args, 2, 1, :discard)
+    assert ["--license", "agpl"] in pairs
+    assert ["--copyright", "Jane Doe"] in pairs
+    assert ["--source-url", "https://example.com/my_app"] in pairs
+
+    for option <- ~w(--license --copyright --source-url) do
+      refute option in IthibatiNew.arguments(["my_app"])
+    end
+  end
+
   test "an option this archive no longer has is refused" do
     assert_raise OptionParser.ParseError, fn ->
       IthibatiNew.arguments(["my_app", "--with-mail"])

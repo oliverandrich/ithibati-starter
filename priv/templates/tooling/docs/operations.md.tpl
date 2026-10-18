@@ -28,6 +28,14 @@ for the deployment, `TRUSTED_PROXIES` when a reverse proxy runs on another host,
 | `MAIL_FROM` | The address invitations come from |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Submission server; the port defaults to 587 |
 | `__APP_UPCASE___MIGRATE_ON_START` | `false` to migrate by hand with `bin/migrate`; unset or `true` migrates on start; anything else stops the boot |
+| `SOURCE_URL` | The address of this deployment's source code; any value that is not an absolute http or https URL stops the boot |
+
+## Source code
+
+Every layout links to the source code when `:source_url` is set. An AGPL application sets
+it in `config/config.exs` when it is generated, because AGPL §13 requires the offer to its
+users. A deployment of modified code sets `SOURCE_URL` to its own source. Without either,
+the link is not shown.
 
 ## Choosing a database
 

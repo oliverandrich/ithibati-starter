@@ -20,6 +20,18 @@ Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is neede
   `mix archive.install hex ithibati_new 0.9.0`. Versions before 0.9.0 remain available from
   their Git tags only.
 - This changelog. It replaces the version notes in [Upgrading](docs/upgrading.md).
+- `--license mit|agpl` chooses the application's license, MIT by default. The installer writes
+  `LICENSE` and a license section with the copyright line in `README.md`. `--copyright NAME`
+  names the holder; without it the installer takes git's `user.name`. `agpl` means `AGPL-3.0-or-later` and
+  requires `--source-url URL`, which `config/config.exs` stores as `:source_url`.
+  `.ithibati-starter` gains a `license=` line.
+- Every layout can link to the source code. `lib/my_app_web/components/layouts.ex` gains
+  `source_offer/1`, which `auth/1` and `member/1` render when `:source_url` is set.
+  `config/runtime.exs` reads `SOURCE_URL` and refuses a value that is not an absolute http or
+  https URL. `docs/operations.md` describes it. `priv/gettext` gains "Source code" and its German
+  translation.
+
+  An existing application has no `LICENSE` file. Add one, and the README section, by hand.
 
 ### Changed
 

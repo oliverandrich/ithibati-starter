@@ -88,7 +88,7 @@ mix ithibati.new my_app \
 
 </details>
 
-## One profile, two choices left to the operator
+## One profile, three choices left to the operator
 
 Every generated application gets the same thing: the Phoenix tooling, checks and CI,
 vanilla Tailwind with Lucide and browser locale detection, passkeys with invitations
@@ -98,6 +98,15 @@ chosen when you generate it but when you run it.
 
 **`--brand COLOUR`** names the Tailwind palette for the brand colour, `violet` by
 default. Grey palettes are refused. See [Colours](#colours) for the accepted names.
+
+**`--license mit|agpl`** chooses the application's license, `mit` by default. The
+installer writes `LICENSE` and a license section in the README. `agpl` means
+`AGPL-3.0-or-later` and needs **`--source-url URL`**, the address of the application's
+source code. Every layout then links to it, as AGPL §13 requires. Generated `docs/operations.md`
+describes `SOURCE_URL`, which a deployment of modified code sets to its own source.
+
+**`--copyright NAME`** names the copyright holder, with the current year, in the README's
+license section and in an MIT `LICENSE`. Without it the installer takes git's `user.name`, and refuses when that is unset.
 
 **`--without-beans`** omits local tracking. Beans itself is installed separately and
 is not needed to compile, test or run the app. Neither RTK nor personal AI skills are

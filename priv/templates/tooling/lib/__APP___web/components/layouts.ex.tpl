@@ -107,6 +107,30 @@ defmodule __MODULE__Web.Layouts do
     """
   end
 
+  @doc """
+  The address of the application's source code, or nil.
+
+  It is read at render time. `SOURCE_URL` replaces `:source_url` when the application boots.
+  """
+  def source_url, do: Application.get_env(:__APP__, :source_url)
+
+  @doc """
+  Links to the application's source code, which an AGPL application must offer its users.
+
+  Render it inside an element with `:if={source_url()}`, so no empty wrapper takes space.
+  """
+  attr :class, :any, default: "underline underline-offset-2"
+
+  def source_offer(assigns) do
+    assigns = assign(assigns, :url, source_url())
+
+    ~H"""
+    <a href={@url} target="_blank" rel="noopener noreferrer" class={@class}>
+      {gettext("Source code")}
+    </a>
+    """
+  end
+
   @doc "A compact, shared layout for authentication and first-account setup."
   attr :flash, :map, default: %{}
   attr :title, :string, default: nil
@@ -123,6 +147,7 @@ defmodule __MODULE__Web.Layouts do
           <p :if={@subtitle} class="mt-2 text-muted">{@subtitle}</p>
         </div>
         {render_slot(@inner_block)}
+        <p :if={source_url()} class="mt-10 text-center text-sm text-muted"><.source_offer /></p>
       </div>
     </main>
     <.flash_group flash={@flash} />
@@ -165,6 +190,7 @@ defmodule __MODULE__Web.Layouts do
         </div>
       </header>
       <main class="mx-auto max-w-3xl px-6 py-12 sm:py-20">{render_slot(@inner_block)}</main>
+      <footer :if={source_url()} class="mx-auto max-w-3xl px-6 pb-10 text-sm text-muted"><.source_offer /></footer>
       <.flash_group flash={@flash} />
     </div>
     """
@@ -223,6 +249,7 @@ defmodule __MODULE__Web.Layouts do
         {render_slot(@inner_block)}
       </div>
     </main>
+    <footer :if={source_url()} class="px-4 pb-10 text-sm text-muted sm:px-6 lg:px-8"><.source_offer /></footer>
 
     <.flash_group flash={@flash} />
     """
