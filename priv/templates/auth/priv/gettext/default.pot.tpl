@@ -299,6 +299,22 @@ msgstr ""
 msgid "Your invitation is ready. Send this link to your guest:"
 msgstr ""
 
+#: lib/__APP___web/live/inside_live.ex:197
+#: lib/__APP___web/live/inside_live.ex:198
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:196
+#, elixir-autogen, elixir-format
+msgid "Copying was blocked. Select the link and copy it yourself."
+msgstr ""
+
+#: lib/__APP___web/live/inside_live.ex:195
+#, elixir-autogen, elixir-format
+msgid "Link copied."
+msgstr ""
+
 #: lib/__APP___web/live/invite_live.ex:77
 #, elixir-autogen, elixir-format
 msgid "You’re invited"

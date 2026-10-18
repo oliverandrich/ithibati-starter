@@ -118,9 +118,14 @@ defmodule IthibatiStarterTest do
     assert files["assets/js/app.js"] =~ ~s(import {InvitationLink} from "./invitation_link")
 
     assert files["assets/js/app.js"] =~
-             "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink}"
+             "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink, CopyText}"
 
     assert files["assets/js/invitation_link.js"] =~ "history.replaceState"
+
+    # The link and the recovery codes copy through one module.
+    assert files["assets/js/app.js"] =~ ~s(import {CopyText} from "./copy_text")
+    assert files["assets/js/copy_text.js"] =~ "export async function copyText"
+    assert files["assets/js/recovery_codes.js"] =~ ~s(import {copyText} from "./copy_text")
   end
 
   # Starting Chrome is most of a short feature's runtime, so the features share one session.

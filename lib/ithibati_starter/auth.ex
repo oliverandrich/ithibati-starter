@@ -110,12 +110,12 @@ defmodule IthibatiStarter.Auth do
     |> Files.replace(
       "assets/js/app.js",
       "import {Socket}",
-      "import \"./recovery_codes\"\nimport {InvitationLink} from \"./invitation_link\"\nimport {hooks as ithibatiHooks} from \"ithibati\"\nimport {Socket}"
+      "import \"./recovery_codes\"\nimport {InvitationLink} from \"./invitation_link\"\nimport {CopyText} from \"./copy_text\"\nimport {hooks as ithibatiHooks} from \"ithibati\"\nimport {Socket}"
     )
     |> Files.replace(
       "assets/js/app.js",
       "hooks: {...colocatedHooks}",
-      "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink}"
+      "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink, CopyText}"
     )
     |> Files.replace(
       "config/runtime.exs",

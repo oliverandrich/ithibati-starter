@@ -54,6 +54,20 @@ defmodule __MODULE__Web.InsideLiveTest do
     refute Repo.one(Invitation)
   end
 
+  # The link is long, so a button beside it copies it. The hook reads the link from the button.
+  test "a new link has a copy button with its own status line", %{conn: conn} do
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
+
+    html = view |> form("#invitation-form", note: "Grace") |> render_submit()
+
+    [link] = Regex.run(~r{https?://[^\s<"]+/invite#[A-Za-z0-9_-]+}, html)
+    button = "button[phx-hook=CopyText][aria-label='Copy link']"
+    assert has_element?(view, "#{button}[data-copy-text='#{link}']")
+
+    [_, status] = Regex.run(~r{data-copy-status="([^"]+)"}, html)
+    assert has_element?(view, "##{status}[role=status][phx-update=ignore]")
+  end
+
   # The list shows the note and nothing else identifies an open invitation, so one without a note
   # would be a row nobody can tell apart.
   test "a named invitation needs a note", %{conn: conn} do

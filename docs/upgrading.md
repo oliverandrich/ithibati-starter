@@ -95,6 +95,13 @@ A page opened without a link now asks for the link instead of calling it used or
 `lib/my_app_web/live/inside_live.ex` reports a missing address before a missing note.
 `test/my_app_web/invite_live_test.exs` and `invitation_delivery_test.exs` cover these.
 
+**A new invitation link has a copy button.** `lib/my_app_web/live/inside_live.ex` shows a copy
+icon beside the link and a status line below the box. The new `assets/js/copy_text.js` holds
+`copyText` and the `CopyText` hook. Import `CopyText` in `assets/js/app.js` and add it to the
+LiveSocket's `hooks`.
+`assets/js/recovery_codes.js` copies through `copyText`. `priv/gettext` gains three sentences.
+`test/my_app_web/inside_live_test.exs` and `test/features/invitation_test.exs` cover the button.
+
 ### 0.7.0
 
 **Colours are named by role.** `assets/css/app.css` gains an `@theme` block with role

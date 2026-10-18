@@ -155,4 +155,28 @@ defmodule __MODULE__Web.InvitationTest do
     |> assert_has(css("p", text: "Signed in as ada."))
     |> refute_has(css("#claim-form"))
   end
+
+  # Headless Chrome may refuse the clipboard, so the page records what it would write.
+  feature "the copy button puts the new link on the clipboard", %{session: session} do
+    virtual_authenticator(session)
+
+    claim(session, "ada")
+    link = invite_link(session, "Grace")
+
+    session
+    |> execute_script("""
+    Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {
+      writeText: async text => { window.copiedText = text }
+    }})
+    """)
+    |> click(button("Copy link"))
+    |> assert_has(css("[id^=copy-link-status-]", text: "Link copied."))
+    |> assert_has(css("[phx-hook=CopyText][data-copied]"))
+    |> execute_script("return window.copiedText", fn copied -> assert copied == link end)
+    |> execute_script("""
+    navigator.clipboard.writeText = async () => { throw new Error('permission denied') }
+    """)
+    |> click(button("Copy link"))
+    |> assert_has(css("[id^=copy-link-status-]", text: "Copying was blocked"))
+  end
 end

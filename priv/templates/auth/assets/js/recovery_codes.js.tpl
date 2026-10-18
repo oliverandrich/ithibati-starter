@@ -1,3 +1,5 @@
+import {copyText} from "./copy_text"
+
 // This screen is rendered by a controller, so copying does not depend on a LiveView hook.
 window.addEventListener("click", async event => {
   const button = event.target.closest("[data-copy-recovery]")
@@ -6,12 +8,7 @@ window.addEventListener("click", async event => {
   const status = document.getElementById("copy-status")
   const codes = Array.from(document.querySelectorAll("#recovery-codes li"), item => item.textContent.trim())
   button.disabled = true
-  try {
-    await navigator.clipboard.writeText(codes.join("\n"))
-    status.textContent = button.dataset.copySuccess
-  } catch {
-    status.textContent = button.dataset.copyError
-  } finally {
-    button.disabled = false
-  }
+  const copied = await copyText(codes.join("\n"))
+  button.disabled = false
+  status.textContent = copied ? button.dataset.copySuccess : button.dataset.copyError
 })
