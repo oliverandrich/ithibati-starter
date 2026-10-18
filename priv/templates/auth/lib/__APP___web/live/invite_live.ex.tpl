@@ -29,8 +29,11 @@ defmodule __MODULE__Web.InviteLive do
      )}
   end
 
+  # One token per mount. The hook pushes "" when the page was opened without a link.
   @impl true
-  # One token per page, so a socket cannot ask about token after token.
+  def handle_event("invitation-token", %{"token" => ""}, %{assigns: %{status: :waiting}} = socket),
+    do: {:noreply, assign(socket, status: :missing)}
+
   def handle_event("invitation-token", %{"token" => token}, %{assigns: %{status: :waiting}} = socket) do
     invitation = Invitations.fetch(token)
 
@@ -47,21 +50,23 @@ defmodule __MODULE__Web.InviteLive do
     {:noreply, assign(socket, username: username, error: nil)}
   end
 
-  def handle_event("accept", params, socket) do
-    identity =
-      case socket.assigns.status do
-        :open -> %{token: socket.assigns.token, username: params["username"]}
-        _addressed -> %{token: socket.assigns.token}
-      end
+  def handle_event("accept", params, %{assigns: %{status: :open}} = socket),
+    do: {:noreply, register(socket, %{token: socket.assigns.token, username: params["username"]})}
 
-    {:noreply, socket |> assign(error: nil) |> push_event("ithibati:register", identity)}
-  end
+  def handle_event("accept", _params, %{assigns: %{status: :addressed}} = socket),
+    do: {:noreply, register(socket, %{token: socket.assigns.token})}
+
+  # Nothing is open to accept yet, or any more.
+  def handle_event("accept", _params, socket), do: {:noreply, socket}
 
   def handle_event("ithibati:failed", %{"error" => error} = payload, socket) do
     {:noreply, assign(socket, error: CeremonyMessages.message(error, payload["exception"]))}
   end
 
   def handle_event("ithibati:done", _payload, socket), do: {:noreply, socket}
+
+  defp register(socket, identity),
+    do: socket |> assign(error: nil) |> push_event("ithibati:register", identity)
 
   defp status(nil), do: :unknown
   defp status(invitation), do: if(Invitations.open?(invitation), do: :open, else: :addressed)
@@ -88,6 +93,10 @@ defmodule __MODULE__Web.InviteLive do
       <.alert :if={@status == :unknown} class="mt-6">
         {gettext("This invitation has been used already, or it has expired. Ask for a new link.")}
       </.alert>
+
+      <p :if={@status == :missing} class="mt-6 text-center text-sm text-muted">
+        {gettext("Open the link from your invitation to accept it.")}
+      </p>
 
       <.alert :if={@error} class="mt-6">{@error}</.alert>
 

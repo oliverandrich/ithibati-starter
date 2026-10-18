@@ -86,6 +86,15 @@ Check the diff for these before deploying:
 
 Each entry names what changed in generated applications and what to do about it.
 
+### Unreleased
+
+**The invitation page starts a ceremony only for an open invitation.**
+`lib/my_app_web/live/invite_live.ex` ignores `accept` until a token has opened an invitation.
+A page opened without a link now asks for the link instead of calling it used or expired.
+`priv/gettext` gains that sentence and its German translation.
+`lib/my_app_web/live/inside_live.ex` reports a missing address before a missing note.
+`test/my_app_web/invite_live_test.exs` and `invitation_delivery_test.exs` cover these.
+
 ### 0.7.0
 
 **Colours are named by role.** `assets/css/app.css` gains an `@theme` block with role

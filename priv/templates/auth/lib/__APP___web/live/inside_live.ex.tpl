@@ -131,11 +131,12 @@ defmodule __MODULE__Web.InsideLive do
     end
   end
 
+  # Only email mode asks for a username, and its note is optional, so the username error comes first.
   defp changeset_message(changeset, email?) do
-    case changeset.errors do
-      [{:username, error} | _rest] -> refusal(CoreComponents.translate_error(error), email?)
-      [{:note, error} | _rest] -> gettext("Note %{message}.", message: CoreComponents.translate_error(error))
-      _other -> gettext("That invitation could not be written.")
+    case {changeset.errors[:username], changeset.errors[:note]} do
+      {nil, nil} -> gettext("That invitation could not be written.")
+      {nil, error} -> gettext("Note %{message}.", message: CoreComponents.translate_error(error))
+      {error, _note} -> refusal(CoreComponents.translate_error(error), email?)
     end
   end
 

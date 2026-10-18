@@ -83,6 +83,15 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
     end)
   end
 
+  # The note is optional when addressed, so an empty form is refused for its address.
+  test "an empty addressed invitation is refused for the address, not the note", %{conn: conn} do
+    addressing()
+    html = conn |> signed_in("ada@example.test") |> invite(username: "", note: "")
+
+    assert html =~ "Email address can&#39;t be blank."
+    refute html =~ "Note can"
+  end
+
   test "a German sender's guest gets a German subject", %{conn: conn} do
     addressing()
 

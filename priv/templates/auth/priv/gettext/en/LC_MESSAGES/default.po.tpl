@@ -239,6 +239,11 @@ msgstr ""
 msgid "This invitation has been used already, or it has expired. Ask for a new link."
 msgstr ""
 
+#: lib/__APP___web/live/invite_live.ex:98
+#, elixir-autogen, elixir-format
+msgid "Open the link from your invitation to accept it."
+msgstr ""
+
 #: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:34
 #, elixir-autogen, elixir-format
 msgid "This is the only time these codes will be shown."

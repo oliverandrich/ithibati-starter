@@ -232,6 +232,11 @@ msgstr "Neue Konten können nur per Einladung erstellt werden."
 msgid "This invitation has been used already, or it has expired. Ask for a new link."
 msgstr "Diese Einladung wurde bereits verwendet oder ist abgelaufen. Bitte um einen neuen Link."
 
+#: lib/__APP___web/live/invite_live.ex:98
+#, elixir-autogen, elixir-format
+msgid "Open the link from your invitation to accept it."
+msgstr "Öffne den Link aus deiner Einladung, um sie anzunehmen."
+
 #: lib/__APP___web/controllers/session_html/recovery_codes.html.heex:34
 #, elixir-autogen, elixir-format
 msgid "This is the only time these codes will be shown."

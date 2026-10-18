@@ -62,7 +62,35 @@ defmodule __MODULE__Web.InviteLiveTest do
     assert_push_event(view, "invitation-token-forget", %{})
   end
 
-  # One page opens one invitation. A socket cannot use it to ask about token after token.
+  # The page decides nothing before an invitation is open, so no ceremony starts without one.
+  test "accepting before the token arrives starts nothing", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/invite")
+
+    render_submit(view, "accept", %{"username" => "grace"})
+
+    refute_push_event(view, "ithibati:register", _)
+  end
+
+  test "accepting a token that opens nothing starts nothing", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/invite")
+    opened(view, "a-token-nobody-ever-held")
+
+    render_submit(view, "accept", %{"username" => "grace"})
+
+    refute_push_event(view, "ithibati:register", _)
+  end
+
+  # Without a link there is nothing that was used or ran out.
+  test "a page opened without a link says so", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/invite")
+
+    html = opened(view, "")
+
+    assert html =~ "Open the link from your invitation"
+    refute html =~ "has been used already"
+  end
+
+  # One mount opens one invitation.
   test "a page takes one token and ignores any after it", %{conn: conn} do
     open = invitation(%{"note" => "Grace"}, addressed: false)
     {:ok, view, _html} = live(conn, "/invite")
