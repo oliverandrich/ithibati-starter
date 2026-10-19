@@ -270,7 +270,7 @@ defmodule __MODULE__Web.InvitationsLive do
     """
   end
 
-  # Rows from before the inviter column existed have none.
+  # Rows from before the inviter column existed have none. A removed account leaves no pending row.
   defp inviter(%{invited_by: %{username: username}}), do: username
   defp inviter(_unknown), do: gettext("Unknown")
 end

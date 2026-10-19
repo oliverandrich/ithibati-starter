@@ -66,6 +66,8 @@ defmodule __MODULE__.Invitations do
   The inviter comes with it. It is `nil` for a row that predates the column, which a table built
   by this project's own migration never has — but an application that turned invitations on
   before schema version 4 will, and the page says so rather than inventing a name.
+  A pending row never names a removed account. `open/2` locks the inviter, and
+  `__MODULE__.Accounts.remove_account/2` deletes the account's open invitations.
   """
   def pending do
     Invitations.pending_query()
