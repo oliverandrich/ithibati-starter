@@ -76,6 +76,8 @@ defmodule __MODULE__Web.Router do
       live "/", InsideLive
       live "/account/settings", SettingsLive
       live "/account/invitations", InvitationsLive
+      # Administrator pages declare `__MODULE__Web.Admin`; see docs/interface.md.
+      live "/accounts", AccountsLive
       live "/account/verify", VerifyIdentityLive
       live "/account/passkeys", AccountSecurityLive, :passkeys
       live "/account/recovery-codes", AccountSecurityLive, :recovery_codes

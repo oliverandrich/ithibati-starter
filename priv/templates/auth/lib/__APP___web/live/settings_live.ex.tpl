@@ -36,6 +36,9 @@ defmodule __MODULE__Web.SettingsLive do
           </.group_link>
           <.group_link to={~p"/account/invitations"}>{gettext("Invitations")}</.group_link>
         </.group>
+        <.group :if={@current_account.admin} id="settings-admin" heading={gettext("Administration")} tag="nav">
+          <.group_link to={~p"/accounts"}>{gettext("Accounts")}</.group_link>
+        </.group>
       </div>
     </Layouts.member>
     """

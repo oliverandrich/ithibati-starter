@@ -40,6 +40,11 @@ adds the administrator flag.
   functions with the role read from the database. `MyApp.Repo` gains `for_update/1` for that
   lock. The new `rel/overlays/bin/grant-admin` and `lib/my_app/grant_admin.ex` make an account
   an administrator on the host. `docs/operations.md` describes the command.
+- `/accounts` lists every account with its join date and role, for administrators only.
+  The new `lib/my_app_web/live/accounts_live.ex` renders it. The new
+  `lib/my_app_web/admin.ex` provides `on_mount {MyAppWeb.Admin, :require_admin}`.
+  `Accounts.list_accounts/1` checks the role again. The settings page gains an
+  Administration group for administrators. `lib/my_app_web/router.ex` routes the page.
 - `docs/interface.md` explains when to use `Layouts.auth/1` or `Layouts.member/1`, the page shapes
   and the navigation. README and CONTRIBUTING link it.
 

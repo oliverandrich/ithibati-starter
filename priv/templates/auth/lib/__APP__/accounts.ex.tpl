@@ -3,13 +3,28 @@ defmodule __MODULE__.Accounts do
   The administrator role. An administrator grants and revokes it; the last one keeps it.
 
   The functions for an administrator take the acting account first and read its flag from the
-  database. A stale struct therefore grants nothing. Further administrator functions run through `with_admin/2`.
+  database. A stale struct therefore grants nothing. Functions that change data run through
+  `with_admin/2`.
   """
   import Ecto.Query
 
   alias Ithibati.Schema.Identifier
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
+
+  @doc """
+  Lists every account by username for an administrator.
+
+  Returns `{:error, :forbidden}` unless `admin` is one.
+  """
+  def list_accounts(%User{id: id}) do
+    # One read, so the role and the list come from the same snapshot.
+    accounts = Repo.all(from u in User, order_by: u.username)
+
+    if Enum.any?(accounts, &(&1.id == id and &1.admin)),
+      do: {:ok, accounts},
+      else: {:error, :forbidden}
+  end
 
   @doc """
   Makes the account with `account_id` an administrator.

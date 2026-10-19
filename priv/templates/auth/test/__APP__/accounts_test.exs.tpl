@@ -83,6 +83,15 @@ defmodule __MODULE__.AccountsTest do
              {:error, :forbidden}
   end
 
+  test "an administrator lists every account by username, a member lists none" do
+    admin = account(%{admin: true, username: "zz-admin"})
+    member = account(%{username: "aa-member"})
+
+    assert {:ok, accounts} = Accounts.list_accounts(admin)
+    assert Enum.map(accounts, & &1.id) == [member.id, admin.id]
+    assert Accounts.list_accounts(%{member | admin: true}) == {:error, :forbidden}
+  end
+
   # The operator's way back when no administrator is left, run on the host.
   test "the operator grants the role by identifier, as Ithibati stores it" do
     member = account()

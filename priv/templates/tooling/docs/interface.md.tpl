@@ -95,6 +95,10 @@ leads to another page. Its `detail` shows a short value, such as a count:
 Add a group for each new topic. A page under the settings sets
 `back={%{to: ~p"/account/settings", label: gettext("Settings")}}` and `breadcrumb`.
 
+An administrator page stays in the `:members` live_session, so it opens without a page
+load. It declares `on_mount {__MODULE__Web.Admin, :require_admin}`, which sends members
+back to the settings. Its `__MODULE__.Accounts` calls check the role again.
+
 ## Pages below another page
 
 A page reached from another one sets `title` and `back`:

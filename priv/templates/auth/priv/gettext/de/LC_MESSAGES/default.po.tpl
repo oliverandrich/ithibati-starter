@@ -127,7 +127,7 @@ msgstr "Mit Wiederherstellungscode anmelden"
 msgid "Sign out"
 msgstr "Abmelden"
 
-#: lib/__APP___web/live/inside_live.ex:19
+#: lib/__APP___web/live/inside_live.ex:16
 #, elixir-autogen, elixir-format
 msgid "Signed in as %{username}."
 msgstr "Angemeldet als %{username}."
@@ -262,7 +262,7 @@ msgstr "Benutzername %{message}."
 msgid "We can't find the internet"
 msgstr "Keine Verbindung zum Internet"
 
-#: lib/__APP___web/live/inside_live.ex:17
+#: lib/__APP___web/live/inside_live.ex:14
 #, elixir-autogen, elixir-format
 msgid "Welcome home"
 msgstr "Willkommen"
@@ -759,9 +759,49 @@ msgstr "Passkeys"
 
 #: lib/__APP___web/components/layouts.ex:300
 #: lib/__APP___web/live/account_security_live.ex:56
+#: lib/__APP___web/live/accounts_live.ex:33
 #: lib/__APP___web/live/invitations_live.ex:159
 #: lib/__APP___web/live/settings_live.ex:30
 #: lib/__APP___web/live/settings_live.ex:32
 #, elixir-autogen, elixir-format
 msgid "Settings"
 msgstr "Einstellungen"
+
+#: lib/__APP___web/live/accounts_live.ex:40
+#, elixir-autogen, elixir-format
+msgid "1 account"
+msgid_plural "%{count} accounts"
+msgstr[0] "1 Konto"
+msgstr[1] "%{count} Konten"
+
+#: lib/__APP___web/live/accounts_live.ex:32
+#: lib/__APP___web/live/accounts_live.ex:36
+#: lib/__APP___web/live/settings_live.ex:50
+#, elixir-autogen, elixir-format
+msgid "Accounts"
+msgstr "Konten"
+
+#: lib/__APP___web/live/settings_live.ex:47
+#, elixir-autogen, elixir-format
+msgid "Administration"
+msgstr "Administration"
+
+#: lib/__APP___web/live/accounts_live.ex:60
+#, elixir-autogen, elixir-format
+msgid "Administrator"
+msgstr "Administrator"
+
+#: lib/__APP___web/live/accounts_live.ex:53
+#, elixir-autogen, elixir-format
+msgid "Joined %{date}"
+msgstr "Dabei seit %{date}"
+
+#: lib/__APP___web/live/accounts_live.ex:60
+#, elixir-autogen, elixir-format
+msgid "Member"
+msgstr "Mitglied"
+
+#: lib/__APP___web/admin.ex:25
+#, elixir-autogen, elixir-format
+msgid "Only administrators can open this page."
+msgstr "Nur Administratoren können diese Seite öffnen."

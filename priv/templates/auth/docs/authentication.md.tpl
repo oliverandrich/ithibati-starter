@@ -56,9 +56,12 @@ button and a manual-copy fallback when clipboard permission is unavailable.
 
 The account menu in the header of `Layouts.member/1` opens from an icon and names the
 account at its top. It leads to `/account/settings`. That page counts the passkeys and
-the unused recovery codes. It also links the invitations. `/account/passkeys` supports
-enrollment, naming and removal; the last passkey cannot be removed. `/account/recovery-codes` shows the unused count
-and requires explicit confirmation before replacing every old code. New codes
+the unused recovery codes. It also links the invitations. For an administrator, an
+Administration group links `/accounts`. That page lists every account with its join
+date and role. A member who opens it is sent back to the settings.
+
+`/account/passkeys` supports enrollment, naming and removal; the last passkey cannot
+be removed. `/account/recovery-codes` shows the unused count and requires explicit confirmation before replacing every old code. New codes
 use the same one-time display and copy flow as registration.
 
 Passkey changes and code regeneration use controller requests with a freshly
