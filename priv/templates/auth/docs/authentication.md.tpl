@@ -63,6 +63,9 @@ administrator grants or revokes the role on another account's row, or removes th
 account. Each change asks for the passkey, as the security settings do. A new
 administrator could remove any account. Revoking could leave a stolen session the
 only administrator.
+A grant or revocation reaches the account's open pages without a reload. A revoked
+administrator on `/accounts` is sent to the settings. `bin/grant-admin`
+runs in its own VM, so open pages show its grant after a reload.
 Removing deletes the account's passkeys and recovery codes and revokes its sessions
 in the same transaction. Its open pages are disconnected after the commit. An
 administrator cannot remove their own account there.

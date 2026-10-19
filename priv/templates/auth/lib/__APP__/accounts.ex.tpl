@@ -35,8 +35,11 @@ defmodule __MODULE__.Accounts do
   Returns `{:error, :forbidden}` unless `admin` is one, and `{:error, :not_found}` for an
   unknown account.
   """
-  def grant_admin(admin, account_id),
-    do: with_admin(admin, fn _admins -> account_id |> account() |> set_admin(true) end)
+  def grant_admin(admin, account_id) do
+    admin
+    |> with_admin(fn _admins -> account_id |> account() |> set_admin(true) end)
+    |> announced()
+  end
 
   @doc """
   Takes the role from the account with `account_id`. An administrator may revoke their own.
@@ -45,13 +48,38 @@ defmodule __MODULE__.Accounts do
   of `grant_admin/2`.
   """
   def revoke_admin(admin, account_id) do
-    with_admin(admin, fn admins ->
+    admin
+    |> with_admin(fn admins ->
       case account(account_id) do
         %User{id: id} when admins == [id] -> {:error, :last_admin}
         account -> set_admin(account, false)
       end
     end)
+    |> announced()
   end
+
+  @doc """
+  Subscribes the calling process to role changes of `account`.
+
+  The process receives `:role_changed` after `grant_admin/2` or `revoke_admin/2` returns for
+  that account. The message carries no role: broadcasts from two processes arrive in any order,
+  so the subscriber reads `admin?/1`.
+  """
+  def subscribe_role(%User{id: id}), do: Phoenix.PubSub.subscribe(__MODULE__.PubSub, role_topic(id))
+
+  @doc "Whether `account` is an administrator, by the stored role. A removed account is not."
+  def admin?(%User{id: id}), do: Repo.exists?(from u in User, where: u.id == ^id and u.admin)
+
+  # After `with_admin/2` returns, so a subscriber reads the committed role. Inside a caller's own
+  # transaction, the message can arrive before that transaction commits.
+  defp announced({:ok, %User{id: id}} = result) do
+    Phoenix.PubSub.broadcast(__MODULE__.PubSub, role_topic(id), :role_changed)
+    result
+  end
+
+  defp announced(error), do: error
+
+  defp role_topic(id), do: "account_role:#{id}"
 
   @doc """
   Removes the account with `account_id` with its sessions and open invitations, for an
@@ -87,6 +115,8 @@ defmodule __MODULE__.Accounts do
 
   The identifier is a username, or an address in email mode, normalized as Ithibati stores it.
   It checks no acting account: running a release command already takes access to the host.
+  It broadcasts nothing. The release command runs in its own VM, so open pages show the new role
+  after a reload.
   """
   def grant_admin_as_operator(identifier) do
     User

@@ -8,6 +8,7 @@ defmodule __MODULE__Web.AccountsLiveTest do
 
   alias Ithibati.Identity.Sessions
   alias Ithibati.Web.Gate
+  alias __MODULE__.Accounts
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
 
@@ -51,6 +52,38 @@ defmodule __MODULE__Web.AccountsLiveTest do
 
     {:ok, view, _html} = live(signed_in(conn, account()), ~p"/account/settings")
     refute has_element?(view, "#settings-admin")
+  end
+
+  # The gate loads the account once per mount. A role change reaches an open page as a message.
+  test "the settings follow a role granted or revoked while they are open", %{conn: conn} do
+    admin = account(%{admin: true})
+    member = account()
+    {:ok, view, _html} = live(signed_in(conn, member), ~p"/account/settings")
+
+    {:ok, _member} = Accounts.grant_admin(admin, member.id)
+    assert has_element?(view, "#settings-admin")
+
+    {:ok, _member} = Accounts.revoke_admin(admin, member.id)
+    refute has_element?(view, "#settings-admin")
+  end
+
+  # Broadcasts from two processes arrive in any order, so the message only says to read again.
+  test "an open page takes the stored role, whatever the message order", %{conn: conn} do
+    member = account()
+    {:ok, view, _html} = live(signed_in(conn, member), ~p"/account/settings")
+
+    Repo.update!(Ecto.Changeset.change(member, admin: true))
+    send(view.pid, :role_changed)
+    assert has_element?(view, "#settings-admin")
+  end
+
+  test "an administrator whose role is revoked leaves the accounts page", %{conn: conn} do
+    admin = account(%{admin: true})
+    other = account(%{admin: true})
+    {:ok, view, _html} = live(signed_in(conn, other), ~p"/accounts")
+
+    {:ok, _other} = Accounts.revoke_admin(admin, other.id)
+    assert_redirect(view, ~p"/account/settings")
   end
 
   # A confirmation from the last five minutes, as `/account/verify` leaves it in the session.

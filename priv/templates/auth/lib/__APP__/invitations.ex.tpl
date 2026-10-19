@@ -17,6 +17,7 @@ defmodule __MODULE__.Invitations do
 
   alias Ecto.Changeset
   alias Ithibati.Identity.Invitations
+  alias __MODULE__.Accounts
   alias __MODULE__.Accounts.Invitation
   alias __MODULE__.Accounts.User
   alias __MODULE__.Identity
@@ -95,8 +96,8 @@ defmodule __MODULE__.Invitations do
   def withdraw(%User{id: id}, %Invitation{invited_by_id: id} = invitation),
     do: Invitations.withdraw(invitation)
 
-  def withdraw(%User{id: id}, invitation) do
-    if Repo.exists?(from u in User, where: u.id == ^id and u.admin),
+  def withdraw(account, invitation) do
+    if Accounts.admin?(account),
       do: Invitations.withdraw(invitation),
       else: {:error, :forbidden}
   end

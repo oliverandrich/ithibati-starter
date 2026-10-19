@@ -98,6 +98,8 @@ Add a group for each new topic. A page under the settings sets
 An administrator page stays in the `:members` live_session, so it opens without a page
 load. It declares `on_mount {__MODULE__Web.Admin, :require_admin}`, which sends members
 back to the settings. Its `__MODULE__.Accounts` calls check the role again.
+`__MODULE__Web.AccountRole` keeps `current_account.admin` current on every page of that
+live_session. A page may show controls by it.
 
 ## Confirmations
 

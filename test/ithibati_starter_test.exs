@@ -346,7 +346,7 @@ defmodule IthibatiStarterTest do
     assert files["docs/operations.md"] =~ "LOG_LEVEL"
   end
 
-  test "the members' live_session collects garbage and holds the administrator pages" do
+  test "the members' live_session collects garbage, follows the role and holds the administrator pages" do
     files = installed_files()
 
     assert files["lib/sample_web/transport_garbage.ex"] =~
@@ -356,6 +356,8 @@ defmodule IthibatiStarterTest do
 
     assert [_, members] = String.split(files["lib/sample_web/router.ex"], "live_session :members")
     assert members =~ "{SampleWeb.TransportGarbage, :collect}"
+    assert members =~ "{SampleWeb.AccountRole, :follow}"
+    assert files["lib/sample_web/account_role.ex"] =~ "Accounts.subscribe_role("
     # An administrator page in another live_session would load in full on every visit.
     assert members =~ ~s{live("/accounts", AccountsLive)}
     assert files["config/test.exs"] =~ "collect_transport_garbage: false"

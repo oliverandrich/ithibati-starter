@@ -107,6 +107,11 @@ adds the administrator flag.
   `MyApp.Invitations.withdraw/2` takes the acting account and answers `{:error, :forbidden}`
   for another member. `withdrawable?/2` decides whether the page shows the button, and
   `withdraws_any?/1` words the page's help.
+- Member pages follow a role granted or revoked while they are open. The new
+  `lib/my_app_web/account_role.ex` is an `on_mount` hook of the `:members` live_session in
+  `lib/my_app_web/router.ex`. `MyApp.Accounts.grant_admin/2` and `revoke_admin/2` broadcast
+  `:role_changed`, and the hook reads `Accounts.admin?/1`. An administrator page whose account
+  loses the role sends it to the settings; `MyAppWeb.Admin` assigns `admin_page` for that.
 - `MyApp.Invitations.open/2` locks the inviter's row and answers `{:error, :not_found}` for a
   removed account, so a removal cannot leave a working invitation behind.
 - `MyAppWeb.Reauth` lists the confirmation targets in `@targets`. `target/1` and `target?/1`

@@ -4,6 +4,7 @@ defmodule __MODULE__Web.InvitationsLiveTest do
   import Phoenix.LiveViewTest
 
   alias Ithibati.Web.Gate
+  alias __MODULE__.Accounts
   alias __MODULE__.Accounts.Invitation
   alias __MODULE__.Accounts.User
   alias __MODULE__.Invitations
@@ -89,6 +90,24 @@ defmodule __MODULE__Web.InvitationsLiveTest do
 
     view |> element(~s(#invitation-#{invitation.id} button[phx-click="withdraw"])) |> render_click()
     refute has_element?(view, "#invitation-#{invitation.id}")
+  end
+
+  # The buttons and the help follow the role while the page is open, not the role at mount.
+  test "the page follows a role granted or revoked while it is open", %{conn: conn} do
+    signed_in(conn, "ada")
+    ada = Repo.get_by!(User, username: "ada")
+    {:ok, invitation} = Invitations.open(ada, %{"note" => "Grace"})
+    {:ok, view, _html} = live(member(build_conn()), "/account/invitations")
+    bob = Repo.get_by!(User, username: "bob")
+    button = ~s(#invitation-#{invitation.id} button[phx-click="withdraw"])
+
+    {:ok, _bob} = Accounts.grant_admin(ada, bob.id)
+    assert render(view) =~ "As an administrator, you can take back any invitation"
+    assert has_element?(view, button)
+
+    {:ok, _bob} = Accounts.revoke_admin(ada, bob.id)
+    assert render(view) =~ "You can take back the ones you sent"
+    refute has_element?(view, button)
   end
 
   # The link is long, so a button beside it copies it. The hook reads the link from the button.
