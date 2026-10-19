@@ -67,6 +67,12 @@ schema, the screen and the sentence. `:operator_code` is the only supported clai
 mode. Do not add Ithibati's `:open` mode, a second identifier column, or a
 registration path that skips an invitation.
 
+Administrators are accounts whose `admin` flag is set. The account that claims the
+instance is the first one, and the last administrator keeps the role. Each
+administrator function takes the acting account first and runs through
+`__MODULE__.Accounts.with_admin/2`, which reads the flag from the database.
+`bin/grant-admin` is the operator's exception; it runs on the host and only adds the role.
+
 Authentication budgets are keyed by `conn.remote_ip`. `__MODULE__Web.ClientIp`
 supplies that address and believes `X-Forwarded-For` only on a connection from the
 loopback or from `TRUSTED_PROXIES`. Keep the plug ahead of the request id.
@@ -102,7 +108,8 @@ with Ithibati Starter:
 - `release`: compile assets and build a production release for the build platform.
 - In the unpacked release, `bin/setup-code` issues the first-account code and
   `bin/server` starts the HTTP server. Both migrate the database first.
-  `bin/migrate` applies migrations on their own.
+  `bin/migrate` applies migrations on their own. `bin/grant-admin USERNAME` makes
+  an account an administrator.
 
 Application-specific asset builds and quality checks remain in Mix aliases.
 

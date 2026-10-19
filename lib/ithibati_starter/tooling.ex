@@ -26,9 +26,7 @@ defmodule IthibatiStarter.Tooling do
     |> Igniter.add_task("deps.unlock", ["daisyui", "heroicons"])
     |> Igniter.rm("assets/vendor/heroicons.js")
     |> Files.copy_tree("tooling", bindings, on_exists: :overwrite)
-    |> Igniter.add_task("cmd", [
-      "chmod +x rel/overlays/bin/server rel/overlays/bin/migrate rel/overlays/bin/setup-code"
-    ])
+    |> Igniter.add_task("cmd", ["chmod +x " <> Enum.join(launchers(), " ")])
     |> MixProject.update(:project, [:elixir], fn _ -> {:ok, {:code, inspect("~> 1.20")}} end)
     |> MixProject.update(:cli, [:preferred_envs, :precommit], fn _ -> {:ok, {:code, :test}} end)
     |> MixProject.update(:project, [:aliases, :precommit], fn _ -> {:ok, {:code, gate()}} end)
@@ -79,6 +77,16 @@ defmodule IthibatiStarter.Tooling do
       "assets.build",
       "test"
     ]
+  end
+
+  # Every launcher template becomes an executable release command.
+  defp launchers do
+    :ithibati_starter
+    |> :code.priv_dir()
+    |> Path.join("templates/tooling/rel/overlays/bin/*.tpl")
+    |> Path.wildcard()
+    |> Enum.map(&("rel/overlays/bin/" <> Path.basename(&1, ".tpl")))
+    |> Enum.sort()
   end
 
   # Phoenix scaffolds PostgreSQL. The repository becomes a dispatcher over one repository per

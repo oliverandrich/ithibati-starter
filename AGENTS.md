@@ -93,7 +93,7 @@ with Ithibati Starter:
 - `release`: compile assets and build a production release for the build platform.
 - In the unpacked release, `bin/setup-code` and `bin/server` migrate the database
   first; `bin/server` then starts the HTTP server. `bin/migrate` applies
-  migrations on their own.
+  migrations on their own. `bin/grant-admin USERNAME` makes an account an administrator.
 
 Application-specific asset builds and quality checks remain in Mix aliases.
 

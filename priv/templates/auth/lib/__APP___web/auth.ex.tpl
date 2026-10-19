@@ -153,9 +153,10 @@ defmodule __MODULE__Web.Auth do
   # `claim/2` is what stops it from being the second as well. Before the grant, like `accept/2`
   # above: a transaction that is going to be refused should not mint recovery codes on its way to
   # being rolled back, because they sit in plaintext in the `changes_so_far` the caller is handed.
+  # The claiming account administers the instance.
   defp claim_instance(username, key_attrs, authorization) do
     Multi.new()
-    |> Multi.insert(:account, User.changeset(%User{}, %{"username" => username}))
+    |> Multi.insert(:account, User.changeset(%User{admin: true}, %{"username" => username}))
     |> Instance.claim(authorization: authorization)
     |> Grant.with_key_and_codes(key_attrs)
   end

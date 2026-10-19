@@ -23,6 +23,9 @@ defmodule __MODULE__.Repo.SQLite do
   # The repository registers under that name, so name lookups for `__MODULE__.Repo` find it.
   use Ecto.Repo, otp_app: :__APP__, adapter: Ecto.Adapters.SQLite3, default_dynamic_repo: @name
 
+  @doc "Returns `query` unchanged. An `:immediate` transaction holds the write lock from BEGIN."
+  def for_update(query), do: query
+
   # Under `:supervisor`, `__MODULE__.Repo` has already merged its configuration beneath the
   # start options. Under `:runtime`, the `__MODULE__.Repo` configuration overrides the given one.
   # `@defaults` sit beneath both. `priv` and the telemetry prefix match a single repository.

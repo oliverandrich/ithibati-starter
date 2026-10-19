@@ -93,7 +93,7 @@ from names to addresses would leave every identifier it holds failing the new fo
 ## Migrating and starting
 
 Every start of the application migrates its database first. That includes
-`bin/setup-code` and `bin/server`, so the server never serves an outdated schema.
+`bin/setup-code`, `bin/grant-admin` and `bin/server`, so the server never serves an outdated schema.
 Issue the first-account setup code on the server, then start the application:
 
 ```sh
@@ -143,6 +143,20 @@ deployment's normal workflow.
 Back up the database before an update, because the new release migrates it as it
 starts. Replacing the release does not undo migrations. The old release works again
 only if it supports the resulting schema.
+
+## Administrators
+
+The account that claims the instance is its administrator. Upgrading an existing
+application with the `add_admin_to_users` migration makes the claiming account an
+administrator if it still exists. An instance whose first account was deleted has
+none. On the host, this makes an account an administrator:
+
+```sh
+bin/grant-admin USERNAME
+```
+
+In email mode, pass the account's address. The command exits with status 1 when
+no account has that username or address.
 
 ## Authentication maintenance
 

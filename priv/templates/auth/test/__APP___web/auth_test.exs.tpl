@@ -66,7 +66,8 @@ defmodule __MODULE__Web.AuthTest do
 
       assert {:ok, _conn} = Auth.register(authorized, key_attrs(), "first_one", %{})
 
-      assert Repo.get_by(User, username: "first_one")
+      # The account that claims the instance administers it.
+      assert %User{admin: true} = Repo.get_by(User, username: "first_one")
       refute Instance.needs_setup?()
       assert {:error, :already_claimed} = Instance.issue_code()
     end
@@ -127,7 +128,7 @@ defmodule __MODULE__Web.AuthTest do
       assert {:ok, _conn} =
                Auth.register(conn(), key_attrs(), "invitee", %{"token" => ctx.invitation.token})
 
-      assert Repo.get_by(User, username: "invitee")
+      assert %User{admin: false} = Repo.get_by(User, username: "invitee")
       assert Repo.get!(Invitation, ctx.invitation.id).accepted_at
     end
 

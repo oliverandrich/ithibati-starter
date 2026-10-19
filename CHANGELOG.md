@@ -12,7 +12,8 @@ a version to an existing application.
 
 ## [0.9.0] - 2026-10-18
 
-Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is needed.
+Requires Ithibati 0.9.0. Ithibati's schema version stays at 5. One application migration
+adds the administrator flag.
 
 ### Added
 
@@ -31,6 +32,14 @@ Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is neede
   passkeys with their number, the recovery codes left and the invitations. The new
   `lib/my_app_web/live/settings_live.ex` renders it with `group/1` and `group_link/1`, new in
   `lib/my_app_web/components/core_components.ex`. `lib/my_app_web/router.ex` routes it.
+- An administrator role. The new migration
+  `priv/repo/migrations/20261019100000_add_admin_to_users.exs` adds `users.admin` and grants it
+  to the account that claimed the instance. `lib/my_app/accounts/user.ex` gains the field, and
+  the claim in `lib/my_app_web/auth.ex` sets it. The new `lib/my_app/accounts.ex` grants and
+  revokes the role; the last administrator keeps it. `with_admin/2` runs further administrator
+  functions with the role read from the database. `MyApp.Repo` gains `for_update/1` for that
+  lock. The new `rel/overlays/bin/grant-admin` and `lib/my_app/grant_admin.ex` make an account
+  an administrator on the host. `docs/operations.md` describes the command.
 - `docs/interface.md` explains when to use `Layouts.auth/1` or `Layouts.member/1`, the page shapes
   and the navigation. README and CONTRIBUTING link it.
 

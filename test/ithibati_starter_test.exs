@@ -383,9 +383,9 @@ defmodule IthibatiStarterTest do
   end
 
   @tag :command_contract
-  test "release launchers start the server, migrate and issue setup codes from any directory" do
-    result = project() |> install() |> apply_igniter!()
-    files = result.assigns.test_files
+  test "release launchers start the server, migrate, issue setup codes and grant the role from any directory" do
+    igniter = project() |> install()
+    files = apply_igniter!(igniter).assigns.test_files
 
     directory =
       Path.join(System.tmp_dir!(), "starter release #{System.unique_integer([:positive])}")
@@ -393,24 +393,46 @@ defmodule IthibatiStarterTest do
     File.mkdir_p!(directory)
     on_exit(fn -> File.rm_rf!(directory) end)
     app = Path.join(directory, "sample")
-    File.write!(app, "#!/bin/sh\nprintf '%s\\n' \"$PHX_SERVER\" \"$@\"\nexit 17\n")
+
+    # The identifier reaches the release through the environment, since `eval` takes no arguments.
+    File.write!(
+      app,
+      "#!/bin/sh\nprintf '%s\\n' \"$PHX_SERVER\" \"$GRANT_ADMIN_IDENTIFIER\" \"$@\"\nexit 17\n"
+    )
+
     File.chmod!(app, 0o755)
 
-    for {name, expected} <- [
-          {"server", "true\nstart\n"},
-          {"migrate", "\neval\nSample.Release.migrate()\n"},
-          {"setup-code", "\neval\nSample.InitialSetup.print_code!()\n"}
+    for {name, args, expected} <- [
+          {"server", [], "true\n\nstart\n"},
+          {"migrate", [], "\n\neval\nSample.Release.migrate()\n"},
+          {"setup-code", [], "\n\neval\nSample.InitialSetup.print_code!()\n"},
+          {"grant-admin", ["ada@example.org"],
+           "\nada@example.org\neval\nSample.GrantAdmin.run!()\n"}
         ] do
-      source = Map.fetch!(files, "rel/overlays/bin/#{name}")
       path = Path.join(directory, name)
-      File.write!(path, source)
-      assert {^expected, 17} = System.cmd("sh", [path], cd: "/", env: [{"PHX_SERVER", nil}])
+      File.write!(path, Map.fetch!(files, "rel/overlays/bin/#{name}"))
 
-      if name == "setup-code" do
+      assert {^expected, 17} =
+               System.cmd("sh", [path | args], cd: "/", env: [{"PHX_SERVER", nil}])
+
+      # Commands that start the application clear PHX_SERVER, so no listener opens.
+      if name in ["setup-code", "grant-admin"] do
         assert {^expected, 17} =
-                 System.cmd("sh", [path], cd: "/", env: [{"PHX_SERVER", "true"}])
+                 System.cmd("sh", [path | args], cd: "/", env: [{"PHX_SERVER", "true"}])
       end
     end
+
+    assert {usage, 64} =
+             System.cmd("sh", [Path.join(directory, "grant-admin")], stderr_to_stdout: true)
+
+    assert usage =~ "usage:"
+
+    # The commands above run through `sh`, so only this shows a release can execute them.
+    assert {"cmd", ["chmod +x " <> chmod]} =
+             Enum.find(igniter.tasks, &match?({"cmd", ["chmod" <> _]}, &1))
+
+    launchers = files |> Map.keys() |> Enum.filter(&String.starts_with?(&1, "rel/overlays/bin/"))
+    assert Enum.sort(String.split(chmod)) == Enum.sort(launchers)
   end
 
   test "there is one profile left; Beans, the brand colour and the license are the choices" do

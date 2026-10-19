@@ -22,6 +22,8 @@ defmodule __MODULE__.Accounts.User do
     ithibati_account()
 
     field :name, :string
+    # Set by `__MODULE__.Accounts` and the claim, never cast from a form.
+    field :admin, :boolean, default: false
     timestamps(type: :utc_datetime_usec)
   end
 

@@ -8,6 +8,11 @@ defmodule __MODULE__.Repo.Postgres do
   # The repository registers under that name, so name lookups for `__MODULE__.Repo` find it.
   use Ecto.Repo, otp_app: :__APP__, adapter: Ecto.Adapters.Postgres, default_dynamic_repo: @name
 
+  import Ecto.Query, only: [lock: 2]
+
+  @doc "Locks the rows `query` selects until the transaction ends."
+  def for_update(query), do: lock(query, "FOR UPDATE")
+
   # Under `:supervisor`, `__MODULE__.Repo` has already merged its configuration beneath the
   # start options. Under `:runtime`, the `__MODULE__.Repo` configuration overrides the given one.
   # `priv` and the telemetry prefix match a single repository.

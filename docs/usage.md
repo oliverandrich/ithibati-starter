@@ -214,8 +214,9 @@ absolute `DATABASE_PATH` for SQLite or `DATABASE_URL` for PostgreSQL. The genera
 ## Deliberate defaults
 
 **A starting point, not an admin product.** Every authenticated member can invite
-someone. There are no administrator roles, invitation-management dashboard, billing,
-teams or background-job framework. Add the policies your app needs.
+someone. The account that claims the instance is an administrator. There is no
+invitation-management dashboard, billing, teams or background-job framework. Add the
+policies your app needs.
 
 **Fresh applications only.** The tested scaffold is a non-umbrella Phoenix 1.8.14
 application with PostgreSQL, HTML, LiveView, Tailwind and esbuild. The installer adds
@@ -242,4 +243,5 @@ never migrate on start. Auth cleanup never runs automatically.
 
 Generated applications share `mise dev`, `mise reset`, `mise migrate`, `mise setup-code` and
 `mise release`. Reset explicitly recreates the development database; release
-builds provide `bin/migrate`, `bin/setup-code` and `bin/server` for the target machine.
+builds provide `bin/migrate`, `bin/setup-code`, `bin/server` and `bin/grant-admin` for the
+target machine.

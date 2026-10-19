@@ -7,7 +7,10 @@ the code after migration as described in [Operations](operations.md); enter it o
 HTTPS. The code is printed only by that command, stored only as a digest, and
 consumed with the first account claim. Later registrations require a valid
 invitation; every authenticated member can create links on `/account/invitations`. Links are
-shown once, expire, and are accepted once. There is no administrator role.
+shown once, expire, and are accepted once. The account that claims the instance
+is an administrator. `bin/grant-admin` makes another account one; see
+[Operations](operations.md#administrators). `__MODULE__.Accounts` grants and
+revokes the role, and the last administrator keeps it.
 
 The same page lists what is outstanding: for whom, by whom and when it runs
 out. Any member can take any of them back, and the link stops working at once.
