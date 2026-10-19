@@ -31,7 +31,6 @@ defmodule __MODULE__Web.PlaywrightCase do
       end
 
       setup %{conn: conn}, do: __MODULE__Web.PlaywrightCase.fail_on_page_errors(conn)
-      setup %{conn: conn}, do: __MODULE__Web.PlaywrightCase.leave_page_at_exit(conn)
 
       import __MODULE__Web.PlaywrightCase
       import Ithibati.Testing.Passkeys
@@ -64,17 +63,6 @@ defmodule __MODULE__Web.PlaywrightCase do
           flunk("the page error collector did not answer")
       end
     end)
-  end
-
-  @doc """
-  Navigates the page to `about:blank` when the feature ends, before the sandbox owner stops.
-
-  Leaving ends the page's LiveViews, so none queries the database after its sandbox is gone.
-  It waits for the page, where `ecto_sandbox_stop_owner_delay` would wait a fixed time.
-  This `on_exit` runs before the case's own, because `on_exit` callbacks run in reverse order.
-  """
-  def leave_page_at_exit(%{frame_id: frame}) do
-    on_exit(fn -> Frame.goto(frame, url: "about:blank", timeout: timeout()) end)
   end
 
   defp collect_page_errors(errors) do
