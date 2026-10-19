@@ -235,6 +235,18 @@ defmodule __MODULE__Web.FeatureCase do
     session
   end
 
+  @doc "Sets the viewport, with `mobile` for a phone's touch and scrollbars."
+  def viewport(session, width, height, mobile) do
+    command(session, "Emulation.setDeviceMetricsOverride", %{
+      width: width,
+      height: height,
+      deviceScaleFactor: 1,
+      mobile: mobile
+    })
+
+    session
+  end
+
   # chromedriver answers the WebDriver envelope — `sessionId`, `status`, `value` — and what CDP
   # returned is inside `value`.
   defp command(session, cmd, params) do

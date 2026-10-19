@@ -45,6 +45,10 @@ defmodule IthibatiStarterTest do
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
       assert files["docs/authentication.md"] =~ "pins Ithibati 0.9.0"
       assert files["docs/localization.md"] =~ "Accept-Language"
+      assert files["docs/interface.md"] =~ "Layouts.member/1"
+      assert files["docs/interface.md"] =~ "SampleWeb.Navigation"
+      assert files["README.md"] =~ "[Interface](docs/interface.md)"
+      assert files["CONTRIBUTING.md"] =~ "[Interface](docs/interface.md)"
       assert files["CONTRIBUTING.md"] =~ "Chrome"
       refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
       refute files["CONTRIBUTING.md"] =~ "## Health, releases"
@@ -119,7 +123,7 @@ defmodule IthibatiStarterTest do
     assert files["assets/js/app.js"] =~ ~s(import {InvitationLink} from "./invitation_link")
 
     assert files["assets/js/app.js"] =~
-             "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink, CopyText}"
+             "hooks: {...colocatedHooks, ...ithibatiHooks, InvitationLink, CopyText, ShrinkTitle}"
 
     assert files["assets/js/invitation_link.js"] =~ "history.replaceState"
 
@@ -127,6 +131,23 @@ defmodule IthibatiStarterTest do
     assert files["assets/js/app.js"] =~ ~s(import {CopyText} from "./copy_text")
     assert files["assets/js/copy_text.js"] =~ "export async function copyText"
     assert files["assets/js/recovery_codes.js"] =~ ~s(import {copyText} from "./copy_text")
+  end
+
+  test "the member shell ships its navigation, title hook and safe-area variables" do
+    files = installed_files()
+
+    assert files["lib/sample_web/navigation.ex"] =~ "def items(_account)"
+    assert files["lib/sample_web/navigation.ex"] =~ ~s(section: :home)
+    assert files["lib/sample_web/components/layouts.ex"] =~ "SampleWeb.Navigation.items("
+    assert files["assets/js/app.js"] =~ ~s(import {ShrinkTitle} from "./shrink_title")
+    assert files["assets/js/app.js"] =~ ~r/hooks: \{[^}]*\bShrinkTitle\b/
+    assert files["assets/js/shrink_title.js"] =~ "export const ShrinkTitle"
+    assert files["assets/css/app.css"] =~ "--nav-bar: 49px;"
+    assert files["assets/css/app.css"] =~ "--safe-bottom: env(safe-area-inset-bottom, 0px);"
+    assert files["lib/sample_web/components/core_components.ex"] =~ "<h1 data-large-title"
+    assert files["lib/sample_web/live/inside_live.ex"] =~ "section={:home}"
+    assert files["test/sample_web/components/member_layout_test.exs"] =~ "layout={:columns}"
+    assert files["test/features/shell_test.exs"] =~ "data-shrunk"
   end
 
   # Starting Chrome is most of a short feature's runtime, so the features share one session.

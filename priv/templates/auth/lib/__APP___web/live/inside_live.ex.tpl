@@ -146,7 +146,7 @@ defmodule __MODULE__Web.InsideLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_account={@current_account}>
+    <Layouts.member flash={@flash} current_account={@current_account} section={:home}>
       <.header>
         {gettext("Welcome home")}
         <:subtitle>{gettext("Signed in as %{username}.", username: @current_account.username)}</:subtitle>

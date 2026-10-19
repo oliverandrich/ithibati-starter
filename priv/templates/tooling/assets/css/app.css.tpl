@@ -84,3 +84,23 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Below lg the main navigation is a bottom tab bar; --nav-bar is its height, Apple's 49pt.
+   The safe area insets are read once here, so the layout and the browser tests share the names. */
+:root {
+  --nav-bar: 49px;
+  --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px); --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* From lg overscroll-behavior: none disables rubber-band scrolling and Safari's pull to reload. */
+@media (width >= 64rem) {
+  html { overscroll-behavior: none; }
+}
+
+/* Safe area insets keep the page and bars clear of the status bar and a landscape notch. */
+@media (width < 64rem) {
+  body { padding-inline: var(--safe-left) var(--safe-right); }
+  #masthead { padding-top: calc(.375rem + var(--safe-top)); }
+  #main-navigation { padding-inline: var(--safe-left) var(--safe-right); }
+}

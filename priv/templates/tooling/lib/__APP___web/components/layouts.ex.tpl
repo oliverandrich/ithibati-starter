@@ -166,35 +166,196 @@ defmodule __MODULE__Web.Layouts do
     """
   end
 
-  @doc "The signed-in application shell."
+  @doc """
+  The signed-in application layout.
+
+  Below `lg` the header is a top bar, and a tab bar links the places once there are two.
+  From `lg` the same header is the left column with the sidebar.
+  `__MODULE__Web.Navigation` lists the places; `section` marks the page's own.
+
+  `layout={:sidebar}`, the default, renders the inner block in the main column.
+  `layout={:columns}` renders only the `:list` and `:detail` slots, side by side from `lg`.
+  A phone shows the list, or the detail once `selected` is true.
+
+  `docs/interface.md` says when to use which layout and shape.
+  """
   attr :flash, :map, required: true
   attr :current_account, :map, required: true
-  slot :inner_block, required: true
+  attr :section, :atom, default: nil, doc: "the navigation entry the page belongs to"
+
+  attr :navigation, :list,
+    default: nil,
+    doc: "the places to link; `__MODULE__Web.Navigation.items/1` by default"
+
+  attr :title, :string,
+    default: nil,
+    doc: "the page's title, which a phone's bar shows once the large heading has scrolled away"
+
+  attr :back, :map,
+    default: nil,
+    doc: "`%{to: path, label: text}`, where a phone's bar leads back to; `patch:` stays in the view"
+
+  attr :breadcrumb, :boolean,
+    default: false,
+    doc: "whether wide screens in `:sidebar`, which hide the bar's back link, show a breadcrumb"
+
+  attr :layout, :atom, default: :sidebar, values: [:sidebar, :columns]
+  attr :selected, :boolean, default: false, doc: "whether a phone shows the detail in `:columns`"
+  slot :inner_block, doc: "the page in `:sidebar`"
+  slot :list, doc: "the list pane in `:columns`"
+  slot :detail, doc: "the detail pane in `:columns`"
 
   def member(assigns) do
+    places = assigns.navigation || __MODULE__Web.Navigation.items(assigns.current_account)
+    assigns = assign(assigns, places: places, tabs?: length(places) > 1)
+
     ~H"""
-    <div class="min-h-svh">
-      <header class="border-b border-line bg-surface">
-        <div class="flex items-center justify-between gap-4 px-6 py-5">
-          <.link navigate={~p"/"} class="min-w-0 truncate text-xl font-semibold tracking-tight"><.wordmark /></.link>
-          <details id="user-menu" class="group relative shrink-0" phx-click-away={JS.remove_attribute("open", to: "#user-menu")} phx-window-keydown={JS.remove_attribute("open", to: "#user-menu")} phx-key="Escape">
-            <summary class="flex cursor-pointer list-none items-center gap-2 rounded-control px-3 py-2 text-sm font-semibold hover:bg-selection focus-visible:outline-2 focus-visible:outline-accent">
-              <span class="max-w-32 truncate" title={@current_account.username}>{@current_account.username}</span><Lucideicons.chevron_down aria-hidden="true" class="size-4 shrink-0 transition" />
+    <div class={[
+      "min-h-svh lg:grid lg:grid-cols-[256px_minmax(0,1fr)] lg:pb-0",
+      @tabs? && "pb-[calc(var(--nav-bar)+var(--safe-bottom))]"
+    ]}>
+      <%!-- Below `lg` a sticky top bar; see assets/js/shrink_title.js. --%>
+      <header
+        id="app-header"
+        phx-hook="ShrinkTitle"
+        phx-mounted={JS.ignore_attributes(["data-shrunk"])}
+        class="group sticky top-0 z-30 flex flex-wrap items-center justify-between gap-4 lg:h-svh lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-start lg:gap-5 lg:overflow-y-auto lg:border-r lg:border-line lg:px-3 lg:py-4"
+      >
+        <%!-- The translucent background is set here, not on the header. A `backdrop-filter` on
+             the header would make it the containing block of the fixed tab bar. --%>
+        <div
+          id="masthead"
+          class="relative flex w-full items-center justify-between gap-3 bg-ground/85 px-4 py-1.5 backdrop-blur-md sm:px-10 lg:bg-transparent lg:py-0 lg:pr-0 lg:pl-2.5 lg:backdrop-blur-none"
+        >
+          <.link
+            :if={@back}
+            id="nav-back"
+            navigate={@back[:to]}
+            patch={@back[:patch]}
+            class="flex min-h-11 items-center gap-0.5 text-body font-medium text-accent lg:hidden"
+          >
+            <Lucideicons.chevron_left aria-hidden="true" class="-ml-1.5 size-6" />
+            {@back.label}
+          </.link>
+          <.link
+            navigate={~p"/"}
+            class={["min-w-0 items-center", if(@back, do: "hidden lg:flex", else: "flex")]}
+          >
+            <span class="truncate text-2xl leading-none font-bold tracking-tight lg:text-[26px]"><.wordmark /></span>
+          </.link>
+          <%!-- Shows the page title once the large heading scrolls out of view. --%>
+          <p
+            :if={@title}
+            id="nav-title"
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-x-28 truncate text-center text-label font-semibold opacity-0 transition-opacity group-data-[shrunk]:opacity-100 lg:hidden"
+          >
+            {@title}
+          </p>
+          <details
+            id="user-menu"
+            class="relative shrink-0"
+            phx-click-away={JS.remove_attribute("open", to: "#user-menu")}
+            phx-window-keydown={JS.remove_attribute("open", to: "#user-menu")}
+            phx-key="Escape"
+          >
+            <summary
+              aria-label={gettext("Account menu, %{username}", username: @current_account.username)}
+              title={@current_account.username}
+              class="flex size-11 cursor-pointer list-none items-center justify-center rounded-control text-muted hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-accent lg:size-7"
+            >
+              <Lucideicons.circle_user aria-hidden="true" class="size-5 lg:size-4.5" />
             </summary>
-            <nav aria-label={gettext("Your account")} class="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-line bg-surface p-2 shadow-lg">
-              <.link navigate={~p"/account/passkeys"} class="block rounded-control px-3 py-2 text-sm hover:bg-selection">{gettext("Manage passkeys")}</.link>
-              <.link navigate={~p"/account/recovery-codes"} class="block rounded-control px-3 py-2 text-sm hover:bg-selection">{gettext("Recovery codes")}</.link>
-              <.link href={~p"/session"} method="delete" class="mt-1 block rounded-control border-t border-line px-3 py-2 text-sm text-danger hover:bg-danger-surface">{gettext("Sign out")}</.link>
+            <nav
+              aria-label={gettext("Your account")}
+              class="absolute top-full right-0 z-40 mt-2 w-56 rounded-control border border-line bg-surface p-1 text-label shadow-lg"
+            >
+              <p class="mb-1 truncate border-b border-line px-3 pt-2 pb-2.5 font-semibold">{@current_account.username}</p>
+              <.link navigate={~p"/account/passkeys"} class="block rounded-control px-3 py-2 hover:bg-ground">{gettext("Manage passkeys")}</.link>
+              <.link navigate={~p"/account/recovery-codes"} class="block rounded-control px-3 py-2 hover:bg-ground">{gettext("Recovery codes")}</.link>
+              <.link href={~p"/session"} method="delete" class="mt-1 block rounded-control border-t border-line px-3 py-2 text-danger hover:bg-danger-surface">{gettext("Sign out")}</.link>
             </nav>
           </details>
         </div>
+        <nav id="sidebar" aria-label={gettext("Main navigation")} class="hidden flex-col gap-0.5 lg:flex">
+          <.link
+            :for={place <- @places}
+            id={"sidebar-#{place.section}"}
+            navigate={place.to}
+            aria-current={place.section == @section && "page"}
+            class="flex min-h-9 items-center gap-2.5 rounded-control px-2.5 text-label text-muted hover:bg-surface hover:text-ink aria-[current=page]:bg-selection aria-[current=page]:font-semibold aria-[current=page]:text-accent"
+          >
+            <Lucideicons.render! name={place.icon} aria-hidden="true" class="size-4 shrink-0" />
+            <span class="min-w-0 truncate">{place.label}</span>
+          </.link>
+        </nav>
+        <div :if={source_url()} id="colophon" class="hidden text-meta text-muted lg:mt-auto lg:block lg:px-2.5 lg:pb-1">
+          <.source_offer />
+        </div>
+        <%!-- Phone tab bar in iOS style: icon and label per place, above the safe-area inset. --%>
+        <nav
+          :if={@tabs?}
+          id="main-navigation"
+          aria-label={gettext("Main navigation")}
+          class="fixed inset-x-0 bottom-0 z-30 flex h-[calc(var(--nav-bar)+var(--safe-bottom))] items-stretch justify-around border-t border-line bg-ground/85 pb-[var(--safe-bottom)] backdrop-blur-md lg:hidden"
+        >
+          <.link
+            :for={place <- @places}
+            id={"tab-#{place.section}"}
+            navigate={place.to}
+            aria-current={place.section == @section && "page"}
+            class="flex min-w-16 flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted aria-[current=page]:text-accent"
+          >
+            <Lucideicons.render! name={place.icon} aria-hidden="true" class="size-6" />
+            <span>{place.label}</span>
+          </.link>
+        </nav>
       </header>
-      <main class="mx-auto max-w-3xl px-6 py-12 sm:py-20">{render_slot(@inner_block)}</main>
-      <footer :if={source_url()} class="mx-auto max-w-3xl px-6 pb-10 text-sm text-muted"><.source_offer /></footer>
+      <div class="min-w-0">
+        <main
+          :if={@layout == :sidebar}
+          id="main-content"
+          class="mx-auto max-w-7xl px-6 py-6 sm:px-12 sm:py-12 lg:max-w-none lg:px-10 lg:py-10"
+        >
+          <nav
+            :if={@breadcrumb && @back && @title}
+            id="breadcrumb"
+            aria-label={gettext("Breadcrumb")}
+            class="mb-4 hidden items-center gap-1 text-label text-muted lg:flex"
+          >
+            <.link navigate={@back[:to]} patch={@back[:patch]} class="hover:text-ink">{@back.label}</.link>
+            <Lucideicons.chevron_right aria-hidden="true" class="size-4" />
+            <span aria-current="page" class="text-ink">{@title}</span>
+          </nav>
+          {render_slot(@inner_block)}
+        </main>
+        <%!-- From lg the page does not scroll; each pane scrolls on its own and takes the keyboard
+             through `tabindex`. The list stands beside the detail, so no breadcrumb is needed. --%>
+        <main
+          :if={@layout == :columns}
+          id="main-content"
+          class="lg:grid lg:h-svh lg:grid-cols-[28rem_minmax(0,1fr)]"
+        >
+          <section
+            id="list-pane"
+            tabindex="0"
+            class={[pane_class(), "lg:border-r lg:border-line lg:bg-surface", @selected && "hidden lg:block"]}
+          >
+            {render_slot(@list)}
+          </section>
+          <section id="detail-pane" tabindex="0" class={[pane_class(), !@selected && "hidden lg:block"]}>
+            {render_slot(@detail)}
+          </section>
+        </main>
+      </div>
       <.flash_group flash={@flash} />
     </div>
     """
   end
+
+  defp pane_class,
+    do:
+      "min-w-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent lg:h-svh lg:overflow-y-auto lg:overscroll-none"
 
   @doc """
   Renders your app layout.

@@ -51,8 +51,8 @@ The public auth screens are `/login` (passkey), `/recover` (recovery code), and
 auth appearance live in `Layouts.auth/1`; the one-time code screen includes a copy
 button and a manual-copy fallback when clipboard permission is unavailable.
 
-The member header in `Layouts.member/1` takes `current_account` and displays the
-username menu. `/account/passkeys` supports enrollment, naming and removal; the
+The account menu in the header of `Layouts.member/1` opens from an icon and names the
+account at its top. `/account/passkeys` supports enrollment, naming and removal; the
 last passkey cannot be removed. `/account/recovery-codes` shows the unused count
 and requires explicit confirmation before replacing every old code. New codes
 use the same one-time display and copy flow as registration.

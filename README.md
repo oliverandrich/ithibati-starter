@@ -63,7 +63,8 @@ Powered by **Ithibati 0.9.0**, with passkeys and accounts that are named or addr
 - Centered auth screens with the project name as a wordmark and responsive layouts.
 - Colour tokens named by role. Neutral greys and ink carry the interface; one brand
   colour, violet unless `--brand` names another Tailwind palette, marks the wordmark and links.
-- A protected home page, project name on the left and username menu on the right.
+- A member shell: a sidebar on wide screens, a top bar and tab bar on phones, and
+  a list/detail layout a page can switch to.
 - Light/dark styling follows the operating system, without a theme switch or stored override.
 - **English and German** auth screens, validation messages and ceremony feedback.
   The browser determines the language on each HTTP request.

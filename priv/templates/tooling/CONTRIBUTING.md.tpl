@@ -128,3 +128,4 @@ submitting. Follow the TDD and Conventional Commit rules in [AGENTS.md](AGENTS.m
 - [Operations](docs/operations.md): configuration, releases and migrations.
 - [Authentication](docs/authentication.md): accounts, invitations and security.
 - [Localization](docs/localization.md): language selection and translations.
+- [Interface](docs/interface.md): layouts, page shapes and navigation.

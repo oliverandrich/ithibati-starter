@@ -163,6 +163,13 @@ STARTTLS. Other providers can replace the Swoosh adapter.
 Customize `Layouts.auth/1` and `Layouts.member/1` to change the shared appearance.
 `Layouts.wordmark/1` renders the project's module name with a dot in the brand colour.
 
+## The member shell
+
+`Layouts.member/1` is the shell of every signed-in page in the navigation. From `lg` it has a
+sidebar, and below `lg` a top bar and a tab bar. A page chooses `layout={:sidebar}` or
+`layout={:columns}` for a list beside its detail. `MyAppWeb.Navigation.items/1` lists the
+places. The generated `docs/interface.md` explains the layouts and when to use each one.
+
 ## Colours
 
 Templates name colours by role, never by hue. `assets/css/app.css` defines the roles

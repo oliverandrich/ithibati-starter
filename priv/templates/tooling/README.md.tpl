@@ -28,3 +28,4 @@ migrate the database first, as described in [Operations](docs/operations.md).
 - [Operations](docs/operations.md): configuration, releases and migrations.
 - [Authentication](docs/authentication.md): accounts, invitations and security.
 - [Localization](docs/localization.md): language selection and translations.
+- [Interface](docs/interface.md): layouts, page shapes and navigation.

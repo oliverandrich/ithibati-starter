@@ -16,6 +16,20 @@ Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is neede
 
 ### Added
 
+- The member shell from Sikio. `Layouts.member/1` gains a sidebar from `lg`, a sticky top bar and a
+  bottom tab bar below it, and the attrs `section`, `title`, `back`, `breadcrumb`, `layout` and
+  `selected`. The new `lib/my_app_web/navigation.ex` lists the places sidebar and tab bar link to.
+  `layout={:columns}` renders the `:list` and `:detail` slots side by side.
+  `assets/js/shrink_title.js` shows the page title in the top bar once the large heading has
+  scrolled away; `assets/js/app.js` registers it as `ShrinkTitle`. `.header` marks its heading
+  with `data-large-title`. `assets/css/app.css` gains `--nav-bar` and the safe-area variables.
+  `lib/my_app_web/live/inside_live.ex` passes `section={:home}`.
+  `test/my_app_web/components/member_layout_test.exs` and `test/features/shell_test.exs` cover it.
+  Applying this by hand replaces `member/1` in `lib/my_app_web/components/layouts.ex` whole.
+
+- `docs/interface.md` explains when to use `Layouts.auth/1` or `Layouts.member/1`, the page shapes
+  and the navigation. README and CONTRIBUTING link it.
+
 - `ithibati_starter` and `ithibati_new` are published on Hex. Install the archive with
   `mix archive.install hex ithibati_new 0.9.0`. Versions before 0.9.0 remain available from
   their Git tags only.
@@ -43,6 +57,13 @@ Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is neede
 
 ### Changed
 
+- `Layouts.member/1` puts the account menu behind an icon; the menu names the account at its top.
+  Pages fill the main column from `lg` instead of a `max-w-3xl` column. The source code link moves
+  into the sidebar. `inner_block` is optional, because `:columns` renders its slots instead.
+  `navigation` replaces `MyAppWeb.Navigation.items/1` for one page. `docs/authentication.md`
+  describes the menu.
+- `test/support/feature_case.ex` gains `viewport/4`; `test/features/account_security_test.exs`
+  uses it.
 - `mix.exs` requires Ithibati `~> 0.9.0`. `docs/authentication.md`, `README.md` and
   `ITHIBATI_STARTER_NOTICE.md` name the new versions.
 - `mix ithibati.new` installs `ithibati_starter` 0.9.0 from Hex instead of the Git tag. The

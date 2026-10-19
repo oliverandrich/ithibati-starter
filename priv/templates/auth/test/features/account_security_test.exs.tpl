@@ -56,9 +56,7 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
   feature "German security pages work on a narrow screen", %{session: session} do
     language(session, "de")
     virtual_authenticator(session)
-    {:ok, _} = Wallaby.HTTPClient.request(:post, "#{session.url}/chromium/send_command_and_get_result", %{
-      cmd: "Emulation.setDeviceMetricsOverride", params: %{width: 390, height: 844, deviceScaleFactor: 1, mobile: true}
-    })
+    viewport(session, 390, 844, true)
     session
     |> unlock_setup()
     |> fill_in(css("input[name=username]"), with: "ada")
