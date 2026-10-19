@@ -15,8 +15,10 @@ defmodule IthibatiStarter.Auth do
     igniter
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    |> Deps.add_dep({:ithibati, "~> 0.9.0"}, yes?: true)
-    |> Deps.add_dep({:wallaby, "~> 0.31.0", only: :test, runtime: false}, yes?: true)
+    |> Deps.add_dep({:ithibati, "~> 0.10.0"}, yes?: true)
+    |> Deps.add_dep({:phoenix_test_playwright, "~> 0.19.0", only: :test, runtime: false},
+      yes?: true
+    )
     |> Deps.add_dep({:swoosh, "~> 1.28"}, yes?: true)
     |> Deps.add_dep({:gen_smtp, "~> 1.3"}, yes?: true)
     |> Files.copy_tree("auth", b)
@@ -58,10 +60,24 @@ defmodule IthibatiStarter.Auth do
     |> Config.configure("test.exs", app, [:collect_transport_garbage], false)
     # Browser features all arrive from loopback and otherwise share the production setup budget.
     |> Config.configure("test.exs", app, [:auth_rate_limits], setup: {1_000, 60})
-    |> Config.configure("test.exs", :wallaby, [:otp_app], app)
-    |> Config.configure("test.exs", :wallaby, [:driver], Wallaby.Chrome)
-    |> Config.configure("test.exs", :wallaby, [:js_logger], nil)
-    |> Config.configure("test.exs", :wallaby, [:screenshot_on_failure], true)
+    |> Config.configure("test.exs", :phoenix_test, [:otp_app], app)
+    |> Config.configure("test.exs", :phoenix_test, [:endpoint], endpoint)
+    # The features were written against a three-second wait.
+    |> Config.configure("test.exs", :phoenix_test, [:playwright, :timeout], 3_000)
+    # A cold CI runner took longer than the default four seconds to start the browser.
+    # Written as code, so the generated file keeps the underscore Credo asks for.
+    |> Config.configure(
+      "test.exs",
+      :phoenix_test,
+      [:playwright, :browser_launch_timeout],
+      {:code, Sourceror.parse_string!("30_000")}
+    )
+    |> Config.configure(
+      "test.exs",
+      :phoenix_test,
+      [:playwright, :screenshot],
+      {:code, Sourceror.parse_string!(~s|System.get_env("PW_SCREENSHOT", "false") in ~w(t true)|)}
+    )
     |> Igniter.create_new_file(
       "lib/#{b.app}_web/router.ex",
       Files.template("fragments/router", b),
@@ -137,11 +153,13 @@ defmodule IthibatiStarter.Auth do
     )
     |> Files.append("test/test_helper.exs", """
 
-    Application.put_env(:wallaby, :chromedriver, path: #{b.module}Web.BrowserDriver.path(), headless: true)
-    Application.put_env(:wallaby, :base_url, #{b.module}Web.Endpoint.url())
-    {:ok, _} = Application.ensure_all_started(:wallaby)
-    {:ok, _} = #{b.module}Web.BrowserPool.start()
-    ExUnit.after_suite(fn _ -> #{b.module}Web.BrowserPool.stop() end)
+    # The PostgreSQL pass excludes the browser features, so it needs neither node nor Playwright.
+    ex_unit = ExUnit.configuration()
+
+    if :feature in ex_unit[:include] or :feature not in ex_unit[:exclude] do
+      Application.put_env(:phoenix_test, :base_url, #{b.module}Web.Endpoint.url())
+      {:ok, _} = PhoenixTest.Playwright.Supervisor.start_link()
+    end
     """)
   end
 end

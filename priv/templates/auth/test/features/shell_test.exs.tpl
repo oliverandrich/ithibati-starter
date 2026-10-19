@@ -1,36 +1,36 @@
 defmodule __MODULE__Web.ShellTest do
-  use __MODULE__Web.FeatureCase
+  use __MODULE__Web.PlaywrightCase
 
-  feature "the member shell is a sidebar on wide screens and a top bar on phones", %{session: session} do
-    virtual_authenticator(session)
-    viewport(session, 1280, 900, false)
+  test "the member shell is a sidebar on wide screens and a top bar on phones", %{conn: conn} do
+    virtual_authenticator(conn)
+    resize(conn, 1280, 900)
 
-    session
+    conn
     |> unlock_setup()
-    |> fill_in(css("input[name=username]"), with: "ada")
-    |> click(button("Create your passkey"))
-    |> landed_on("/recovery-codes")
+    |> fill("input[name=username]", "ada")
+    |> click_button("Create your passkey")
+    |> assert_path("/recovery-codes")
     |> open("/")
     |> connected()
-    |> assert_has(css("#sidebar-home[aria-current=page]"))
-    |> execute_script("return getComputedStyle(document.querySelector('#sidebar')).display", fn display ->
+    |> assert_has("#sidebar-home[aria-current=page]")
+    |> evaluate("getComputedStyle(document.querySelector('#sidebar')).display", fn display ->
       assert display == "flex"
     end)
-    |> take_screenshot(name: "shell-desktop", log: false)
+    |> screenshot("shell-desktop.png")
 
     # The same page narrows to a phone, so the hook must renew the margin from the header's height.
-    session
-    |> viewport(390, 844, true)
-    |> execute_script("return getComputedStyle(document.querySelector('#sidebar')).display", fn display ->
+    conn
+    |> resize(390, 844)
+    |> evaluate("getComputedStyle(document.querySelector('#sidebar')).display", fn display ->
       assert display == "none"
     end)
-    |> execute_script("return getComputedStyle(document.querySelector('#app-header')).position", fn position ->
+    |> evaluate("getComputedStyle(document.querySelector('#app-header')).position", fn position ->
       assert position == "sticky"
     end)
-    |> take_screenshot(name: "shell-phone", log: false)
+    |> screenshot("shell-phone.png")
     |> scroll_past_heading()
     # The observer reports in a later frame, so the check waits for the attribute to go.
-    |> execute_script("window.scrollTo(0, 0)")
-    |> assert_has(css("#app-header:not([data-shrunk])"))
+    |> evaluate("window.scrollTo(0, 0)")
+    |> assert_has("#app-header:not([data-shrunk])")
   end
 end

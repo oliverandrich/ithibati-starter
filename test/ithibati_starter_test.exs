@@ -43,14 +43,15 @@ defmodule IthibatiStarterTest do
       assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
       assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
-      assert files["docs/authentication.md"] =~ "pins Ithibati 0.9.0"
+      assert files["docs/authentication.md"] =~ "pins Ithibati 0.10.0"
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["docs/interface.md"] =~ "Layouts.member/1"
       assert files["docs/interface.md"] =~ "SampleWeb.Navigation"
       assert files["docs/interface.md"] =~ "group_link/1"
       assert files["README.md"] =~ "[Interface](docs/interface.md)"
       assert files["CONTRIBUTING.md"] =~ "[Interface](docs/interface.md)"
-      assert files["CONTRIBUTING.md"] =~ "Chrome"
+      assert files["CONTRIBUTING.md"] =~ "Playwright"
+      refute files["CONTRIBUTING.md"] =~ "Chromedriver"
       refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
       refute files["CONTRIBUTING.md"] =~ "## Health, releases"
       assert files["README.md"] =~ "docs/operations.md"
@@ -96,15 +97,22 @@ defmodule IthibatiStarterTest do
     assert_has_task(result, "format", [])
     assert_creates(result, "lib/sample/accounts/invitation.ex")
     assert_creates(result, "lib/sample_web/live/sign_in_live.ex")
-    assert_creates(result, "mise.toml", fn text -> assert text =~ "mix precommit" end)
+
+    assert_creates(result, "mise.toml", fn text ->
+      assert text =~ "mix precommit"
+      assert text =~ "playwright install chromium"
+    end)
 
     assert_creates(result, ".github/workflows/ci.yml", fn text ->
       assert text =~ "mise run check"
+      assert text =~ "playwright install-deps"
     end)
 
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.9.0"})
+    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.10.0"})
+    assert diff(result, only: "mix.exs") =~ ~s({:phoenix_test_playwright, "~> 0.19.0")
+    refute diff(result, only: "mix.exs") =~ ":wallaby"
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"
     assert diff(result, only: "lib/sample_web/router.ex") =~ "ithibati_routes"
     assert diff(result, only: "config/config.exs") =~ ~s("setup_code")
@@ -151,18 +159,18 @@ defmodule IthibatiStarterTest do
     assert files["test/features/shell_test.exs"] =~ "data-shrunk"
   end
 
-  # Starting Chrome is most of a short feature's runtime, so the features share one session.
-  test "the browser features share one Chrome session" do
+  # Google Chrome leaves a copy of its app bundle in the temp folder on every launch.
+  test "the browser features run in Playwright's Chrome for Testing" do
     files = installed_files()
 
-    assert files["test/test_helper.exs"] =~ "{:ok, _} = SampleWeb.BrowserPool.start()"
+    assert files["test/test_helper.exs"] =~ "PhoenixTest.Playwright.Supervisor.start_link()"
+    assert files["test/support/playwright_case.ex"] =~ "use PhoenixTest.Playwright.Case"
+    assert files["test/support/playwright_case.ex"] =~ "import Ithibati.Testing.Passkeys"
+    assert files["assets/package.json"] =~ ~s("playwright": "1.64.1")
+    assert files["assets/package-lock.json"] =~ ~s("node_modules/playwright")
 
-    assert files["test/test_helper.exs"] =~
-             "ExUnit.after_suite(fn _ -> SampleWeb.BrowserPool.stop() end)"
-
-    assert files["test/support/feature_case.ex"] =~ "BrowserPool.checkout()"
-    refute files["test/support/feature_case.ex"] =~ "use Wallaby.Feature"
-    assert files["test/support/browser_pool.ex"] =~ "Storage.clearDataForOrigin"
+    for gone <- ~w(feature_case.ex browser_pool.ex browser_driver.ex),
+        do: refute(Map.has_key?(files, "test/support/" <> gone))
   end
 
   # A starter fix reaches an application only when somebody copies it. The drift test names the

@@ -66,8 +66,7 @@ The initial support floor is Elixir 1.20 / OTP 29 with Phoenix 1.8.14, SQLite an
 
 ## Test real generated applications
 
-Install **PostgreSQL 18**, **Chrome** and a **Chromedriver matching your Chrome
-version**. Point the suite at a local PostgreSQL instance on which the test user
+Install **PostgreSQL 18**. Point the suite at a local PostgreSQL instance on which the test user
 can create disposable databases:
 
 ```sh
@@ -75,14 +74,12 @@ export PGHOST=127.0.0.1
 export PGPORT=5432
 export PGUSER=postgres
 export PGPASSWORD=postgres
-export CHROMEWEBDRIVER=/absolute/path/to/chromedriver-directory
 mise run integration
 ```
 
-`CHROMEWEBDRIVER` is a directory containing the `chromedriver` executable. On
-GitHub Actions it comes from the runner environment. Keep it in sync with Chrome
-when testing locally. Missing browser tooling must fail the suite rather than
-silently skip coverage.
+Each generated application installs Playwright and its Chrome for Testing through its own
+`mise run browser`; no installed Chrome is needed. Missing browser tooling must fail the suite
+rather than silently skip coverage.
 
 The script installs the pinned generators and the local archive in an isolated
 archive directory, then uses `mix ithibati.new` to create disposable default and

@@ -1,49 +1,46 @@
 defmodule __MODULE__Web.AdministrationFeatureTest do
-  use __MODULE__Web.FeatureCase
+  use __MODULE__Web.PlaywrightCase
 
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
 
-  defp dialog_open?(session),
-    do: execute_script(session, "return document.querySelector('#remove-confirm')?.matches(':modal') === true", [], &send(self(), {:open, &1}))
+  defp dialog_open?(conn),
+    do: value_of(conn, "() => document.querySelector('#remove-confirm')?.matches(':modal') === true")
 
-  defp focused(session),
-    do: execute_script(session, "return document.activeElement.dataset.action || ''", [], &send(self(), {:focused, &1}))
+  defp focused(conn), do: value_of(conn, "() => document.activeElement.dataset.action || ''")
 
-  feature "an administrator confirms the passkey and opens the removal dialog", %{session: session} do
-    virtual_authenticator(session)
+  test "an administrator confirms the passkey and opens the removal dialog", %{conn: conn} do
+    virtual_authenticator(conn)
 
-    session
+    conn
     |> unlock_setup()
-    |> fill_in(css("input[name=username]"), with: "ada")
-    |> click(button("Create your passkey"))
-    |> landed_on("/recovery-codes")
+    |> fill("input[name=username]", "ada")
+    |> click_button("Create your passkey")
+    |> assert_path("/recovery-codes")
 
     grace = Repo.insert!(%User{username: "grace"})
 
-    session
+    conn
     |> open("/accounts")
     |> connected()
-    |> click(css("#account-#{grace.id} [data-action=remove]"))
-    |> landed_on("/account/verify")
+    |> click("#account-#{grace.id} [data-action=remove]")
+    |> assert_path("/account/verify")
     |> connected()
-    |> click(button("Confirm with a passkey"))
-    |> landed_on("/accounts")
+    |> click_button("Confirm with a passkey")
+    |> assert_path("/accounts")
     |> connected()
-    |> click(css("#account-#{grace.id} [data-action=remove]"))
-    |> assert_has(css("#remove-confirm", text: "Remove grace?"))
-    |> dialog_open?()
+    |> click("#account-#{grace.id} [data-action=remove]")
+    |> assert_has("#remove-confirm", text: "Remove grace?")
 
-    assert_receive {:open, true}
+    assert dialog_open?(conn)
 
     # The LiveView test covers cancel and confirm. In the browser, LiveView sometimes leaves a
     # click unanswered that follows the opening within milliseconds.
-    session
-    |> send_keys([:escape])
-    |> refute_has(css("#remove-confirm"))
-    |> focused()
+    conn
+    |> press("#remove-confirm", "Escape")
+    |> refute_has("#remove-confirm")
 
-    assert_receive {:focused, "remove"}
+    assert focused(conn) == "remove"
     assert Repo.get(User, grace.id)
   end
 end

@@ -4,8 +4,8 @@
 
 You'll need **mise** and **Elixir 1.20.4 / OTP 29.0.6**. Development runs on SQLite;
 **PostgreSQL 18** is needed for the generated checks, which test against both databases.
-Chrome and a matching Chromedriver are required for the browser tests.
-Node.js is not required: Mix manages Tailwind and esbuild.
+The browser tests run in Playwright's Chrome for Testing on Node.js, which mise installs.
+Mix manages Tailwind and esbuild.
 
 Install the pinned generators and the starter archive once:
 
@@ -25,7 +25,7 @@ cd my_app
 The `ithibati_new` 0.9.0 archive installs `ithibati_starter` 0.9.0 from Hex by
 default. The `ithibati_starter` entry in the generated `mix.lock` records its version
 and checksum. `--starter` accepts another version, a Git revision or a local checkout.
-Starter 0.9.0 generates applications with Ithibati 0.9.0 and schema version 5.
+Starter 0.9.0 generates applications with Ithibati 0.10.0 and schema version 5.
 
 Start developing:
 

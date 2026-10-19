@@ -12,7 +12,7 @@ a version to an existing application.
 
 ## [0.9.0] - 2026-10-18
 
-Requires Ithibati 0.9.0. Ithibati's schema version stays at 5. One application migration
+Requires Ithibati 0.10.0. Ithibati's schema version stays at 5. One application migration
 adds the administrator flag.
 
 ### Added
@@ -85,6 +85,12 @@ adds the administrator flag.
 
 ### Changed
 
+- The browser features run in Playwright's Chrome for Testing instead of Wallaby and chromedriver.
+  No installed Chrome is needed. `test/support/playwright_case.ex` replaces `feature_case.ex`,
+  `browser_pool.ex` and `browser_driver.ex`; `Ithibati.Testing.Passkeys` adds the virtual
+  authenticator. `assets/package.json` pins `playwright`, and `mise run browser` installs it with
+  its headless Chrome. mise installs Node.js for it. The CI workflow installs the browser's
+  system libraries and caches the browser.
 - `Layouts.member/1` puts the account menu behind an icon; the menu names the account at its top.
   Pages fill the main column from `lg` instead of a `max-w-3xl` column. The source code link moves
   into the sidebar. `inner_block` is optional, because `:columns` renders its slots instead.

@@ -5,7 +5,7 @@
 [![CI](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)
 [![Phoenix 1.8](https://img.shields.io/badge/Phoenix-1.8-orange.svg)](https://phoenixframework.org)
-[![Ithibati 0.9.0](https://img.shields.io/badge/Ithibati-0.9.0-violet.svg)](https://github.com/oliverandrich/ithibati)
+[![Ithibati 0.10.0](https://img.shields.io/badge/Ithibati-0.10.0-violet.svg)](https://github.com/oliverandrich/ithibati)
 
 An opinionated [Igniter](https://github.com/ash-project/igniter) installer for fresh
 Phoenix applications: passkeys, invitation-only accounts, vanilla Tailwind,
@@ -22,7 +22,7 @@ it without the starter as a runtime dependency.
 
 ### Authentication and account security
 
-Powered by **Ithibati 0.9.0**, with passkeys and accounts that are named or addressed:
+Powered by **Ithibati 0.10.0**, with passkeys and accounts that are named or addressed:
 
 - **Claim the site:** an operator-issued setup code authorizes the first account;
   subsequent registrations require an invitation.
@@ -78,7 +78,7 @@ Powered by **Ithibati 0.9.0**, with passkeys and accounts that are named or addr
 | Credo | Strict checks, with selected ExSlop, Jump and migration checks |
 | Sobelow | Security analysis in the application check gate |
 | gitleaks | Secret scan over every commit and the staged and unstaged changes in the check gate |
-| ExUnit + Wallaby | Application tests and real browser/WebAuthn flows using virtual authenticators |
+| ExUnit + Playwright | Application tests and real browser/WebAuthn flows using virtual authenticators |
 | GitHub Actions | Check workflows plus a separate dependency-audit workflow |
 | Dependabot | Grouped dependency and Actions updates |
 | Beans, optional | Local, Git-ignored work tracking |
@@ -109,8 +109,8 @@ command; the starter installs no scheduler.
 
 You'll need **mise** and **Elixir 1.20.4 / OTP 29.0.6**. Development runs on SQLite;
 **PostgreSQL 18** is needed for the generated checks, which test against both databases.
-Chrome and a matching Chromedriver are required for the browser tests.
-Node.js is not required: Mix manages Tailwind and esbuild.
+The browser tests run in Playwright's Chrome for Testing on Node.js, which mise installs.
+Mix manages Tailwind and esbuild.
 
 Install the pinned generators and the starter archive once:
 
@@ -130,7 +130,7 @@ cd my_app
 The `ithibati_new` 0.9.0 archive installs `ithibati_starter` 0.9.0 from Hex by
 default. The generated `mix.lock` records its version and checksum. Use `--starter`
 to choose a local checkout or another version. Starter 0.9.0 generates applications
-with Ithibati 0.9.0 and schema version 5.
+with Ithibati 0.10.0 and schema version 5.
 
 Start developing:
 

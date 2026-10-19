@@ -1,36 +1,35 @@
 defmodule __MODULE__Web.RecoveryTest do
-  use __MODULE__Web.FeatureCase
+  use __MODULE__Web.PlaywrightCase
 
   alias Ithibati.Identity.RecoveryCodes
 
-  feature "recovery codes sign in without a passkey and cannot be reused", %{session: session} do
-    virtual_authenticator(session)
+  test "recovery codes sign in without a passkey and cannot be reused", %{conn: conn} do
+    virtual_authenticator(conn)
 
     codes =
-      session
+      conn
       |> unlock_setup()
-      |> fill_in(css("input[name=username]"), with: "ada")
-      |> click(button("Create your passkey"))
-      |> landed_on("/recovery-codes")
-      |> all(css("main li"))
-      |> Enum.map(&Wallaby.Element.text/1)
+      |> fill("input[name=username]", "ada")
+      |> click_button("Create your passkey")
+      |> assert_path("/recovery-codes")
+      |> assert_has("main li", count: 12)
+      |> value_of("() => Array.from(document.querySelectorAll('main li'), li => li.textContent.trim())")
 
-    assert length(codes) == 12
     [code | _] = codes
 
-    session
+    conn
     |> clear_cookies()
     |> open("/recover")
-    |> fill_in(css("input[name=code]"), with: code)
-    |> click(button("Sign in with a recovery code"))
-    |> through_navigation(css("p", text: "Signed in as ada"))
+    |> fill("input[name=code]", code)
+    |> click_button("Sign in with a recovery code")
+    |> assert_has("p", text: "Signed in as ada")
 
-    session
+    conn
     |> clear_cookies()
     |> open("/recover")
-    |> fill_in(css("input[name=code]"), with: code)
-    |> click(button("Sign in with a recovery code"))
-    |> assert_has(css("[role=alert]"))
+    |> fill("input[name=code]", code)
+    |> click_button("Sign in with a recovery code")
+    |> assert_has("[role=alert]")
 
     account = Repo.get_by!(User, username: "ada")
     assert RecoveryCodes.remaining(account) == 11

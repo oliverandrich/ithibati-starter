@@ -1,32 +1,32 @@
 defmodule __MODULE__Web.GermanAuthTest do
-  use __MODULE__Web.FeatureCase
+  use __MODULE__Web.PlaywrightCase
 
-  feature "German survives setup, clipboard, sign-out and live recovery navigation", %{session: session} do
-    language(session, "de-DE,de;q=0.9")
-    virtual_authenticator(session)
+  @tag browser_context_opts: [locale: "de-DE"]
+  test "German survives setup, clipboard, sign-out and live recovery navigation", %{conn: conn} do
+    virtual_authenticator(conn)
 
-    session
+    conn
     |> unlock_setup()
-    |> assert_has(css("html[lang=de]"))
-    |> fill_in(css("input[name=username]"), with: "ada")
-    |> click(button("Erstelle deinen Passkey"))
-    |> landed_on("/recovery-codes")
-    |> assert_has(css("h1", text: "Speichere deine Wiederherstellungscodes"))
-    |> execute_script("Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: async () => {}}})")
-    |> click(button("Wiederherstellungscodes kopieren"))
-    |> assert_has(css("#copy-status", text: "Wiederherstellungscodes kopiert."))
-    |> click(link("Codes gespeichert. Weiter"))
-    |> landed_on("/")
-    |> assert_has(css("p", text: "Angemeldet als ada."))
+    |> assert_has("html[lang=de]")
+    |> fill("input[name=username]", "ada")
+    |> click_button("Erstelle deinen Passkey")
+    |> assert_path("/recovery-codes")
+    |> assert_has("h1", text: "Speichere deine Wiederherstellungscodes")
+    |> evaluate("Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: async () => {}}})")
+    |> click_button("Wiederherstellungscodes kopieren")
+    |> assert_has("#copy-status", text: "Wiederherstellungscodes kopiert.")
+    |> click_link("Codes gespeichert. Weiter")
+    |> assert_path("/")
+    |> assert_has("p", text: "Angemeldet als ada.")
     |> connected()
-    |> click(css("#user-menu summary"))
-    |> click(link("Abmelden"))
-    |> landed_on("/login")
-    |> click(link("Passkey verloren? Wiederherstellungscode verwenden"))
-    |> fill_in(css("input[name=code]"), with: "invalid-code")
-    |> click(button("Mit Wiederherstellungscode anmelden"))
-    |> assert_has(css("[role=alert]", text: "Dieser Wiederherstellungscode ist ungültig."))
-    |> click(link("Zurück zur Passkey-Anmeldung"))
-    |> assert_has(button("Mit einem Passkey anmelden"))
+    |> click("#user-menu summary")
+    |> click_link("Abmelden")
+    |> assert_path("/login")
+    |> click_link("Passkey verloren? Wiederherstellungscode verwenden")
+    |> fill("input[name=code]", "invalid-code")
+    |> click_button("Mit Wiederherstellungscode anmelden")
+    |> assert_has("[role=alert]", text: "Dieser Wiederherstellungscode ist ungültig.")
+    |> click_link("Zurück zur Passkey-Anmeldung")
+    |> assert_has("button", text: "Mit einem Passkey anmelden")
   end
 end

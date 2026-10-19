@@ -1,43 +1,29 @@
 defmodule __MODULE__Web.TailwindTest do
-  use __MODULE__Web.FeatureCase
+  use __MODULE__Web.PlaywrightCase
 
-  feature "styles follow system changes and ignore an old stored theme", %{session: session} do
-    session
-    |> system_scheme("light")
+  test "styles follow system changes and ignore an old stored theme", %{conn: conn} do
+    conn
+    |> color_scheme("light")
     |> open("/")
-    |> execute_script("localStorage.setItem('phx:theme', 'dark')")
+    |> evaluate("localStorage.setItem('phx:theme', 'dark')")
     |> open("/")
+    |> refute_has("[data-phx-theme]")
+
     # Chrome's serialisation of an oklch colour varies by version, so the light value is read
     # from the page and compared with itself rather than written out here.
-    |> execute_script("return getComputedStyle(document.body).backgroundColor", fn color ->
-      refute color == "rgba(0, 0, 0, 0)"
-      send(self(), {:light, color})
-    end)
-    |> refute_has(css("[data-phx-theme]"))
-    |> execute_script("return getComputedStyle(document.querySelector('#setup-code-form button')).display", fn display ->
-      assert display == "inline-flex"
-    end)
-    |> system_scheme("dark")
-    |> execute_script("return getComputedStyle(document.body).colorScheme", fn scheme ->
-      assert scheme == "dark"
-    end)
-    |> execute_script("return getComputedStyle(document.body).backgroundColor", fn color ->
-      assert_received {:light, light}
-      refute color in [light, "rgba(0, 0, 0, 0)"]
-      send(self(), {:light, light})
-    end)
-    |> system_scheme("light")
-    |> execute_script("return getComputedStyle(document.body).backgroundColor", fn color ->
-      assert_received {:light, ^color}
-    end)
+    light = background(conn)
+    refute light == "rgba(0, 0, 0, 0)"
+
+    assert value_of(conn, "() => getComputedStyle(document.querySelector('#setup-code-form button')).display") ==
+             "inline-flex"
+
+    color_scheme(conn, "dark")
+    assert value_of(conn, "() => getComputedStyle(document.body).colorScheme") == "dark"
+    refute background(conn) in [light, "rgba(0, 0, 0, 0)"]
+
+    color_scheme(conn, "light")
+    assert background(conn) == light
   end
 
-  defp system_scheme(session, value) do
-    {:ok, _} = Wallaby.HTTPClient.request(:post, "#{session.url}/chromium/send_command_and_get_result", %{
-      cmd: "Emulation.setEmulatedMedia",
-      params: %{features: [%{name: "prefers-color-scheme", value: value}]}
-    })
-
-    session
-  end
+  defp background(conn), do: value_of(conn, "() => getComputedStyle(document.body).backgroundColor")
 end

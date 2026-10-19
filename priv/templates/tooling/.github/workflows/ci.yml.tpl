@@ -44,4 +44,12 @@ jobs:
             _build
           key: ${{ runner.os }}-mix-${{ env.MIX_ENV }}-${{ hashFiles('mise.toml', 'mix.lock') }}
       - run: mix deps.get --check-locked
+      # The lockfile pins playwright, and each playwright version pins its browser build.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('assets/package-lock.json') }}
+      - run: mise run browser:npm
+      # The runner image does not promise the system libraries the headless Chrome needs.
+      - run: npm exec --prefix assets -- playwright install-deps chromium
       - run: mise run check

@@ -65,4 +65,13 @@ jobs:
         with:
           cache: ${{ github.ref_type != 'tag' }}
       - run: mix deps.get --check-locked
+      # The template's lockfile pins playwright, and each playwright version pins its browser build.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        if: ${{ github.ref_type != 'tag' }}
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('priv/templates/auth/assets/package-lock.json.tpl') }}
+      # The generated applications run Playwright's headless Chrome, which needs these libraries.
+      # The version comes from the template, so the two cannot drift apart.
+      - run: npx -y "playwright@$(jq -r '.devDependencies.playwright' priv/templates/auth/assets/package.json.tpl)" install-deps chromium
       - run: mise run integration

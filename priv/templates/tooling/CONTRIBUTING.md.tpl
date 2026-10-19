@@ -62,7 +62,7 @@ reason beside it.
 Keep migration history unchanged. Credo scans source, tests and all migrations;
 Jump inspects inline HEEx and files reached through embed_templates. ExSlop and
 Jump rules are explicitly selected. Audit findings are separate from PR gates.
-Tailwind/esbuild are Mix-managed; Node is unnecessary.
+Tailwind/esbuild are Mix-managed. Node runs only Playwright for the browser tests.
 Use Lucide components directly, for example `<Lucideicons.chevron_down class="size-4" aria-hidden="true" />`.
 Decorative icons are hidden from assistive technology; label icon-only buttons.
 The `lucide_icons` dependency supplies SVG components without a Tailwind icon plugin. The UI helpers use the CSP's inline-script/style allowances.
@@ -80,17 +80,18 @@ and seeds again. It is an explicit local action, never part of startup or checks
 
 ## Browser tests
 
-Browser tests are mandatory: install Chrome and a matching Chromedriver. On CI,
-CHROMEWEBDRIVER points at the runner's driver directory. Locally configure a matching
-`chromedriver` in ignored `mise.local.toml`, or set CHROMEWEBDRIVER. Check both
-versions after browser updates. `mise run check` builds assets before browser tests;
+Browser tests are mandatory. They run in Playwright's Chrome for Testing. No installed Chrome
+is needed. `mise run browser` installs the pinned `playwright` package from
+`assets/package.json` and its headless Chrome. `mise run setup`, `mise run check` and
+`mise run test` run it first. `mise run check` builds assets before browser tests;
 for direct `mise run test`, build them with `mix assets.build` first. Tests start
 an endpoint on port 4102; override PORT to isolate concurrent suites. Missing browser
 infrastructure fails instead of silently skipping coverage.
 
-The features share one Chrome session from `test/support/browser_pool.ex`. It is reset before each
-feature: blank page, cookies, the test origin's storage, emulation and virtual authenticators. A
-feature that sets `@sessions` gets new sessions of its own.
+Each feature gets a new browser context from `test/support/playwright_case.ex`, so cookies,
+storage and emulation start empty. `Ithibati.Testing.Passkeys` adds the virtual authenticator.
+`PW_SCREENSHOT=true mix test --failed` reruns failed features and keeps a screenshot of each in
+`screenshots/`.
 
 `mix ithibati.doctor` is part of the test-environment gate after schema setup.
 
