@@ -6,7 +6,8 @@ defmodule __MODULE__Web.Reauth do
   # The pages a confirmation returns to, by the purpose in `/account/confirm/:purpose`.
   @targets %{
     "passkeys" => "/account/passkeys",
-    "recovery-codes" => "/account/recovery-codes"
+    "recovery-codes" => "/account/recovery-codes",
+    "accounts" => "/accounts"
   }
 
   @paths Map.values(@targets)

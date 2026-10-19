@@ -25,8 +25,7 @@ defmodule __MODULE__Web.InvitationsLiveTest do
     Plug.Test.init_test_session(build_conn(), get_session(signed))
   end
 
-  # Nobody can be removed from this instance once they are in, so the moment before a link is
-  # redeemed is the only say anybody has over who joins. The page has to show it.
+  # Before a link is redeemed, anybody here has a say over who joins. The page has to show it.
   test "the page lists what is outstanding, by whom, and takes one back", %{conn: conn} do
     {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
 
@@ -52,6 +51,15 @@ defmodule __MODULE__Web.InvitationsLiveTest do
     assert html =~ "Nothing is waiting to be accepted."
     refute has_element?(view, "#invitation-#{invitation.id}")
     refute Repo.one(Invitation)
+  end
+
+  test "an invitation from a removed account names a former member", %{conn: conn} do
+    gone = Repo.insert!(%__MODULE__.Accounts.User{username: "gone"})
+    {:ok, invitation} = __MODULE__.Invitations.open(gone, %{"note" => "Grace"})
+    Repo.delete!(gone)
+
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
+    assert has_element?(view, "#invitation-#{invitation.id}", "Invited by a former member")
   end
 
   # The link is long, so a button beside it copies it. The hook reads the link from the button.

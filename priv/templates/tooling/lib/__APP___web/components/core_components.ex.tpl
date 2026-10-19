@@ -173,6 +173,64 @@ defmodule __MODULE__Web.CoreComponents do
   end
 
   @doc """
+  Renders a modal dialog that asks one question.
+
+  Render it only while it should be open. The `.ShowModal` hook calls `showModal()` once it is
+  mounted, so the server never renders `open`. The dialog focuses itself, so no button shows a
+  focus ring before the first Tab. Once removed, it returns the focus to the element that opened it. The buttons send `confirm_<name>` and `cancel_<name>`;
+  Escape sends `cancel_<name>`.
+
+      <.confirm_dialog :if={@removing} name="remove" title="Remove ada?" confirm_label="Remove" variant="danger">
+        This cannot be undone.
+      </.confirm_dialog>
+  """
+  attr :name, :string, required: true
+  attr :title, :string, required: true
+  attr :confirm_label, :string, required: true
+  attr :variant, :string, default: "primary", doc: "`danger` when the answer cannot be undone"
+  slot :inner_block, required: true
+
+  def confirm_dialog(assigns) do
+    ~H"""
+    <dialog
+      id={"#{@name}-confirm"}
+      tabindex="-1"
+      aria-labelledby={"#{@name}-heading"}
+      phx-hook=".ShowModal"
+      phx-mounted={JS.ignore_attributes(["open"])}
+      phx-window-keydown={"cancel_#{@name}"}
+      phx-key="Escape"
+      class="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-xl bg-surface text-ink shadow-xl ring-1 ring-line outline-none backdrop:bg-scrim/30"
+    >
+      <div class="p-5 sm:p-6">
+        <h2 id={"#{@name}-heading"} class="text-body font-semibold">{@title}</h2>
+        <div class="mt-2 text-label text-muted">{render_slot(@inner_block)}</div>
+      </div>
+      <%!-- Below `sm` the buttons stack with the answer on top; from `sm` they form a row. --%>
+      <div class="flex flex-col gap-2 border-t border-line px-5 py-4 sm:flex-row-reverse sm:px-6">
+        <.button id={"confirm-#{@name}"} type="button" variant={@variant} phx-click={"confirm_#{@name}"}>
+          {@confirm_label}
+        </.button>
+        <.button id={"cancel-#{@name}"} type="button" phx-click={"cancel_#{@name}"}>{gettext("Cancel")}</.button>
+      </div>
+    </dialog>
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".ShowModal">
+      export default {
+        mounted() {
+          this.opener = document.activeElement
+          this.el.showModal()
+          this.el.focus()
+        },
+        // The server removes the dialog, so the browser restores no focus of its own.
+        destroyed() {
+          if (this.opener?.isConnected) this.opener.focus()
+        }
+      }
+    </script>
+    """
+  end
+
+  @doc """
   Renders a button with navigation support.
 
   ## Examples
@@ -181,13 +239,17 @@ defmodule __MODULE__Web.CoreComponents do
       <.button phx-click="go" variant="primary">Send!</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
+  attr :rest, :global, include: ~w(href navigate patch method download name value disabled type)
   attr :class, :any
-  attr :variant, :string, values: ~w(primary)
+  attr :variant, :string, values: ~w(primary danger)
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{"primary" => "bg-accent text-on-accent hover:bg-accent/85", nil => "border border-edge bg-surface text-ink hover:bg-ground"}
+    variants = %{
+      "primary" => "bg-accent text-on-accent hover:bg-accent/85",
+      "danger" => "bg-danger text-on-accent hover:bg-danger/85",
+      nil => "border border-edge bg-surface text-ink hover:bg-ground"
+    }
 
     assigns =
       assign_new(assigns, :class, fn ->

@@ -4,6 +4,7 @@ defmodule __MODULE__.AccountsTest do
   """
   use __MODULE__.DataCase, async: true
 
+  alias Ithibati.Identity.Sessions
   alias __MODULE__.Accounts
   alias __MODULE__.Accounts.User
 
@@ -90,6 +91,43 @@ defmodule __MODULE__.AccountsTest do
     assert {:ok, accounts} = Accounts.list_accounts(admin)
     assert Enum.map(accounts, & &1.id) == [member.id, admin.id]
     assert Accounts.list_accounts(%{member | admin: true}) == {:error, :forbidden}
+  end
+
+  describe "remove_account/2" do
+    # The sessions go in the same transaction as the account. Their digests come back for the
+    # caller to disconnect after the commit.
+    test "an administrator removes a member with its sessions" do
+      admin = account(%{admin: true})
+      member = account()
+      token = Sessions.generate_session_token(member)
+
+      member_id = member.id
+
+      assert {:ok, %{account: %User{id: ^member_id}, digests: [_digest]}} =
+               Accounts.remove_account(admin, to_string(member_id))
+
+      refute Repo.get(User, member.id)
+      refute Sessions.get_user_by_session_token(token)
+    end
+
+    test "another administrator can be removed, the acting one cannot" do
+      admin = account(%{admin: true})
+      other = account(%{admin: true})
+
+      assert Accounts.remove_account(admin, admin.id) == {:error, :self}
+      assert {:ok, %{digests: []}} = Accounts.remove_account(admin, other.id)
+      assert Repo.get(User, admin.id)
+    end
+
+    test "a member removes nothing, and an unknown account is reported" do
+      admin = account(%{admin: true})
+      member = account()
+
+      assert Accounts.remove_account(member, admin.id) == {:error, :forbidden}
+      assert Accounts.remove_account(admin, -1) == {:error, :not_found}
+      assert Accounts.remove_account(admin, "not an id") == {:error, :not_found}
+      assert Repo.get(User, admin.id)
+    end
   end
 
   # The operator's way back when no administrator is left, run on the host.

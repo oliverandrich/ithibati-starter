@@ -15,7 +15,7 @@ msgstr "Ein Benutzername besteht aus Buchstaben, Ziffern und Unterstrichen und d
 msgid "Accept with a passkey"
 msgstr "Mit einem Passkey annehmen"
 
-#: lib/__APP___web/components/core_components.ex:488
+#: lib/__APP___web/components/core_components.ex:552
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr "Aktionen"
@@ -92,7 +92,7 @@ msgid "No passkey is registered here yet."
 msgstr "Hier ist noch kein Passkey registriert."
 
 #: lib/__APP___web/live/sign_in_live.ex:131
-#: lib/__APP___web/live/verify_identity_live.ex:57
+#: lib/__APP___web/live/verify_identity_live.ex:55
 #, elixir-autogen, elixir-format
 msgid "Recovery code"
 msgstr "Wiederherstellungscode"
@@ -440,25 +440,21 @@ msgstr[1] "Du hast %{count} unbenutzte Wiederherstellungscodes."
 msgid "Your account"
 msgstr "Dein Konto"
 
-#: lib/__APP___web/live/verify_identity_live.ex:67
+#: lib/__APP___web/components/core_components.ex:228
+#: lib/__APP___web/live/verify_identity_live.ex:65
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: lib/__APP___web/live/verify_identity_live.ex:46
+#: lib/__APP___web/live/verify_identity_live.ex:44
 #, elixir-autogen, elixir-format
 msgid "Confirm with a passkey"
 msgstr "Mit einem Passkey bestätigen"
 
-#: lib/__APP___web/live/verify_identity_live.ex:61
+#: lib/__APP___web/live/verify_identity_live.ex:59
 #, elixir-autogen, elixir-format
 msgid "Confirm with a recovery code"
 msgstr "Mit Wiederherstellungscode bestätigen"
-
-#: lib/__APP___web/live/verify_identity_live.ex:40
-#, elixir-autogen, elixir-format
-msgid "Confirm your current account before changing its security settings. Confirmation lasts five minutes."
-msgstr "Bestätige dein aktuelles Konto, bevor du seine Sicherheitseinstellungen änderst. Die Bestätigung gilt fünf Minuten."
 
 #: lib/__APP___web/live/verify_identity_live.ex:38
 #, elixir-autogen, elixir-format
@@ -511,7 +507,7 @@ msgstr "Zu viele Versuche. Bitte warte eine Minute und versuche es erneut."
 msgid "Use a passkey or recovery code belonging to your current account."
 msgstr "Verwende einen Passkey oder Wiederherstellungscode deines aktuellen Kontos."
 
-#: lib/__APP___web/live/verify_identity_live.ex:52
+#: lib/__APP___web/live/verify_identity_live.ex:50
 #, elixir-autogen, elixir-format
 msgid "Use a recovery code instead"
 msgstr "Stattdessen einen Wiederherstellungscode verwenden"
@@ -615,8 +611,7 @@ msgstr[1] "Zu viele Einladungen. Versuche es in %{count} Minuten erneut."
 msgid "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
 msgstr "Jeder hier kann eine zurücknehmen. Bis sie angenommen ist, ist das die einzige Mitsprache darüber, wer dazukommt."
 
-#: lib/__APP___web/live/invitations_live.ex:254
-#: lib/__APP___web/live/invitations_live.ex:256
+#: lib/__APP___web/live/invitations_live.ex:253
 #, elixir-autogen, elixir-format
 msgid "Invited by %{username}"
 msgstr "Eingeladen von %{username}"
@@ -631,12 +626,12 @@ msgstr "Es wartet nichts darauf, angenommen zu werden."
 msgid "Outstanding invitations"
 msgstr "Offene Einladungen"
 
-#: lib/__APP___web/live/invitations_live.ex:261
+#: lib/__APP___web/live/invitations_live.ex:257
 #, elixir-autogen, elixir-format
 msgid "Runs out %{date}"
 msgstr "Läuft ab am %{date}"
 
-#: lib/__APP___web/live/invitations_live.ex:270
+#: lib/__APP___web/live/invitations_live.ex:266
 #, elixir-autogen, elixir-format
 msgid "Take it back"
 msgstr "Zurücknehmen"
@@ -651,7 +646,7 @@ msgstr "Diese Einladung gibt es nicht mehr."
 msgid "That invitation is not waiting any more. Somebody accepted it, or took it back first."
 msgstr "Diese Einladung wartet nicht mehr. Jemand hat sie angenommen oder vorher zurückgenommen."
 
-#: lib/__APP___web/live/invitations_live.ex:256
+#: lib/__APP___web/live/invitations_live.ex:277
 #, elixir-autogen, elixir-format
 msgid "Unknown"
 msgstr "Unbekannt"
@@ -759,7 +754,7 @@ msgstr "Passkeys"
 
 #: lib/__APP___web/components/layouts.ex:300
 #: lib/__APP___web/live/account_security_live.ex:56
-#: lib/__APP___web/live/accounts_live.ex:33
+#: lib/__APP___web/live/accounts_live.ex:112
 #: lib/__APP___web/live/invitations_live.ex:159
 #: lib/__APP___web/live/settings_live.ex:30
 #: lib/__APP___web/live/settings_live.ex:32
@@ -767,15 +762,15 @@ msgstr "Passkeys"
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: lib/__APP___web/live/accounts_live.ex:40
+#: lib/__APP___web/live/accounts_live.ex:119
 #, elixir-autogen, elixir-format
 msgid "1 account"
 msgid_plural "%{count} accounts"
 msgstr[0] "1 Konto"
 msgstr[1] "%{count} Konten"
 
-#: lib/__APP___web/live/accounts_live.ex:32
-#: lib/__APP___web/live/accounts_live.ex:36
+#: lib/__APP___web/live/accounts_live.ex:111
+#: lib/__APP___web/live/accounts_live.ex:115
 #: lib/__APP___web/live/settings_live.ex:50
 #, elixir-autogen, elixir-format
 msgid "Accounts"
@@ -786,22 +781,78 @@ msgstr "Konten"
 msgid "Administration"
 msgstr "Administration"
 
-#: lib/__APP___web/live/accounts_live.ex:60
+#: lib/__APP___web/live/accounts_live.ex:133
 #, elixir-autogen, elixir-format
 msgid "Administrator"
 msgstr "Administrator"
 
-#: lib/__APP___web/live/accounts_live.ex:53
+#: lib/__APP___web/live/accounts_live.ex:132
 #, elixir-autogen, elixir-format
 msgid "Joined %{date}"
 msgstr "Dabei seit %{date}"
 
-#: lib/__APP___web/live/accounts_live.ex:60
+#: lib/__APP___web/live/accounts_live.ex:134
 #, elixir-autogen, elixir-format
 msgid "Member"
 msgstr "Mitglied"
 
-#: lib/__APP___web/admin.ex:25
+#: lib/__APP___web/admin.ex:27
 #, elixir-autogen, elixir-format
 msgid "Only administrators can open this page."
 msgstr "Nur Administratoren können diese Seite öffnen."
+
+#: lib/__APP___web/live/verify_identity_live.ex:40
+#, elixir-autogen, elixir-format
+msgid "Confirm your current account before this change. Confirmation lasts five minutes."
+msgstr "Bestätige dein aktuelles Konto vor dieser Änderung. Die Bestätigung gilt fünf Minuten."
+
+#: lib/__APP___web/live/accounts_live.ex:151
+#, elixir-autogen, elixir-format
+msgid "Make administrator"
+msgstr "Zum Administrator machen"
+
+#: lib/__APP___web/live/accounts_live.ex:170
+#: lib/__APP___web/live/accounts_live.ex:181
+#, elixir-autogen, elixir-format
+msgid "Remove"
+msgstr "Entfernen"
+
+#: lib/__APP___web/live/accounts_live.ex:180
+#, elixir-autogen, elixir-format
+msgid "Remove %{username}?"
+msgstr "%{username} entfernen?"
+
+#: lib/__APP___web/live/accounts_live.ex:69
+#, elixir-autogen, elixir-format
+msgid "Removed %{username}."
+msgstr "%{username} entfernt."
+
+#: lib/__APP___web/live/accounts_live.ex:161
+#, elixir-autogen, elixir-format
+msgid "Revoke administrator"
+msgstr "Administratorrolle entziehen"
+
+#: lib/__APP___web/live/accounts_live.ex:88
+#, elixir-autogen, elixir-format
+msgid "The last administrator keeps the role."
+msgstr "Der letzte Administrator behält die Rolle."
+
+#: lib/__APP___web/live/accounts_live.ex:184
+#, elixir-autogen, elixir-format
+msgid "Their passkeys and recovery codes are deleted, and their open sessions end. This cannot be undone."
+msgstr "Passkeys und Wiederherstellungscodes werden gelöscht, offene Sitzungen enden. Das lässt sich nicht rückgängig machen."
+
+#: lib/__APP___web/live/accounts_live.ex:91
+#, elixir-autogen, elixir-format
+msgid "This account no longer exists."
+msgstr "Dieses Konto gibt es nicht mehr."
+
+#: lib/__APP___web/live/invitations_live.ex:278
+#, elixir-autogen, elixir-format
+msgid "a former member"
+msgstr "einem früheren Mitglied"
+
+#: lib/__APP___web/live/accounts_live.ex:94
+#, elixir-autogen, elixir-format
+msgid "Nothing changed. Please try again."
+msgstr "Nichts geändert. Bitte versuche es noch einmal."

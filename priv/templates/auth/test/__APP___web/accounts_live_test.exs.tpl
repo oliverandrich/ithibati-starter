@@ -6,6 +6,7 @@ defmodule __MODULE__Web.AccountsLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Ithibati.Identity.Sessions
   alias Ithibati.Web.Gate
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
@@ -50,5 +51,83 @@ defmodule __MODULE__Web.AccountsLiveTest do
 
     {:ok, view, _html} = live(signed_in(conn, account()), ~p"/account/settings")
     refute has_element?(view, "#settings-admin")
+  end
+
+  # A confirmation from the last five minutes, as `/account/verify` leaves it in the session.
+  defp confirmed(conn, account) do
+    conn
+    |> Plug.Conn.put_session(:confirmed_account_id, account.id)
+    |> Plug.Conn.put_session(:confirmed_at, System.system_time(:second))
+  end
+
+  defp action(view, account, name),
+    do: view |> element(~s|#account-#{account.id} [data-action="#{name}"]|) |> render_click()
+
+  test "a confirmed administrator grants and revokes the role on a row", %{conn: conn} do
+    admin = account(%{admin: true})
+    member = account()
+    {:ok, view, _html} = live(conn |> signed_in(admin) |> confirmed(admin), ~p"/accounts")
+
+    action(view, member, "grant")
+    assert has_element?(view, "#account-#{member.id}", "Administrator")
+
+    action(view, member, "revoke")
+    assert has_element?(view, "#account-#{member.id}", "Member")
+    refute Repo.reload!(member).admin
+  end
+
+  test "a change without a recent confirmation asks for it first", %{conn: conn} do
+    admin = account(%{admin: true})
+    member = account()
+    other = account(%{admin: true})
+
+    for {target, name} <- [{member, "grant"}, {other, "revoke"}, {member, "remove"}] do
+      {:ok, view, _html} = live(signed_in(conn, admin), ~p"/accounts")
+      assert {:error, {:redirect, %{to: "/account/confirm/accounts"}}} = action(view, target, name)
+    end
+
+    assert %{admin: false} = Repo.reload!(member)
+    assert %{admin: true} = Repo.reload!(other)
+
+    confirm = get(signed_in(conn, admin), ~p"/account/confirm/accounts")
+    assert redirected_to(confirm) == "/account/verify"
+    assert get_session(confirm, :reauth_target) == "/accounts"
+  end
+
+  test "the own row offers no actions, and a forged event removes nothing", %{conn: conn} do
+    admin = account(%{admin: true})
+    {:ok, view, _html} = live(conn |> signed_in(admin) |> confirmed(admin), ~p"/accounts")
+
+    refute has_element?(view, "#account-#{admin.id} [data-action]")
+    render_click(view, "remove", %{"id" => to_string(admin.id)})
+    refute has_element?(view, "#remove-confirm")
+  end
+
+  test "a confirmed administrator removes an account and ends its open pages", %{conn: conn} do
+    admin = account(%{admin: true})
+    member = account()
+    token = Sessions.generate_session_token(member)
+    __MODULE__Web.Endpoint.subscribe(Gate.live_socket_id(token))
+    {:ok, view, _html} = live(conn |> signed_in(admin) |> confirmed(admin), ~p"/accounts")
+
+    action(view, member, "remove")
+    assert has_element?(view, "#remove-confirm", member.username)
+
+    view |> element("#confirm-remove") |> render_click()
+    refute has_element?(view, "#account-#{member.id}")
+    assert render(view) =~ "Removed #{member.username}."
+    refute Repo.get(User, member.id)
+    assert_receive %Phoenix.Socket.Broadcast{event: "disconnect"}
+  end
+
+  test "cancelling the dialog removes nothing", %{conn: conn} do
+    admin = account(%{admin: true})
+    member = account()
+    {:ok, view, _html} = live(conn |> signed_in(admin) |> confirmed(admin), ~p"/accounts")
+
+    action(view, member, "remove")
+    view |> element("#cancel-remove") |> render_click()
+    refute has_element?(view, "#remove-confirm")
+    assert Repo.get(User, member.id)
   end
 end

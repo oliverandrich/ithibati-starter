@@ -151,7 +151,7 @@ STARTTLS. Other providers can replace the Swoosh adapter.
 | `/` | Protected home |
 | `/account/settings` | Account settings, leading to passkeys, recovery codes and invitations |
 | `/account/invitations` | Invitation creation and the outstanding invitations |
-| `/accounts` | Every account with its role, for administrators |
+| `/accounts` | Every account with its role; administrators grant, revoke and remove |
 | `/setup` | Operator-code entry and first-account setup; closes after the instance is claimed |
 | `/login` | Passkey sign-in |
 | `/recover` | Recovery-code sign-in |

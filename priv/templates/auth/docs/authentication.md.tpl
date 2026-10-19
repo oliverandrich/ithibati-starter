@@ -14,8 +14,8 @@ revokes the role, and the last administrator keeps it.
 
 The same page lists what is outstanding: for whom, by whom and when it runs
 out. Any member can take any of them back, and the link stops working at once.
-This example has no way to remove an account, so that is the only moment
-anybody has a say over who joins. `__MODULE__.Invitations` holds the queries,
+An invitation from a removed account names a former member.
+`__MODULE__.Invitations` holds the queries,
 and they come from Ithibati rather than being written again: `pending_query/0`
 is the predicate `fetch/1` uses, and `withdraw/1` rechecks the acceptance
 inside its delete.
@@ -58,7 +58,14 @@ The account menu in the header of `Layouts.member/1` opens from an icon and name
 account at its top. It leads to `/account/settings`. That page counts the passkeys and
 the unused recovery codes. It also links the invitations. For an administrator, an
 Administration group links `/accounts`. That page lists every account with its join
-date and role. A member who opens it is sent back to the settings.
+date and role. A member who opens it is sent back to the settings. There an
+administrator grants or revokes the role on another account's row, or removes that
+account. Each change asks for the passkey, as the security settings do. A new
+administrator could remove any account. Revoking could leave a stolen session the
+only administrator.
+Removing deletes the account's passkeys and recovery codes and revokes its sessions
+in the same transaction. Its open pages are disconnected after the commit. An
+administrator cannot remove their own account there.
 
 `/account/passkeys` supports enrollment, naming and removal; the last passkey cannot
 be removed. `/account/recovery-codes` shows the unused count and requires explicit confirmation before replacing every old code. New codes

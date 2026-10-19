@@ -34,6 +34,8 @@
   --color-signal-strong: var(--color-__BRAND__-700);
   --color-danger: var(--color-red-700);
   --color-danger-surface: var(--color-red-50);
+  /* Dims the page behind a modal dialog, in both modes. */
+  --color-scrim: var(--color-black);
 
   /* A small type scale for dense interfaces. */
   --text-meta: 12px;

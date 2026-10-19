@@ -73,6 +73,10 @@ administrator function takes the acting account first and runs through
 `__MODULE__.Accounts.with_admin/2`, which reads the flag from the database.
 `bin/grant-admin` is the operator's exception; it runs on the host and only adds the role.
 
+Data an account owns references `users` with `on_delete: :delete_all`. Cleanup the database
+cannot do, but which must roll back with the removal, goes into `removed/1` in
+`__MODULE__.Accounts`. Work outside the database follows the result of `remove_account/2`.
+
 Authentication budgets are keyed by `conn.remote_ip`. `__MODULE__Web.ClientIp`
 supplies that address and believes `X-Forwarded-For` only on a connection from the
 loopback or from `TRUSTED_PROXIES`. Keep the plug ahead of the request id.

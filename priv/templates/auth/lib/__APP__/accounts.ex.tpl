@@ -1,6 +1,7 @@
 defmodule __MODULE__.Accounts do
   @moduledoc """
-  The administrator role. An administrator grants and revokes it; the last one keeps it.
+  The administrator role and what it allows: listing accounts, granting and revoking the role,
+  and removing an account. The last administrator keeps the role.
 
   The functions for an administrator take the acting account first and read its flag from the
   database. A stale struct therefore grants nothing. Functions that change data run through
@@ -8,6 +9,7 @@ defmodule __MODULE__.Accounts do
   """
   import Ecto.Query
 
+  alias Ithibati.Identity.Sessions
   alias Ithibati.Schema.Identifier
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
@@ -51,6 +53,31 @@ defmodule __MODULE__.Accounts do
   end
 
   @doc """
+  Removes the account with `account_id` with its sessions, for an administrator.
+
+  Returns `{:ok, %{account: account, digests: digests}}`. Pass the digests to
+  `Ithibati.Web.Gate.disconnect_sessions/2` after the commit; do other work outside the database
+  there as well. An administrator cannot remove their own account here: `{:error, :self}`.
+  Otherwise it returns the errors of `grant_admin/2`.
+  """
+  def remove_account(%User{id: id} = admin, account_id) do
+    with_admin(admin, fn _admins ->
+      case account(account_id) do
+        nil -> {:error, :not_found}
+        %User{id: ^id} -> {:error, :self}
+        account -> removed(account)
+      end
+    end)
+  end
+
+  # Data an account owns references `users` with `on_delete: :delete_all`. Cleanup the database
+  # cannot do, and that must roll back with the deletion, belongs here.
+  defp removed(account) do
+    digests = Sessions.revoke_all(account)
+    with {:ok, account} <- Repo.delete(account), do: {:ok, %{account: account, digests: digests}}
+  end
+
+  @doc """
   Makes the account named `identifier` an administrator, for the operator on the host.
 
   The identifier is a username, or an address in email mode, normalized as Ithibati stores it.
@@ -85,9 +112,8 @@ defmodule __MODULE__.Accounts do
   defp committed({:ok, result}), do: result
   defp committed({:error, reason}), do: Repo.rollback(reason)
 
-  # An id from a form arrives as a string.
   defp account(account_id) do
-    case Ecto.Type.cast(User.__schema__(:type, :id), account_id) do
+    case Repo.cast_id(User, account_id) do
       {:ok, id} -> Repo.get(User, id)
       :error -> nil
     end

@@ -24,7 +24,7 @@ defmodule __MODULE__Web.VerifyIdentityLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.auth flash={@flash} title={gettext("Confirm your identity")} subtitle={gettext("Confirm your current account before changing its security settings. Confirmation lasts five minutes.")}>
+    <Layouts.auth flash={@flash} title={gettext("Confirm your identity")} subtitle={gettext("Confirm your current account before this change. Confirmation lasts five minutes.")}>
       <p :if={@error} role="alert" class="mb-4 text-label text-danger">{@error}</p>
       <Layouts.auth_button phx-click="confirm">{gettext("Confirm with a passkey")}</Layouts.auth_button>
       <details id="recovery-confirmation" phx-mounted={JS.ignore_attributes(["open"])} class="mt-6 text-sm">

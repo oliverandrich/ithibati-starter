@@ -31,6 +31,14 @@ defmodule __MODULE__.Repo do
     def unquote(name)(unquote_splicing(args)), do: repo().unquote(name)(unquote_splicing(args))
   end
 
+  @doc """
+  Casts an id from a form to `schema`'s primary key type. Returns `{:ok, id}` or `:error`.
+
+  `get/2` raises `Ecto.Query.CastError` on a value the key cannot hold. The key type is asked of
+  the schema, because it is a setting.
+  """
+  def cast_id(schema, id), do: Ecto.Type.cast(schema.__schema__(:type, :id), id)
+
   # The selected repository registers under this module's name, so name lookups find it.
   # `Ecto.Adapters.SQL.query/4` and the test sandbox are such lookups.
   # Start options override the `__MODULE__.Repo` configuration, which overrides Ecto's defaults.

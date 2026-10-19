@@ -59,6 +59,26 @@ defmodule __MODULE__Web.CoreComponentsTest do
     assert link |> LazyHTML.query("span.text-muted") |> LazyHTML.text() == "2"
   end
 
+  test "a confirmation dialog asks one question and names its two answers" do
+    assigns = %{}
+
+    html =
+      ~H"""
+      <CoreComponents.confirm_dialog name="remove" title="Remove ada?" confirm_label="Remove" variant="danger">
+        It cannot be undone.
+      </CoreComponents.confirm_dialog>
+      """
+      |> rendered_to_string()
+      |> LazyHTML.from_fragment()
+
+    dialog = LazyHTML.query(html, "dialog#remove-confirm")
+    assert LazyHTML.attribute(dialog, "aria-labelledby") == ["remove-heading"]
+    assert LazyHTML.attribute(dialog, "open") == []
+    assert html |> LazyHTML.query("#remove-heading") |> LazyHTML.text() == "Remove ada?"
+    assert html |> LazyHTML.query("#confirm-remove") |> LazyHTML.attribute("phx-click") == ["confirm_remove"]
+    assert html |> LazyHTML.query("#cancel-remove") |> LazyHTML.attribute("phx-click") == ["cancel_remove"]
+  end
+
   test "a group of rows names its section, and a group without a heading names nothing" do
     assigns = %{}
     named = rendered_to_string(~H(<CoreComponents.group id="rows" heading="Rows">Row</CoreComponents.group>))

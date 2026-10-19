@@ -45,6 +45,16 @@ adds the administrator flag.
   `lib/my_app_web/admin.ex` provides `on_mount {MyAppWeb.Admin, :require_admin}`.
   `Accounts.list_accounts/1` checks the role again. The settings page gains an
   Administration group for administrators. `lib/my_app_web/router.ex` routes the page.
+- On `/accounts` an administrator grants or revokes the role and removes accounts. Each change
+  asks for the passkey within five minutes; `MyAppWeb.Reauth` gains the `accounts`
+  target. `Accounts.remove_account/2` revokes the sessions in the same transaction and returns
+  the account and the session digests, for `Gate.disconnect_sessions/2` after the commit.
+- `confirm_dialog/1` in `core_components.ex` asks one question in a modal, opened by the
+  colocated `.ShowModal` hook. `button/1` gains the `danger` variant and passes `type`.
+  `assets/css/app.css` gains `--color-scrim` for the dialog's backdrop.
+- `MyApp.Repo.cast_id/2` casts an id from a form to a schema's key type.
+  `MyApp.Invitations.get/1` uses it.
+- An invitation from a removed account names a former member.
 - `docs/interface.md` explains when to use `Layouts.auth/1` or `Layouts.member/1`, the page shapes
   and the navigation. README and CONTRIBUTING link it.
 
@@ -86,6 +96,7 @@ adds the administrator flag.
   `invitations_live_test.exs`.
 - The account menu holds Settings and Sign out. Pages under the settings pass
   `section={:settings}`, which marks the menu, and lead back to the settings.
+- `/account/verify` asks for confirmation "before this change", since administration uses it too.
 - `MyAppWeb.Reauth` lists the confirmation targets in `@targets`. `target/1` and `target?/1`
   replace the lists in `account_security_controller.ex` and `verify_identity_live.ex`.
 - `test/support/feature_case.ex` gains `viewport/4` and `scroll_past_heading/1`.

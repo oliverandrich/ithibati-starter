@@ -2,8 +2,8 @@ defmodule __MODULE__.Invitations do
   @moduledoc """
   What is outstanding, who made it, and taking one back.
 
-  This example has no way to remove an account, so the only moment anybody can influence who
-  joins is before a link is redeemed. A page that only makes links leaves that moment invisible.
+  Before a link is redeemed is the moment to influence who joins; an administrator can remove an
+  account afterwards. A page that only makes links leaves that moment invisible.
   Every member may invite and every member may withdraw, which keeps the rule the same in both
   directions; an application that wants fewer people withdrawing than inviting decides that
   here, and not in the library.
@@ -60,19 +60,10 @@ defmodule __MODULE__.Invitations do
     |> Repo.all()
   end
 
-  @doc """
-  One invitation by id, or `nil` for an id that names none.
-
-  The id arrives from a form and nothing upstream says it is a number, so it is cast here rather
-  than handed to `Repo.get/2`, which raises `Ecto.Query.CastError` on anything its primary key
-  cannot hold. Asked of the schema rather than assumed: the key type is a setting, and a guess
-  written here would be wrong the moment it changes.
-  """
+  @doc "One invitation by an id from a form, or `nil` for an id that names none."
   def get(id) do
-    type = Invitation.__schema__(:type, :id)
-
-    case Ecto.Type.cast(type, id) do
-      {:ok, named} -> Repo.get(Invitation, named)
+    case Repo.cast_id(Invitation, id) do
+      {:ok, id} -> Repo.get(Invitation, id)
       :error -> nil
     end
   end

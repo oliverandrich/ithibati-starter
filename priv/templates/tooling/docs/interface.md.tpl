@@ -99,6 +99,11 @@ An administrator page stays in the `:members` live_session, so it opens without 
 load. It declares `on_mount {__MODULE__Web.Admin, :require_admin}`, which sends members
 back to the settings. Its `__MODULE__.Accounts` calls check the role again.
 
+## Confirmations
+
+`confirm_dialog/1` asks one question before a change that cannot be undone. `/accounts` uses
+it to remove an account. Its documentation in `CoreComponents` names the events it sends.
+
 ## Pages below another page
 
 A page reached from another one sets `title` and `back`:
