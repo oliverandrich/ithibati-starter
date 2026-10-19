@@ -48,7 +48,7 @@ msgstr ""
 msgid "Copying was blocked. Select the codes above and copy them manually."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:189
+#: lib/__APP___web/live/invitations_live.ex:192
 #, elixir-autogen, elixir-format
 msgid "Create a link"
 msgstr ""
@@ -68,7 +68,7 @@ msgstr ""
 msgid "I've saved my codes. Continue"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:164
+#: lib/__APP___web/live/invitations_live.ex:167
 #, elixir-autogen, elixir-format
 msgid "Invite somebody"
 msgstr ""
@@ -174,7 +174,7 @@ msgstr ""
 msgid "That did not check out. Start again."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:142
+#: lib/__APP___web/live/invitations_live.ex:145
 #, elixir-autogen, elixir-format
 msgid "That invitation could not be written."
 msgstr ""
@@ -259,7 +259,7 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:149
+#: lib/__APP___web/live/invitations_live.ex:152
 #, elixir-autogen, elixir-format
 msgid "Username %{message}."
 msgstr ""
@@ -294,23 +294,23 @@ msgstr ""
 msgid "Your browser stopped partway through."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:195
+#: lib/__APP___web/live/invitations_live.ex:198
 #, elixir-autogen, elixir-format
 msgid "Your invitation is ready. Send this link to your guest:"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:206
-#: lib/__APP___web/live/invitations_live.ex:207
+#: lib/__APP___web/live/invitations_live.ex:209
+#: lib/__APP___web/live/invitations_live.ex:210
 #, elixir-autogen, elixir-format
 msgid "Copy link"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:205
+#: lib/__APP___web/live/invitations_live.ex:208
 #, elixir-autogen, elixir-format
 msgid "Copying was blocked. Select the link and copy it yourself."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:204
+#: lib/__APP___web/live/invitations_live.ex:207
 #, elixir-autogen, elixir-format
 msgid "Link copied."
 msgstr ""
@@ -519,7 +519,7 @@ msgstr ""
 msgid "Use a recovery code instead"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:178
+#: lib/__APP___web/live/invitations_live.ex:181
 #, elixir-autogen, elixir-format
 msgid "Their email address"
 msgstr ""
@@ -554,7 +554,7 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:148
+#: lib/__APP___web/live/invitations_live.ex:151
 #, elixir-autogen, elixir-format
 msgid "Email address %{message}."
 msgstr ""
@@ -564,7 +564,7 @@ msgstr ""
 msgid "Enter the operator setup code, then your email address, and create a passkey."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:171
+#: lib/__APP___web/live/invitations_live.ex:174
 #, elixir-autogen, elixir-format
 msgid "Enter your guest's email address. Their invitation link is sent there."
 msgstr ""
@@ -594,66 +594,61 @@ msgstr ""
 msgid "The account will belong to %{address}."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:135
+#: lib/__APP___web/live/invitations_live.ex:138
 #, elixir-autogen, elixir-format
 msgid "The invitation could not be sent. Pass the link on yourself."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:123
+#: lib/__APP___web/live/invitations_live.ex:126
 #, elixir-autogen, elixir-format
 msgid "Too many invitations. Try again in an hour."
 msgid_plural "Too many invitations. Try again in %{count} hours."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/__APP___web/live/invitations_live.ex:115
+#: lib/__APP___web/live/invitations_live.ex:118
 #, elixir-autogen, elixir-format
 msgid "Too many invitations. Try again in a minute."
 msgid_plural "Too many invitations. Try again in %{count} minutes."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/__APP___web/live/invitations_live.ex:236
-#, elixir-autogen, elixir-format
-msgid "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
-msgstr ""
-
-#: lib/__APP___web/live/invitations_live.ex:253
+#: lib/__APP___web/live/invitations_live.ex:256
 #, elixir-autogen, elixir-format
 msgid "Invited by %{username}"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:232
+#: lib/__APP___web/live/invitations_live.ex:235
 #, elixir-autogen, elixir-format
 msgid "Nothing is waiting to be accepted."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:229
+#: lib/__APP___web/live/invitations_live.ex:232
 #, elixir-autogen, elixir-format
 msgid "Outstanding invitations"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:257
+#: lib/__APP___web/live/invitations_live.ex:260
 #, elixir-autogen, elixir-format
 msgid "Runs out %{date}"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:266
+#: lib/__APP___web/live/invitations_live.ex:270
 #, elixir-autogen, elixir-format
 msgid "Take it back"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:87
+#: lib/__APP___web/live/invitations_live.ex:85
 #, elixir-autogen, elixir-format
 msgid "That invitation is no longer there."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:102
+#: lib/__APP___web/live/invitations_live.ex:105
 #, elixir-autogen, elixir-format
 msgid "That invitation is not waiting any more. Somebody accepted it, or took it back first."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:277
+#: lib/__APP___web/live/invitations_live.ex:280
 #, elixir-autogen, elixir-format
 msgid "Unknown"
 msgstr ""
@@ -663,22 +658,22 @@ msgstr ""
 msgid "Choose your username, then create a passkey."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:185
+#: lib/__APP___web/live/invitations_live.ex:188
 #, elixir-autogen, elixir-format
 msgid "Grace, from the meetup"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:143
+#: lib/__APP___web/live/invitations_live.ex:146
 #, elixir-autogen, elixir-format
 msgid "Note %{message}."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:184
+#: lib/__APP___web/live/invitations_live.ex:187
 #, elixir-autogen, elixir-format
 msgid "Note (optional)"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:167
+#: lib/__APP___web/live/invitations_live.ex:170
 #, elixir-autogen, elixir-format
 msgid "Note whom the link is for, then send it to them. They choose their own username."
 msgstr ""
@@ -688,7 +683,7 @@ msgstr ""
 msgid "Opening your invitation…"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:184
+#: lib/__APP___web/live/invitations_live.ex:187
 #, elixir-autogen, elixir-format
 msgid "Who is it for?"
 msgstr ""
@@ -746,8 +741,8 @@ msgstr[1] ""
 msgid "Account & security"
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:158
-#: lib/__APP___web/live/invitations_live.ex:162
+#: lib/__APP___web/live/invitations_live.ex:161
+#: lib/__APP___web/live/invitations_live.ex:165
 #: lib/__APP___web/live/settings_live.ex:42
 #, elixir-autogen, elixir-format
 msgid "Invitations"
@@ -762,7 +757,7 @@ msgstr ""
 #: lib/__APP___web/components/layouts.ex:300
 #: lib/__APP___web/live/account_security_live.ex:56
 #: lib/__APP___web/live/accounts_live.ex:112
-#: lib/__APP___web/live/invitations_live.ex:159
+#: lib/__APP___web/live/invitations_live.ex:162
 #: lib/__APP___web/live/settings_live.ex:30
 #: lib/__APP___web/live/settings_live.ex:32
 #, elixir-autogen, elixir-format
@@ -854,12 +849,22 @@ msgstr ""
 msgid "This account no longer exists."
 msgstr ""
 
-#: lib/__APP___web/live/invitations_live.ex:278
-#, elixir-autogen, elixir-format
-msgid "a former member"
-msgstr ""
-
 #: lib/__APP___web/live/accounts_live.ex:94
 #, elixir-autogen, elixir-format
 msgid "Nothing changed. Please try again."
+msgstr ""
+
+#: lib/__APP___web/live/invitations_live.ex:240
+#, elixir-autogen, elixir-format
+msgid "As an administrator, you can take back any invitation until it is accepted."
+msgstr ""
+
+#: lib/__APP___web/live/invitations_live.ex:95
+#, elixir-autogen, elixir-format
+msgid "Only the member who sent it, or an administrator, can take it back."
+msgstr ""
+
+#: lib/__APP___web/live/invitations_live.ex:241
+#, elixir-autogen, elixir-format
+msgid "You can take back the ones you sent, until they are accepted."
 msgstr ""

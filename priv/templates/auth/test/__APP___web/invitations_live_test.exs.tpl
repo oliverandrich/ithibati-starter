@@ -3,7 +3,10 @@ defmodule __MODULE__Web.InvitationsLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Ithibati.Web.Gate
   alias __MODULE__.Accounts.Invitation
+  alias __MODULE__.Accounts.User
+  alias __MODULE__.Invitations
   alias __MODULE__.Repo
   alias __MODULE__Web.Auth
 
@@ -53,13 +56,39 @@ defmodule __MODULE__Web.InvitationsLiveTest do
     refute Repo.one(Invitation)
   end
 
-  test "an invitation from a removed account names a former member", %{conn: conn} do
-    gone = Repo.insert!(%__MODULE__.Accounts.User{username: "gone"})
-    {:ok, invitation} = __MODULE__.Invitations.open(gone, %{"note" => "Grace"})
-    Repo.delete!(gone)
+  # The first account claims the instance and administers it, so a member is made directly here.
+  defp member(conn) do
+    member = Repo.insert!(%User{username: "bob"})
+    conn |> Plug.Test.init_test_session(%{}) |> Gate.log_in(member)
+  end
 
-    {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
-    assert has_element?(view, "#invitation-#{invitation.id}", "Invited by a former member")
+  # Another member sees the invitation but cannot take it back, not even by a forged event.
+  test "another member cannot take an invitation back", %{conn: conn} do
+    ada = signed_in(conn, "ada")
+    {:ok, ada_view, _html} = live(ada, "/account/invitations")
+    ada_view |> form("#invitation-form", note: "Grace") |> render_submit()
+    invitation = Repo.one(Invitation)
+
+    {:ok, view, _html} = live(member(build_conn()), "/account/invitations")
+    assert has_element?(view, "#invitation-#{invitation.id}")
+    refute has_element?(view, ~s(#invitation-#{invitation.id} button[phx-click="withdraw"]))
+    assert render(view) =~ "You can take back the ones you sent"
+
+    assert render_click(view, "withdraw", %{"id" => to_string(invitation.id)}) =~
+             "Only the member who sent it, or an administrator, can take it back."
+
+    assert has_element?(view, "#invitation-#{invitation.id}")
+  end
+
+  test "an administrator takes back anybody's", %{conn: conn} do
+    admin = signed_in(conn, "ada")
+    {:ok, invitation} = Invitations.open(Repo.insert!(%User{username: "bob"}), %{"note" => "Grace"})
+
+    {:ok, view, _html} = live(admin, "/account/invitations")
+    assert render(view) =~ "As an administrator, you can take back any invitation"
+
+    view |> element(~s(#invitation-#{invitation.id} button[phx-click="withdraw"])) |> render_click()
+    refute has_element?(view, "#invitation-#{invitation.id}")
   end
 
   # The link is long, so a button beside it copies it. The hook reads the link from the button.

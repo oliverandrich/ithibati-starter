@@ -41,7 +41,7 @@ msgstr "Wiederherstellungscodes kopieren"
 msgid "Copying was blocked. Select the codes above and copy them manually."
 msgstr "Das Kopieren wurde blockiert. Markiere die Codes oben und kopiere sie manuell."
 
-#: lib/__APP___web/live/invitations_live.ex:189
+#: lib/__APP___web/live/invitations_live.ex:192
 #, elixir-autogen, elixir-format
 msgid "Create a link"
 msgstr "Einladungslink erstellen"
@@ -61,7 +61,7 @@ msgstr "Gib einen der Codes ein, die du bei der Einrichtung gespeichert hast. Je
 msgid "I've saved my codes. Continue"
 msgstr "Codes gespeichert. Weiter"
 
-#: lib/__APP___web/live/invitations_live.ex:164
+#: lib/__APP___web/live/invitations_live.ex:167
 #, elixir-autogen, elixir-format
 msgid "Invite somebody"
 msgstr "Jemanden einladen"
@@ -167,7 +167,7 @@ msgstr "Dieses Gerät kann keinen für diese Seite auffindbaren Passkey speicher
 msgid "That did not check out. Start again."
 msgstr "Die Überprüfung ist fehlgeschlagen. Bitte versuche es erneut."
 
-#: lib/__APP___web/live/invitations_live.ex:142
+#: lib/__APP___web/live/invitations_live.ex:145
 #, elixir-autogen, elixir-format
 msgid "That invitation could not be written."
 msgstr "Die Einladung konnte nicht erstellt werden."
@@ -252,7 +252,7 @@ msgstr "Wiederherstellungscode verwenden"
 msgid "Username"
 msgstr "Benutzername"
 
-#: lib/__APP___web/live/invitations_live.ex:149
+#: lib/__APP___web/live/invitations_live.ex:152
 #, elixir-autogen, elixir-format
 msgid "Username %{message}."
 msgstr "Benutzername %{message}."
@@ -287,23 +287,23 @@ msgstr "Dein Browser hat unlesbare Daten gesendet."
 msgid "Your browser stopped partway through."
 msgstr "Dein Browser hat den Vorgang unterbrochen."
 
-#: lib/__APP___web/live/invitations_live.ex:195
+#: lib/__APP___web/live/invitations_live.ex:198
 #, elixir-autogen, elixir-format
 msgid "Your invitation is ready. Send this link to your guest:"
 msgstr "Deine Einladung ist bereit. Sende diesen Link an deinen Gast:"
 
-#: lib/__APP___web/live/invitations_live.ex:206
-#: lib/__APP___web/live/invitations_live.ex:207
+#: lib/__APP___web/live/invitations_live.ex:209
+#: lib/__APP___web/live/invitations_live.ex:210
 #, elixir-autogen, elixir-format
 msgid "Copy link"
 msgstr "Link kopieren"
 
-#: lib/__APP___web/live/invitations_live.ex:205
+#: lib/__APP___web/live/invitations_live.ex:208
 #, elixir-autogen, elixir-format
 msgid "Copying was blocked. Select the link and copy it yourself."
 msgstr "Das Kopieren wurde blockiert. Markiere den Link und kopiere ihn selbst."
 
-#: lib/__APP___web/live/invitations_live.ex:204
+#: lib/__APP___web/live/invitations_live.ex:207
 #, elixir-autogen, elixir-format
 msgid "Link copied."
 msgstr "Link kopiert."
@@ -512,7 +512,7 @@ msgstr "Verwende einen Passkey oder Wiederherstellungscode deines aktuellen Kont
 msgid "Use a recovery code instead"
 msgstr "Stattdessen einen Wiederherstellungscode verwenden"
 
-#: lib/__APP___web/live/invitations_live.ex:178
+#: lib/__APP___web/live/invitations_live.ex:181
 #, elixir-autogen, elixir-format
 msgid "Their email address"
 msgstr "E-Mail-Adresse deines Gastes"
@@ -547,7 +547,7 @@ msgstr "Gib einen aktuellen Einrichtungscode ein, bevor du einen Passkey erstell
 msgid "Email address"
 msgstr "E-Mail-Adresse"
 
-#: lib/__APP___web/live/invitations_live.ex:148
+#: lib/__APP___web/live/invitations_live.ex:151
 #, elixir-autogen, elixir-format
 msgid "Email address %{message}."
 msgstr "E-Mail-Adresse %{message}."
@@ -557,7 +557,7 @@ msgstr "E-Mail-Adresse %{message}."
 msgid "Enter the operator setup code, then your email address, and create a passkey."
 msgstr "Gib den Einrichtungscode des Betreibers ein, dann deine E-Mail-Adresse, und erstelle einen Passkey."
 
-#: lib/__APP___web/live/invitations_live.ex:171
+#: lib/__APP___web/live/invitations_live.ex:174
 #, elixir-autogen, elixir-format
 msgid "Enter your guest's email address. Their invitation link is sent there."
 msgstr "Gib die E-Mail-Adresse deines Gasts ein. Der Einladungslink wird dorthin geschickt."
@@ -587,66 +587,61 @@ msgstr "Das ist keine E-Mail-Adresse."
 msgid "The account will belong to %{address}."
 msgstr "Das Konto gehört zu %{address}."
 
-#: lib/__APP___web/live/invitations_live.ex:135
+#: lib/__APP___web/live/invitations_live.ex:138
 #, elixir-autogen, elixir-format
 msgid "The invitation could not be sent. Pass the link on yourself."
 msgstr "Die Einladung konnte nicht versendet werden. Gib den Link selbst weiter."
 
-#: lib/__APP___web/live/invitations_live.ex:123
+#: lib/__APP___web/live/invitations_live.ex:126
 #, elixir-autogen, elixir-format
 msgid "Too many invitations. Try again in an hour."
 msgid_plural "Too many invitations. Try again in %{count} hours."
 msgstr[0] "Zu viele Einladungen. Versuche es in einer Stunde erneut."
 msgstr[1] "Zu viele Einladungen. Versuche es in %{count} Stunden erneut."
 
-#: lib/__APP___web/live/invitations_live.ex:115
+#: lib/__APP___web/live/invitations_live.ex:118
 #, elixir-autogen, elixir-format
 msgid "Too many invitations. Try again in a minute."
 msgid_plural "Too many invitations. Try again in %{count} minutes."
 msgstr[0] "Zu viele Einladungen. Versuche es in einer Minute erneut."
 msgstr[1] "Zu viele Einladungen. Versuche es in %{count} Minuten erneut."
 
-#: lib/__APP___web/live/invitations_live.ex:236
-#, elixir-autogen, elixir-format
-msgid "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
-msgstr "Jeder hier kann eine zurücknehmen. Bis sie angenommen ist, ist das die einzige Mitsprache darüber, wer dazukommt."
-
-#: lib/__APP___web/live/invitations_live.ex:253
+#: lib/__APP___web/live/invitations_live.ex:256
 #, elixir-autogen, elixir-format
 msgid "Invited by %{username}"
 msgstr "Eingeladen von %{username}"
 
-#: lib/__APP___web/live/invitations_live.ex:232
+#: lib/__APP___web/live/invitations_live.ex:235
 #, elixir-autogen, elixir-format
 msgid "Nothing is waiting to be accepted."
 msgstr "Es wartet nichts darauf, angenommen zu werden."
 
-#: lib/__APP___web/live/invitations_live.ex:229
+#: lib/__APP___web/live/invitations_live.ex:232
 #, elixir-autogen, elixir-format
 msgid "Outstanding invitations"
 msgstr "Offene Einladungen"
 
-#: lib/__APP___web/live/invitations_live.ex:257
+#: lib/__APP___web/live/invitations_live.ex:260
 #, elixir-autogen, elixir-format
 msgid "Runs out %{date}"
 msgstr "Läuft ab am %{date}"
 
-#: lib/__APP___web/live/invitations_live.ex:266
+#: lib/__APP___web/live/invitations_live.ex:270
 #, elixir-autogen, elixir-format
 msgid "Take it back"
 msgstr "Zurücknehmen"
 
-#: lib/__APP___web/live/invitations_live.ex:87
+#: lib/__APP___web/live/invitations_live.ex:85
 #, elixir-autogen, elixir-format
 msgid "That invitation is no longer there."
 msgstr "Diese Einladung gibt es nicht mehr."
 
-#: lib/__APP___web/live/invitations_live.ex:102
+#: lib/__APP___web/live/invitations_live.ex:105
 #, elixir-autogen, elixir-format
 msgid "That invitation is not waiting any more. Somebody accepted it, or took it back first."
 msgstr "Diese Einladung wartet nicht mehr. Jemand hat sie angenommen oder vorher zurückgenommen."
 
-#: lib/__APP___web/live/invitations_live.ex:277
+#: lib/__APP___web/live/invitations_live.ex:280
 #, elixir-autogen, elixir-format
 msgid "Unknown"
 msgstr "Unbekannt"
@@ -656,22 +651,22 @@ msgstr "Unbekannt"
 msgid "Choose your username, then create a passkey."
 msgstr "Wähle deinen Benutzernamen und erstelle dann einen Passkey."
 
-#: lib/__APP___web/live/invitations_live.ex:185
+#: lib/__APP___web/live/invitations_live.ex:188
 #, elixir-autogen, elixir-format
 msgid "Grace, from the meetup"
 msgstr "Grace, vom Meetup"
 
-#: lib/__APP___web/live/invitations_live.ex:143
+#: lib/__APP___web/live/invitations_live.ex:146
 #, elixir-autogen, elixir-format
 msgid "Note %{message}."
 msgstr "Notiz %{message}."
 
-#: lib/__APP___web/live/invitations_live.ex:184
+#: lib/__APP___web/live/invitations_live.ex:187
 #, elixir-autogen, elixir-format
 msgid "Note (optional)"
 msgstr "Notiz (optional)"
 
-#: lib/__APP___web/live/invitations_live.ex:167
+#: lib/__APP___web/live/invitations_live.ex:170
 #, elixir-autogen, elixir-format
 msgid "Note whom the link is for, then send it to them. They choose their own username."
 msgstr "Notiere, für wen der Link ist, und schick ihn dann ab. Den Benutzernamen wählt dein Gast selbst."
@@ -681,7 +676,7 @@ msgstr "Notiere, für wen der Link ist, und schick ihn dann ab. Den Benutzername
 msgid "Opening your invitation…"
 msgstr "Deine Einladung wird geöffnet …"
 
-#: lib/__APP___web/live/invitations_live.ex:184
+#: lib/__APP___web/live/invitations_live.ex:187
 #, elixir-autogen, elixir-format
 msgid "Who is it for?"
 msgstr "Für wen ist sie?"
@@ -739,8 +734,8 @@ msgstr[1] "%{count} übrig"
 msgid "Account & security"
 msgstr "Konto & Sicherheit"
 
-#: lib/__APP___web/live/invitations_live.ex:158
-#: lib/__APP___web/live/invitations_live.ex:162
+#: lib/__APP___web/live/invitations_live.ex:161
+#: lib/__APP___web/live/invitations_live.ex:165
 #: lib/__APP___web/live/settings_live.ex:42
 #, elixir-autogen, elixir-format
 msgid "Invitations"
@@ -755,7 +750,7 @@ msgstr "Passkeys"
 #: lib/__APP___web/components/layouts.ex:300
 #: lib/__APP___web/live/account_security_live.ex:56
 #: lib/__APP___web/live/accounts_live.ex:112
-#: lib/__APP___web/live/invitations_live.ex:159
+#: lib/__APP___web/live/invitations_live.ex:162
 #: lib/__APP___web/live/settings_live.ex:30
 #: lib/__APP___web/live/settings_live.ex:32
 #, elixir-autogen, elixir-format
@@ -847,12 +842,22 @@ msgstr "Passkeys und Wiederherstellungscodes werden gelöscht, offene Sitzungen 
 msgid "This account no longer exists."
 msgstr "Dieses Konto gibt es nicht mehr."
 
-#: lib/__APP___web/live/invitations_live.ex:278
-#, elixir-autogen, elixir-format
-msgid "a former member"
-msgstr "einem früheren Mitglied"
-
 #: lib/__APP___web/live/accounts_live.ex:94
 #, elixir-autogen, elixir-format
 msgid "Nothing changed. Please try again."
 msgstr "Nichts geändert. Bitte versuche es noch einmal."
+
+#: lib/__APP___web/live/invitations_live.ex:240
+#, elixir-autogen, elixir-format
+msgid "As an administrator, you can take back any invitation until it is accepted."
+msgstr "Als Administrator kannst du jede Einladung zurücknehmen, bis sie angenommen ist."
+
+#: lib/__APP___web/live/invitations_live.ex:95
+#, elixir-autogen, elixir-format
+msgid "Only the member who sent it, or an administrator, can take it back."
+msgstr "Nur wer sie verschickt hat oder ein Administrator kann sie zurücknehmen."
+
+#: lib/__APP___web/live/invitations_live.ex:241
+#, elixir-autogen, elixir-format
+msgid "You can take back the ones you sent, until they are accepted."
+msgstr "Du kannst deine eigenen Einladungen zurücknehmen, bis sie angenommen sind."

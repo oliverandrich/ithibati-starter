@@ -11,6 +11,7 @@ defmodule __MODULE__.Accounts do
 
   alias Ithibati.Identity.Sessions
   alias Ithibati.Schema.Identifier
+  alias __MODULE__.Accounts.Invitation
   alias __MODULE__.Accounts.User
   alias __MODULE__.Repo
 
@@ -53,7 +54,8 @@ defmodule __MODULE__.Accounts do
   end
 
   @doc """
-  Removes the account with `account_id` with its sessions, for an administrator.
+  Removes the account with `account_id` with its sessions and open invitations, for an
+  administrator.
 
   Returns `{:ok, %{account: account, digests: digests}}`. Pass the digests to
   `Ithibati.Web.Gate.disconnect_sessions/2` after the commit; do other work outside the database
@@ -73,6 +75,9 @@ defmodule __MODULE__.Accounts do
   # Data an account owns references `users` with `on_delete: :delete_all`. Cleanup the database
   # cannot do, and that must roll back with the deletion, belongs here.
   defp removed(account) do
+    # The inviter column has no foreign key. An open invitation would let somebody in on behalf
+    # of an account that is gone.
+    Repo.delete_all(from i in Invitation, where: i.invited_by_id == ^account.id and is_nil(i.accepted_at))
     digests = Sessions.revoke_all(account)
     with {:ok, account} <- Repo.delete(account), do: {:ok, %{account: account, digests: digests}}
   end

@@ -13,9 +13,9 @@ is an administrator. `bin/grant-admin` makes another account one; see
 revokes the role, and the last administrator keeps it.
 
 The same page lists what is outstanding: for whom, by whom and when it runs
-out. Any member can take any of them back, and the link stops working at once.
-An invitation from a removed account names a former member.
-`__MODULE__.Invitations` holds the queries,
+out. A member takes back the invitations they sent; an administrator takes back
+any. The link stops working at once. Removing an account takes back its open
+invitations. `__MODULE__.Invitations` holds the queries,
 and they come from Ithibati rather than being written again: `pending_query/0`
 is the predicate `fetch/1` uses, and `withdraw/1` rechecks the acceptance
 inside its delete.

@@ -100,7 +100,7 @@ defmodule __MODULE__Web.AccountsLiveTest do
 
     refute has_element?(view, "#account-#{admin.id} [data-action]")
     render_click(view, "remove", %{"id" => to_string(admin.id)})
-    refute has_element?(view, "#remove-confirm")
+    refute has_element?(view, "#remove-confirm[data-show]")
   end
 
   test "a confirmed administrator removes an account and ends its open pages", %{conn: conn} do
@@ -111,7 +111,7 @@ defmodule __MODULE__Web.AccountsLiveTest do
     {:ok, view, _html} = live(conn |> signed_in(admin) |> confirmed(admin), ~p"/accounts")
 
     action(view, member, "remove")
-    assert has_element?(view, "#remove-confirm", member.username)
+    assert has_element?(view, "#remove-confirm[data-show]", member.username)
 
     view |> element("#confirm-remove") |> render_click()
     refute has_element?(view, "#account-#{member.id}")
@@ -127,7 +127,7 @@ defmodule __MODULE__Web.AccountsLiveTest do
 
     action(view, member, "remove")
     view |> element("#cancel-remove") |> render_click()
-    refute has_element?(view, "#remove-confirm")
+    refute has_element?(view, "#remove-confirm[data-show]")
     assert Repo.get(User, member.id)
   end
 end

@@ -2,9 +2,8 @@ defmodule __MODULE__Web.InvitationsLive do
   @moduledoc """
   Manual invitation links behind `{:require_account, to: "/login"}`, reached from the settings.
 
-  Nothing here checks who is asking: by the time `mount/3` runs, the gate has either assigned an
-  account or sent the visitor away. What an account may *do* — whether everyone can invite, or only
-  some — is this application's question and would live here, not in the library.
+  The gate assigns an account before `mount/3` runs, or sends the visitor away.
+  Every member may invite. Who may take an invitation back is decided by `__MODULE__.Invitations`.
   """
   use __MODULE__Web, :live_view
 
@@ -66,14 +65,16 @@ defmodule __MODULE__Web.InvitationsLive do
       {:error, retry_after} when is_integer(retry_after) ->
         {:noreply, assign(socket, error: too_many(retry_after))}
 
+      # The account was removed while this page was open.
+      {:error, :not_found} ->
+        {:noreply, assign(socket, error: gettext("That invitation could not be written."))}
+
       {:error, changeset} ->
         {:noreply, assign(socket, error: changeset_message(changeset, socket.assigns.email?))}
     end
   end
 
-  # The id comes off the wire, and nothing here scopes it: every member may withdraw any
-  # invitation that has not been accepted, which is the same rule as "every member may invite".
-  # There is no "yours" to get wrong.
+  # The id comes off the wire; `Invitations.withdraw/2` decides who may take it back.
   def handle_event("withdraw", %{"id" => id}, socket) do
     {:noreply, socket |> taken_back(Invitations.get(id)) |> listed()}
   end
@@ -82,10 +83,15 @@ defmodule __MODULE__Web.InvitationsLive do
     do: assign(socket, error: gettext("That invitation is no longer there."))
 
   defp taken_back(socket, invitation) do
-    case Invitations.withdraw(invitation) do
+    case Invitations.withdraw(socket.assigns.current_account, invitation) do
       {:ok, gone} ->
         socket = assign(socket, error: nil)
         if gone.id == socket.assigns.link_id, do: forgotten(socket), else: socket
+
+      {:error, :forbidden} ->
+        assign(socket,
+          error: gettext("Only the member who sent it, or an administrator, can take it back.")
+        )
 
       # Ithibati answers `:already_accepted` for a row that was accepted *or* is no longer there,
       # because it rechecks inside the delete and a miss cannot tell the two apart. Two members
@@ -225,9 +231,9 @@ defmodule __MODULE__Web.InvitationsLive do
       </p>
 
       <p :if={@pending != []} class="mt-2 text-sm text-muted">
-        {gettext(
-          "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
-        )}
+        {if Invitations.withdraws_any?(@current_account),
+          do: gettext("As an administrator, you can take back any invitation until it is accepted."),
+          else: gettext("You can take back the ones you sent, until they are accepted.")}
       </p>
 
       <ul :if={@pending != []} id="pending-invitations" class="mt-4 divide-y divide-line">
@@ -250,6 +256,7 @@ defmodule __MODULE__Web.InvitationsLive do
           </span>
 
           <button
+            :if={Invitations.withdrawable?(@current_account, invitation)}
             type="button"
             phx-click="withdraw"
             phx-value-id={invitation.id}
@@ -263,9 +270,7 @@ defmodule __MODULE__Web.InvitationsLive do
     """
   end
 
-  # The inviter column has no foreign key, so a removed inviter leaves its id behind. Rows from
-  # before the column existed have none.
+  # Rows from before the inviter column existed have none.
   defp inviter(%{invited_by: %{username: username}}), do: username
-  defp inviter(%{invited_by_id: nil}), do: gettext("Unknown")
-  defp inviter(_removed), do: gettext("a former member")
+  defp inviter(_unknown), do: gettext("Unknown")
 end

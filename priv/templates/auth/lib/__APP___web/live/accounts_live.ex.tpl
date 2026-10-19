@@ -146,9 +146,9 @@ defmodule __MODULE__Web.AccountsLive do
       </div>
 
       <.confirm_dialog
-        :if={@removing}
         name="remove"
-        title={gettext("Remove %{username}?", username: @removing.username)}
+        show={@removing != nil}
+        title={@removing && gettext("Remove %{username}?", username: @removing.username)}
         confirm_label={gettext("Remove")}
         variant="danger"
       >

@@ -175,17 +175,18 @@ defmodule __MODULE__Web.CoreComponents do
   @doc """
   Renders a modal dialog that asks one question.
 
-  Render it only while it should be open. The `.ShowModal` hook calls `showModal()` once it is
-  mounted, so the server never renders `open`. The dialog focuses itself, so no button shows a
-  focus ring before the first Tab. Once removed, it returns the focus to the element that opened it. The buttons send `confirm_<name>` and `cancel_<name>`;
-  Escape sends `cancel_<name>`.
+  Render it always and set `show` while it should be open. The `.ShowModal` hook calls
+  `showModal()` and `close()` as `show` changes, so the server never renders `open`. The dialog
+  focuses itself on opening. `close()` returns the focus to the element that opened it.
+  The buttons send `confirm_<name>` and `cancel_<name>`; Escape sends `cancel_<name>`.
 
-      <.confirm_dialog :if={@removing} name="remove" title="Remove ada?" confirm_label="Remove" variant="danger">
+      <.confirm_dialog name="remove" show={@removing != nil} title="Remove ada?" confirm_label="Remove" variant="danger">
         This cannot be undone.
       </.confirm_dialog>
   """
   attr :name, :string, required: true
-  attr :title, :string, required: true
+  attr :show, :boolean, required: true
+  attr :title, :string, default: nil
   attr :confirm_label, :string, required: true
   attr :variant, :string, default: "primary", doc: "`danger` when the answer cannot be undone"
   slot :inner_block, required: true
@@ -196,9 +197,10 @@ defmodule __MODULE__Web.CoreComponents do
       id={"#{@name}-confirm"}
       tabindex="-1"
       aria-labelledby={"#{@name}-heading"}
+      data-show={@show}
       phx-hook=".ShowModal"
       phx-mounted={JS.ignore_attributes(["open"])}
-      phx-window-keydown={"cancel_#{@name}"}
+      phx-window-keydown={@show && "cancel_#{@name}"}
       phx-key="Escape"
       class="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-xl bg-surface text-ink shadow-xl ring-1 ring-line outline-none backdrop:bg-scrim/30"
     >
@@ -216,14 +218,16 @@ defmodule __MODULE__Web.CoreComponents do
     </dialog>
     <script :type={Phoenix.LiveView.ColocatedHook} name=".ShowModal">
       export default {
-        mounted() {
-          this.opener = document.activeElement
-          this.el.showModal()
-          this.el.focus()
-        },
-        // The server removes the dialog, so the browser restores no focus of its own.
-        destroyed() {
-          if (this.opener?.isConnected) this.opener.focus()
+        mounted() { this.sync() },
+        updated() { this.sync() },
+        sync() {
+          const show = this.el.hasAttribute("data-show")
+          if (show && !this.el.open) {
+            this.el.showModal()
+            this.el.focus()
+          } else if (!show && this.el.open) {
+            this.el.close()
+          }
         }
       }
     </script>

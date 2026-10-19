@@ -4,9 +4,8 @@ defmodule __MODULE__.Invitations do
 
   Before a link is redeemed is the moment to influence who joins; an administrator can remove an
   account afterwards. A page that only makes links leaves that moment invisible.
-  Every member may invite and every member may withdraw, which keeps the rule the same in both
-  directions; an application that wants fewer people withdrawing than inviting decides that
-  here, and not in the library.
+  Every member may invite and take back their own invitations. An administrator takes back any.
+  That rule belongs to this application, not to the library.
 
   The table is this application's and the invariants are Ithibati's, so the queries come from
   there. `pending_query/0` hands over the predicate `fetch/1` uses, and `withdraw/1` rechecks the
@@ -35,11 +34,26 @@ defmodule __MODULE__.Invitations do
 
   Addressed, the invitation binds the address it is sent to. Named, it is open: the invitee
   chooses the username.
+
+  The inviter's row is locked first, so a removal of that account waits or has already happened.
+  An account that is gone opens nothing: `{:error, :not_found}`.
   """
-  def open(%User{} = inviter, attrs) do
+  def open(%User{id: id}, attrs) do
+    Repo.transaction(fn ->
+      with %User{} <- User |> where(id: ^id) |> Repo.for_update() |> Repo.one(),
+           {:ok, invitation} <- insert(id, attrs) do
+        invitation
+      else
+        nil -> Repo.rollback(:not_found)
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+    end)
+  end
+
+  defp insert(inviter_id, attrs) do
     %Invitation{}
     |> Invitation.changeset(attrs, addressed: Identity.email?())
-    |> Changeset.put_change(:invited_by_id, inviter.id)
+    |> Changeset.put_change(:invited_by_id, inviter_id)
     |> Repo.insert()
   end
 
@@ -69,10 +83,32 @@ defmodule __MODULE__.Invitations do
   end
 
   @doc """
-  Takes back an invitation that has not been accepted, and its link stops working at once.
+  Takes back an invitation that has not been accepted, for its inviter or an administrator. Its
+  link stops working at once.
 
-  Answers `{:error, :already_accepted}` for one that was redeemed in the meantime. Nothing here
-  changes an acceptance or an expiry.
+  The role is read from the database. Answers `{:error, :forbidden}` for another member and
+  `{:error, :already_accepted}` for one that was redeemed in the meantime. Nothing here changes
+  an acceptance or an expiry.
   """
-  defdelegate withdraw(invitation), to: Invitations
+  def withdraw(%User{id: id}, %Invitation{invited_by_id: id} = invitation),
+    do: Invitations.withdraw(invitation)
+
+  def withdraw(%User{id: id}, invitation) do
+    if Repo.exists?(from u in User, where: u.id == ^id and u.admin),
+      do: Invitations.withdraw(invitation),
+      else: {:error, :forbidden}
+  end
+
+  @doc """
+  Whether `account` may take back anybody's invitation, by the struct's role.
+  The page reads it to word its help. `withdraw/2` decides by the stored role.
+  """
+  def withdraws_any?(%User{admin: admin}), do: admin
+
+  @doc """
+  Whether `account` may take `invitation` back, by the struct's role, to show the button.
+  `withdraw/2` decides by the stored role.
+  """
+  def withdrawable?(%User{id: id} = account, %Invitation{invited_by_id: inviter}),
+    do: withdraws_any?(account) or inviter == id
 end

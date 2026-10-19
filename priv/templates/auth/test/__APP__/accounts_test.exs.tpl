@@ -110,6 +110,18 @@ defmodule __MODULE__.AccountsTest do
       refute Sessions.get_user_by_session_token(token)
     end
 
+    # An invitation from a removed account would let somebody in on its behalf.
+    test "removing an account takes back its open invitations" do
+      admin = account(%{admin: true})
+      member = account()
+      {:ok, open} = __MODULE__.Invitations.open(member, %{"note" => "Grace"})
+      {:ok, kept} = __MODULE__.Invitations.open(admin, %{"note" => "Linus"})
+
+      assert {:ok, _removed} = Accounts.remove_account(admin, member.id)
+      refute Ithibati.Identity.Invitations.fetch(open.token)
+      assert Ithibati.Identity.Invitations.fetch(kept.token)
+    end
+
     test "another administrator can be removed, the acting one cannot" do
       admin = account(%{admin: true})
       other = account(%{admin: true})
