@@ -13,11 +13,12 @@ defmodule __MODULE__Web.AccountSecurityController do
     if Reauth.confirmed?(conn), do: conn, else: conn |> redirect(to: ~p"/account/confirm/recovery-codes") |> halt()
   end
 
-  def confirm(conn, %{"purpose" => purpose}) when purpose in ["passkeys", "recovery-codes"] do
-    conn |> put_session(:reauth_target, "/account/" <> purpose) |> redirect(to: ~p"/account/verify")
+  def confirm(conn, %{"purpose" => purpose}) do
+    case Reauth.target(purpose) do
+      {:ok, path} -> conn |> put_session(:reauth_target, path) |> redirect(to: ~p"/account/verify")
+      :error -> send_resp(conn, 404, "Not Found")
+    end
   end
-
-  def confirm(conn, _params), do: conn |> send_resp(404, "Not Found")
 
   def sign_out_all(conn, _params), do: conn |> Gate.log_out_all() |> redirect(to: ~p"/login")
 

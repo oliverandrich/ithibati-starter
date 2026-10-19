@@ -6,7 +6,7 @@ can register a username and passkey. Issue
 the code after migration as described in [Operations](operations.md); enter it over
 HTTPS. The code is printed only by that command, stored only as a digest, and
 consumed with the first account claim. Later registrations require a valid
-invitation; every authenticated member can create links on `/`. Links are
+invitation; every authenticated member can create links on `/account/invitations`. Links are
 shown once, expire, and are accepted once. There is no administrator role.
 
 The same page lists what is outstanding: for whom, by whom and when it runs
@@ -52,8 +52,9 @@ auth appearance live in `Layouts.auth/1`; the one-time code screen includes a co
 button and a manual-copy fallback when clipboard permission is unavailable.
 
 The account menu in the header of `Layouts.member/1` opens from an icon and names the
-account at its top. `/account/passkeys` supports enrollment, naming and removal; the
-last passkey cannot be removed. `/account/recovery-codes` shows the unused count
+account at its top. It leads to `/account/settings`. That page counts the passkeys and
+the unused recovery codes. It also links the invitations. `/account/passkeys` supports
+enrollment, naming and removal; the last passkey cannot be removed. `/account/recovery-codes` shows the unused count
 and requires explicit confirmation before replacing every old code. New codes
 use the same one-time display and copy flow as registration.
 

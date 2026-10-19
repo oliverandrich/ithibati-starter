@@ -1,0 +1,269 @@
+defmodule __MODULE__Web.InvitationsLive do
+  @moduledoc """
+  Manual invitation links behind `{:require_account, to: "/login"}`, reached from the settings.
+
+  Nothing here checks who is asking: by the time `mount/3` runs, the gate has either assigned an
+  account or sent the visitor away. What an account may *do* — whether everyone can invite, or only
+  some — is this application's question and would live here, not in the library.
+  """
+  use __MODULE__Web, :live_view
+
+  alias __MODULE__.AuthRateLimiter
+  alias __MODULE__.Identity
+  alias __MODULE__.Invitations
+  alias __MODULE__Web.AuthRateLimit
+  alias __MODULE__Web.CoreComponents
+  alias __MODULE__Web.InvitationMail
+
+  @impl true
+  def mount(_params, _session, socket) do
+    socket =
+      assign(socket,
+        username: "",
+        note: "",
+        link: nil,
+        # Which invitation the link on screen belongs to. The link is the only copy of its token
+        # — the row keeps a digest — so taking some other invitation back must not take it away,
+        # and there is nothing on the withdrawn row to recognise it by afterwards.
+        link_id: nil,
+        error: nil,
+        email?: Identity.email?()
+      )
+
+    {:ok, listed(socket)}
+  end
+
+  defp listed(socket), do: assign(socket, pending: Invitations.pending())
+
+  @impl true
+  def handle_event("validate", params, socket) do
+    {:noreply,
+     assign(socket, username: params["username"] || "", note: params["note"] || "", error: nil)}
+  end
+
+  def handle_event("invite", params, socket) do
+    {limit, seconds} = AuthRateLimiter.budget(:invite)
+    key = AuthRateLimit.key(socket.assigns.current_account, :invite)
+
+    with :ok <- AuthRateLimiter.check(key, limit, seconds),
+         {:ok, invitation} <-
+           Invitations.open(socket.assigns.current_account, Map.take(params, ["username", "note"])) do
+      # The token is the only copy there will ever be: the row holds its sha256, and the virtual
+      # field is empty on anything read back later. So it goes on the screen now or not at all.
+      link = url(~p"/invite") <> "#" <> invitation.token
+
+      {:noreply,
+       socket
+       |> listed()
+       |> assign(
+         link: link,
+         link_id: invitation.id,
+         username: "",
+         note: "",
+         error: undelivered(invitation, link)
+       )}
+    else
+      {:error, retry_after} when is_integer(retry_after) ->
+        {:noreply, assign(socket, error: too_many(retry_after))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, error: changeset_message(changeset, socket.assigns.email?))}
+    end
+  end
+
+  # The id comes off the wire, and nothing here scopes it: every member may withdraw any
+  # invitation that has not been accepted, which is the same rule as "every member may invite".
+  # There is no "yours" to get wrong.
+  def handle_event("withdraw", %{"id" => id}, socket) do
+    {:noreply, socket |> taken_back(Invitations.get(id)) |> listed()}
+  end
+
+  defp taken_back(socket, nil),
+    do: assign(socket, error: gettext("That invitation is no longer there."))
+
+  defp taken_back(socket, invitation) do
+    case Invitations.withdraw(invitation) do
+      {:ok, gone} ->
+        socket = assign(socket, error: nil)
+        if gone.id == socket.assigns.link_id, do: forgotten(socket), else: socket
+
+      # Ithibati answers `:already_accepted` for a row that was accepted *or* is no longer there,
+      # because it rechecks inside the delete and a miss cannot tell the two apart. Two members
+      # pressing this at once would otherwise leave the second reading that somebody accepted an
+      # invitation the first one withdrew.
+      {:error, :already_accepted} ->
+        assign(socket,
+          error:
+            gettext(
+              "That invitation is not waiting any more. Somebody accepted it, or took it back first."
+            )
+        )
+    end
+  end
+
+  defp forgotten(socket), do: assign(socket, link: nil, link_id: nil)
+
+  # Told in hours, because a day-long window counts down in tens of thousands of seconds and
+  # nobody reads that as a waiting time. The budget is configurable, though, so a window shorter
+  # than an hour is told in minutes rather than rounded up to one.
+  defp too_many(seconds) when seconds < 3600 do
+    ngettext(
+      "Too many invitations. Try again in a minute.",
+      "Too many invitations. Try again in %{count} minutes.",
+      div(seconds + 59, 60)
+    )
+  end
+
+  defp too_many(seconds) do
+    ngettext(
+      "Too many invitations. Try again in an hour.",
+      "Too many invitations. Try again in %{count} hours.",
+      div(seconds + 3599, 3600)
+    )
+  end
+
+  # The invitation is already written by the time this runs, so a mail server that is down is
+  # something the sender is told about rather than something that takes the invitation away.
+  defp undelivered(invitation, link) do
+    case InvitationMail.deliver(invitation, link) do
+      {:ok, _sent} -> nil
+      {:error, _reason} -> gettext("The invitation could not be sent. Pass the link on yourself.")
+    end
+  end
+
+  # Only email mode asks for a username, and its note is optional, so the username error comes first.
+  defp changeset_message(changeset, email?) do
+    case {changeset.errors[:username], changeset.errors[:note]} do
+      {nil, nil} -> gettext("That invitation could not be written.")
+      {nil, error} -> gettext("Note %{message}.", message: CoreComponents.translate_error(error))
+      {error, _note} -> refusal(CoreComponents.translate_error(error), email?)
+    end
+  end
+
+  defp refusal(message, true), do: gettext("Email address %{message}.", message: message)
+  defp refusal(message, false), do: gettext("Username %{message}.", message: message)
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <Layouts.member
+      flash={@flash}
+      current_account={@current_account}
+      section={:settings}
+      title={gettext("Invitations")}
+      back={%{to: ~p"/account/settings", label: gettext("Settings")}}
+      breadcrumb
+    >
+      <.header>{gettext("Invitations")}</.header>
+
+      <h2 class="mt-8 text-lg font-semibold">{gettext("Invite somebody")}</h2>
+
+      <p :if={not @email?} class="mt-2 text-sm text-muted">
+        {gettext("Note whom the link is for, then send it to them. They choose their own username.")}
+      </p>
+
+      <p :if={@email?} class="mt-2 text-sm text-muted">
+        {gettext("Enter your guest's email address. Their invitation link is sent there.")}
+      </p>
+
+      <form id="invitation-form" phx-change="validate" phx-submit="invite" class="mt-4">
+        <Layouts.identifier_input
+          :if={@email?}
+          value={@username}
+          label={gettext("Their email address")}
+          placeholder="grace@example.org"
+        />
+        <.input
+          name="note"
+          value={@note}
+          label={if @email?, do: gettext("Note (optional)"), else: gettext("Who is it for?")}
+          placeholder={gettext("Grace, from the meetup")}
+          maxlength="500"
+          required={not @email?}
+        />
+        <.button variant="primary">{gettext("Create a link")}</.button>
+      </form>
+
+      <.alert :if={@error} class="mt-4">{@error}</.alert>
+
+      <.alert :if={@link} kind={:info} class="mt-4">
+        {gettext("Your invitation is ready. Send this link to your guest:")}
+        <div class="mt-2 flex items-start gap-2">
+          <code class="min-w-0 flex-1 break-all py-1.5">{@link}</code>
+          <button
+            type="button"
+            id={"copy-invitation-link-#{@link_id}"}
+            phx-hook="CopyText"
+            data-copy-text={@link}
+            data-copy-status={"copy-link-status-#{@link_id}"}
+            data-copy-success={gettext("Link copied.")}
+            data-copy-error={gettext("Copying was blocked. Select the link and copy it yourself.")}
+            aria-label={gettext("Copy link")}
+            title={gettext("Copy link")}
+            class="group inline-flex size-9 shrink-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 items-center justify-center rounded-control border border-edge bg-surface text-muted hover:bg-ground hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            <Lucideicons.copy aria-hidden="true" class="size-4 group-data-copied:hidden" />
+            <Lucideicons.check aria-hidden="true" class="hidden size-4 text-signal-strong group-data-copied:block" />
+          </button>
+        </div>
+      </.alert>
+
+      <%!-- Outside the box, which is a live region of its own. One per link, so a new link
+        starts without the last one's sentence. --%>
+      <span
+        :if={@link}
+        id={"copy-link-status-#{@link_id}"}
+        role="status"
+        phx-update="ignore"
+        class="mt-2 block min-h-5 text-sm text-muted"
+      ></span>
+
+      <h2 class="mt-10 text-lg font-semibold">{gettext("Outstanding invitations")}</h2>
+
+      <p :if={@pending == []} class="mt-2 text-sm text-muted">
+        {gettext("Nothing is waiting to be accepted.")}
+      </p>
+
+      <p :if={@pending != []} class="mt-2 text-sm text-muted">
+        {gettext(
+          "Anybody here can take one back. Until it is accepted, this is the only say over who joins."
+        )}
+      </p>
+
+      <ul :if={@pending != []} id="pending-invitations" class="mt-4 divide-y divide-line">
+        <li
+          :for={invitation <- @pending}
+          id={"invitation-#{invitation.id}"}
+          class="flex flex-wrap items-center gap-x-4 gap-y-1 py-3"
+        >
+          <span class="font-medium">{invitation.note || invitation.username}</span>
+          <span :if={invitation.note && invitation.username} class="text-sm text-muted">
+            {invitation.username}
+          </span>
+
+          <span class="text-sm text-muted">
+            <%= if invitation.invited_by do %>
+              {gettext("Invited by %{username}", username: invitation.invited_by.username)}
+            <% else %>
+              {gettext("Invited by %{username}", username: gettext("Unknown"))}
+            <% end %>
+          </span>
+
+          <span class="text-sm text-muted">
+            {gettext("Runs out %{date}", date: Calendar.strftime(invitation.expires_at, "%Y-%m-%d"))}
+          </span>
+
+          <button
+            type="button"
+            phx-click="withdraw"
+            phx-value-id={invitation.id}
+            class="text-link ml-auto text-sm"
+          >
+            {gettext("Take it back")}
+          </button>
+        </li>
+      </ul>
+    </Layouts.member>
+    """
+  end
+end

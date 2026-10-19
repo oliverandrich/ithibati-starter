@@ -55,7 +55,7 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
   defp addressing, do: SetupSupport.put_identity(:email)
 
   defp invite(conn, fields) do
-    {:ok, view, _html} = live(conn, "/")
+    {:ok, view, _html} = live(conn, "/account/invitations")
     view |> form("#invitation-form", fields) |> render_submit()
     render(view)
   end
@@ -130,7 +130,7 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
 
   test "the form asks for an address when that is what an account is", %{conn: conn} do
     addressing()
-    {:ok, _view, html} = live(signed_in(conn, "ada@example.test"), "/")
+    {:ok, _view, html} = live(signed_in(conn, "ada@example.test"), "/account/invitations")
 
     assert html =~ "Their email address"
     refute html =~ "Their username"
@@ -138,7 +138,7 @@ defmodule __MODULE__Web.InvitationDeliveryTest do
 
   # Named, the guest chooses their own name, so the form asks only whom the link is for.
   test "and only for a note when it is not", %{conn: conn} do
-    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
 
     assert has_element?(view, "#invitation-form input[name=note]")
     refute has_element?(view, "#invitation-form input[name=username]")

@@ -2,10 +2,11 @@ defmodule __MODULE__Web.VerifyIdentityLive do
   @moduledoc "Confirm the current account without switching users or creating a new session."
   use __MODULE__Web, :live_view
   alias __MODULE__Web.CeremonyMessages
+  alias __MODULE__Web.Reauth
 
   @impl true
   def mount(_params, session, socket) do
-    if session["reauth_target"] in ["/account/passkeys", "/account/recovery-codes"] do
+    if Reauth.target?(session["reauth_target"]) do
       {:ok, assign(socket, error: nil, code: "")}
     else
       {:ok, redirect(socket, to: ~p"/account/passkeys")}

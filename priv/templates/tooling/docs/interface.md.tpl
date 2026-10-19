@@ -8,7 +8,7 @@ for the situation, not the shape. A page's shape is an attribute of `Layouts.mem
 | Layout | Use it for | Examples |
 | --- | --- | --- |
 | `Layouts.auth/1` | One focused step without navigation | `/login`, `/setup`, `/invite`, `/account/verify`, `/recovery-codes` |
-| `Layouts.member/1` | Every page a signed-in account reaches through the navigation | `/`, `/account/passkeys` |
+| `Layouts.member/1` | Every page a signed-in account reaches through the navigation | `/`, `/account/settings`, `/account/passkeys` |
 
 `Layouts.auth/1` centres a narrow card under the wordmark. It takes a `title` and a
 `subtitle`. Some of its steps run while signed in, such as confirming the identity.
@@ -26,7 +26,7 @@ is a sticky top bar. A tab bar at the bottom appears once the navigation has two
 The bars keep clear of the safe-area insets of phones with a notch.
 
 The account menu sits in the header. It opens from an icon whose accessible name carries
-the username. It links the account pages and signs out. Add entries to the `<nav>` inside
+the username. It leads to the settings and signs out. Add entries to the `<nav>` inside
 `#user-menu`. On wide screens, the sidebar's foot links the source code when `source_url/0`
 returns an address.
 
@@ -77,6 +77,23 @@ entry's `section`, which marks the entry as the current page:
 
 `items/1` receives the signed-in account, so the list can depend on it. A page can pass its
 own list through `navigation` instead.
+
+## Settings
+
+`/account/settings` is not a place in the navigation. The account menu leads to it. The
+settings page and every page under it pass `section={:settings}`, which marks the menu.
+
+The page groups its rows with `group/1` from `CoreComponents`. `group_link/1` is a row that
+leads to another page. Its `detail` shows a short value, such as a count:
+
+```heex
+<.group id="settings-account" heading={gettext("Account & security")} tag="nav">
+  <.group_link to={~p"/account/passkeys"} detail={@passkeys}>{gettext("Passkeys")}</.group_link>
+</.group>
+```
+
+Add a group for each new topic. A page under the settings sets
+`back={%{to: ~p"/account/settings", label: gettext("Settings")}}` and `breadcrumb`.
 
 ## Pages below another page
 

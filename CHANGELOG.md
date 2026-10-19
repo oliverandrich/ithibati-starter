@@ -27,6 +27,10 @@ Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is neede
   `test/my_app_web/components/member_layout_test.exs` and `test/features/shell_test.exs` cover it.
   Applying this by hand replaces `member/1` in `lib/my_app_web/components/layouts.ex` whole.
 
+- A settings page at `/account/settings`, reached from the account menu. Its group lists the
+  passkeys with their number, the recovery codes left and the invitations. The new
+  `lib/my_app_web/live/settings_live.ex` renders it with `group/1` and `group_link/1`, new in
+  `lib/my_app_web/components/core_components.ex`. `lib/my_app_web/router.ex` routes it.
 - `docs/interface.md` explains when to use `Layouts.auth/1` or `Layouts.member/1`, the page shapes
   and the navigation. README and CONTRIBUTING link it.
 
@@ -62,8 +66,16 @@ Requires Ithibati 0.9.0. The schema version stays at 5, so no migration is neede
   into the sidebar. `inner_block` is optional, because `:columns` renders its slots instead.
   `navigation` replaces `MyAppWeb.Navigation.items/1` for one page. `docs/authentication.md`
   describes the menu.
-- `test/support/feature_case.ex` gains `viewport/4`; `test/features/account_security_test.exs`
-  uses it.
+- Invitations move from `/` to `/account/invitations`. `lib/my_app_web/live/inside_live.ex`
+  becomes `invitations_live.ex` with the module `MyAppWeb.InvitationsLive`. A new
+  `inside_live.ex` renders the welcome page. `test/my_app_web/inside_live_test.exs` becomes
+  `invitations_live_test.exs`.
+- The account menu holds Settings and Sign out. Pages under the settings pass
+  `section={:settings}`, which marks the menu, and lead back to the settings.
+- `MyAppWeb.Reauth` lists the confirmation targets in `@targets`. `target/1` and `target?/1`
+  replace the lists in `account_security_controller.ex` and `verify_identity_live.ex`.
+- `test/support/feature_case.ex` gains `viewport/4` and `scroll_past_heading/1`.
+  `test/features/account_security_test.exs` and `test/features/shell_test.exs` use them.
 - `mix.exs` requires Ithibati `~> 0.9.0`. `docs/authentication.md`, `README.md` and
   `ITHIBATI_STARTER_NOTICE.md` name the new versions.
 - `mix ithibati.new` installs `ithibati_starter` 0.9.0 from Hex instead of the Git tag. The

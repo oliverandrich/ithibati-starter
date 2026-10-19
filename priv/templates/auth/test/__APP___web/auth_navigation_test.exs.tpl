@@ -41,7 +41,10 @@ defmodule __MODULE__Web.AuthNavigationTest do
 
   test "members land on home and do not see login again" do
     conn = build_conn() |> Plug.Test.init_test_session(get_session(claim()))
-    assert conn |> get("/") |> html_response(200) =~ "Signed in as ada"
+    home = conn |> get("/") |> html_response(200)
+    assert home =~ "Signed in as ada"
+    # Invitations are a setting, so home carries no form of its own.
+    refute home =~ "invitation-form"
     assert conn |> get("/login") |> redirected_to() == "/"
   end
 end

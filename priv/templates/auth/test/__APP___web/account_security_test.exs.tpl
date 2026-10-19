@@ -16,17 +16,31 @@ defmodule __MODULE__Web.AccountSecurityTest do
     %{conn: Plug.Test.init_test_session(build_conn(), session), account: account}
   end
 
-  test "header offers a username menu and both protected account pages", %{conn: conn} do
-    html = conn |> get("/") |> html_response(200)
-    assert html =~ "id=\"user-menu\""
-    assert html =~ "href=\"/account/passkeys\""
-    assert html =~ "href=\"/account/recovery-codes\""
-    assert conn |> get("/account/passkeys") |> html_response(200) =~ "Manage passkeys"
-    assert conn |> get("/account/recovery-codes") |> html_response(200) =~ "12"
+  test "the settings lead to the account pages", %{conn: conn} do
+    settings = conn |> get("/account/settings") |> html_response(200) |> LazyHTML.from_document()
+    rows = LazyHTML.query(settings, "#settings-account a")
+
+    assert rows |> LazyHTML.attribute("href") ==
+             ["/account/passkeys", "/account/recovery-codes", "/account/invitations"]
+
+    assert rows |> Enum.map(&(&1 |> LazyHTML.text() |> String.split())) ==
+             [["Passkeys", "1"], ["Recovery", "codes", "12", "left"], ["Invitations"]]
+  end
+
+  test "each settings page leads back to the settings and marks the menu", %{conn: conn} do
+    for path <- ["/account/passkeys", "/account/recovery-codes", "/account/invitations"] do
+      html = conn |> get(path) |> html_response(200) |> LazyHTML.from_document()
+
+      assert html |> LazyHTML.query("#nav-back") |> LazyHTML.attribute("href") == ["/account/settings"], path
+      assert html |> LazyHTML.query("#breadcrumb a") |> LazyHTML.attribute("href") == ["/account/settings"], path
+      assert html |> LazyHTML.query("#user-menu a[aria-current]") |> LazyHTML.attribute("href") == ["/account/settings"], path
+    end
+
+    assert conn |> get("/") |> html_response(200) |> LazyHTML.from_document() |> LazyHTML.query("#user-menu [aria-current]") |> Enum.empty?()
   end
 
   test "anonymous requests cannot read or change account security" do
-    for path <- ["/account/passkeys", "/account/recovery-codes"] do
+    for path <- ["/account/settings", "/account/passkeys", "/account/recovery-codes", "/account/invitations"] do
       assert build_conn() |> get(path) |> redirected_to() == "/login"
     end
     assert build_conn() |> post("/account/recovery-codes", %{"confirm" => "true"}) |> redirected_to() == "/login"

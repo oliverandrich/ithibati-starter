@@ -35,7 +35,14 @@ defmodule __MODULE__Web.AccountSecurityLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_account={@current_account}>
+    <Layouts.member
+      flash={@flash}
+      current_account={@current_account}
+      section={:settings}
+      title={if(@live_action == :passkeys, do: gettext("Passkeys"), else: gettext("Recovery codes"))}
+      back={%{to: ~p"/account/settings", label: gettext("Settings")}}
+      breadcrumb
+    >
       <section :if={@live_action == :passkeys}>
         <.header>{gettext("Manage passkeys")}
           <:subtitle>{gettext("Give your passkeys recognizable names and keep a spare for another device.")}</:subtitle>

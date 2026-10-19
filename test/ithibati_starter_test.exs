@@ -47,6 +47,7 @@ defmodule IthibatiStarterTest do
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["docs/interface.md"] =~ "Layouts.member/1"
       assert files["docs/interface.md"] =~ "SampleWeb.Navigation"
+      assert files["docs/interface.md"] =~ "group_link/1"
       assert files["README.md"] =~ "[Interface](docs/interface.md)"
       assert files["CONTRIBUTING.md"] =~ "[Interface](docs/interface.md)"
       assert files["CONTRIBUTING.md"] =~ "Chrome"
@@ -119,7 +120,7 @@ defmodule IthibatiStarterTest do
 
     assert files["lib/sample_web/router.ex"] =~ ~s{live("/invite", InviteLive)}
     refute files["lib/sample_web/router.ex"] =~ "/invite/:token"
-    assert files["lib/sample_web/live/inside_live.ex"] =~ ~S{url(~p"/invite") <> "#" <>}
+    assert files["lib/sample_web/live/invitations_live.ex"] =~ ~S{url(~p"/invite") <> "#" <>}
     assert files["assets/js/app.js"] =~ ~s(import {InvitationLink} from "./invitation_link")
 
     assert files["assets/js/app.js"] =~

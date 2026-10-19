@@ -127,6 +127,52 @@ defmodule __MODULE__Web.CoreComponents do
   end
 
   @doc """
+  Renders rows in a card with an optional heading above it, like an iOS settings group.
+
+  `tag` is the group's element, `nav` for a group of links. The heading names it.
+
+  ## Examples
+
+      <.group id="settings-account" heading="Account" tag="nav">
+        <.group_link to={~p"/account/passkeys"} detail={2}>Passkeys</.group_link>
+      </.group>
+  """
+  attr :id, :string, required: true
+  attr :heading, :string, default: nil
+  attr :tag, :string, default: "section"
+  slot :inner_block, required: true
+
+  def group(assigns) do
+    assigns = assign(assigns, :label, assigns.heading && "#{assigns.id}-heading")
+
+    ~H"""
+    <.dynamic_tag tag_name={@tag} id={@id} class="mb-6" aria-labelledby={@label}>
+      <h2 :if={@heading} id={@label} class="mb-2 px-4 text-meta font-semibold tracking-wider text-muted uppercase">
+        {@heading}
+      </h2>
+      <.card class="flex flex-col divide-y divide-line overflow-hidden">
+        {render_slot(@inner_block)}
+      </.card>
+    </.dynamic_tag>
+    """
+  end
+
+  @doc "Renders a row of `group/1` that leads to another page."
+  attr :to, :string, required: true
+  attr :detail, :any, default: nil, doc: "muted text before the chevron, such as a count"
+  slot :inner_block, required: true
+
+  def group_link(assigns) do
+    ~H"""
+    <.link navigate={@to} class="flex min-h-12 items-center gap-3 px-4 text-body text-ink hover:bg-ground">
+      <span class="min-w-0 grow truncate">{render_slot(@inner_block)}</span>
+      <span :if={@detail} class="font-mono text-meta text-muted">{@detail}</span>
+      <Lucideicons.chevron_right aria-hidden="true" class="size-4 shrink-0 text-muted" />
+    </.link>
+    """
+  end
+
+  @doc """
   Renders a button with navigation support.
 
   ## Examples

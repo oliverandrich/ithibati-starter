@@ -235,6 +235,16 @@ defmodule __MODULE__Web.FeatureCase do
     session
   end
 
+  @doc "Scrolls the page's large heading under the top bar, which then shows the title."
+  def scroll_past_heading(session) do
+    session
+    |> execute_script("""
+    document.querySelector('#main-content').insertAdjacentHTML('beforeend', '<div style="height: 3000px"></div>')
+    window.scrollTo(0, 1500)
+    """)
+    |> assert_has(Query.css("#app-header[data-shrunk]"))
+  end
+
   @doc "Sets the viewport, with `mobile` for a phone's touch and scrollbars."
   def viewport(session, width, height, mobile) do
     command(session, "Emulation.setDeviceMetricsOverride", %{

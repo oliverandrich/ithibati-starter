@@ -88,14 +88,22 @@ defmodule __MODULE__Web.MemberLayoutTest do
     assert html |> LazyHTML.query("[data-large-title]") |> Enum.count() == 1
   end
 
-  test "the account menu reaches the account pages and signs out" do
+  test "the account menu reaches the settings and signs out" do
     html = page(%{})
 
     # The icon alone says nothing; the name says whose menu it is.
     assert html |> LazyHTML.query("#user-menu summary") |> LazyHTML.attribute("aria-label") == ["Account menu, ada"]
-    assert html |> LazyHTML.query("#user-menu a[href='/account/passkeys']") |> Enum.count() == 1
-    assert html |> LazyHTML.query("#user-menu a[href='/account/recovery-codes']") |> Enum.count() == 1
+    assert html |> LazyHTML.query("#user-menu a") |> LazyHTML.attribute("href") == ["/account/settings", "/session"]
     assert html |> LazyHTML.query("#user-menu a[data-method=delete][href='/session']") |> Enum.count() == 1
+    assert html |> LazyHTML.query("#user-menu [aria-current]") |> Enum.empty?()
+  end
+
+  # The settings are not a place in the navigation, so the menu shows where the page is.
+  test "the account menu is marked on a settings page" do
+    html = page(%{section: :settings})
+
+    assert classes(html, "#user-menu summary") =~ "text-accent"
+    assert html |> LazyHTML.query("#user-menu a[href='/account/settings']") |> LazyHTML.attribute("aria-current") == ["page"]
   end
 
   # A phone shows one pane at a time; from lg both stand side by side and scroll on their own.

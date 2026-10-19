@@ -74,6 +74,8 @@ defmodule __MODULE__Web.Router do
 
     live_session :members, on_mount: [{Ithibati.Web.Gate, {:require_account, to: "/login"}}, {__MODULE__Web.Locale, :set}, {__MODULE__Web.TransportGarbage, :collect}] do
       live "/", InsideLive
+      live "/account/settings", SettingsLive
+      live "/account/invitations", InvitationsLive
       live "/account/verify", VerifyIdentityLive
       live "/account/passkeys", AccountSecurityLive, :passkeys
       live "/account/recovery-codes", AccountSecurityLive, :recovery_codes

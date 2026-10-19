@@ -4,7 +4,7 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
   alias Ithibati.Identity.Passkeys
   alias Ithibati.Identity.RecoveryCodes
 
-  feature "a member manages passkeys and replaces recovery codes from the menu", %{session: session} do
+  feature "a member manages passkeys and replaces recovery codes from the settings", %{session: session} do
     first = virtual_authenticator(session)
 
     session
@@ -14,8 +14,9 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
     |> landed_on("/recovery-codes")
     |> open("/")
     |> click(css("#user-menu summary"))
-    |> assert_has(link("Manage passkeys"))
-    |> click(link("Manage passkeys"))
+    |> click(link("Settings"))
+    |> landed_on("/account/settings")
+    |> click(css("#settings-account a", text: "Passkeys"))
     |> landed_on("/account/passkeys")
     |> connected()
 
@@ -64,9 +65,11 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
     |> landed_on("/recovery-codes")
     |> open("/")
     |> click(css("#user-menu summary"))
-    |> assert_has(link("Passkeys verwalten"))
     |> take_screenshot(name: "account-menu-mobile", log: false)
-    |> click(link("Passkeys verwalten"))
+    |> click(link("Einstellungen"))
+    |> landed_on("/account/settings")
+    |> take_screenshot(name: "account-settings-mobile", log: false)
+    |> click(css("#settings-account a", text: "Passkeys"))
     |> landed_on("/account/passkeys")
     |> connected()
     |> assert_has(link("Bestätige deine Identität, um einen Passkey hinzuzufügen"))
@@ -74,6 +77,17 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
     |> open("/account/recovery-codes")
     |> assert_has(css("p", text: "Du hast 12 unbenutzte Wiederherstellungscodes."))
     |> take_screenshot(name: "account-recovery-mobile", log: false)
+    # A long back label and a long title share the bar once the heading scrolls away.
+    |> scroll_past_heading()
+    |> execute_script(
+      """
+      const back = document.querySelector('#nav-back').getBoundingClientRect()
+      const text = document.createRange()
+      text.selectNodeContents(document.querySelector('#nav-title'))
+      return back.right <= text.getBoundingClientRect().left
+      """,
+      fn clear -> assert clear end
+    )
   end
 
   feature "a recovery code confirms identity when the passkey is unavailable", %{session: session} do

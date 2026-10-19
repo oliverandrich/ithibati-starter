@@ -28,12 +28,7 @@ defmodule __MODULE__Web.ShellTest do
       assert position == "sticky"
     end)
     |> take_screenshot(name: "shell-phone", log: false)
-    # Content long enough to scroll the large heading under the top bar.
-    |> execute_script("""
-    document.querySelector('#main-content').insertAdjacentHTML('beforeend', '<div style="height: 3000px"></div>')
-    window.scrollTo(0, 1500)
-    """)
-    |> assert_has(css("#app-header[data-shrunk]"))
+    |> scroll_past_heading()
     # The observer reports in a later frame, so the check waits for the attribute to go.
     |> execute_script("window.scrollTo(0, 0)")
     |> assert_has(css("#app-header:not([data-shrunk])"))

@@ -25,7 +25,7 @@ defmodule __MODULE__Web.InvitationTest do
   # or not at all.
   defp invite_link(session, note) do
     session
-    |> open("/")
+    |> open("/account/invitations")
     |> fill_in(css("input[name=note]"), with: note)
     |> click(button("Create a link"))
     |> find(css("code"))

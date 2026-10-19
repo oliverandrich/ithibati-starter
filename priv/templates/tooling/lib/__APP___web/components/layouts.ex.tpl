@@ -172,6 +172,7 @@ defmodule __MODULE__Web.Layouts do
   Below `lg` the header is a top bar, and a tab bar links the places once there are two.
   From `lg` the same header is the left column with the sidebar.
   `__MODULE__Web.Navigation` lists the places; `section` marks the page's own.
+  `section={:settings}` marks the account menu instead, which leads to the settings.
 
   `layout={:sidebar}`, the default, renders the inner block in the main column.
   `layout={:columns}` renders only the `:list` and `:detail` slots, side by side from `lg`.
@@ -181,7 +182,7 @@ defmodule __MODULE__Web.Layouts do
   """
   attr :flash, :map, required: true
   attr :current_account, :map, required: true
-  attr :section, :atom, default: nil, doc: "the navigation entry the page belongs to"
+  attr :section, :atom, default: nil, doc: "the navigation entry the page belongs to, or `:settings`"
 
   attr :navigation, :list,
     default: nil,
@@ -235,7 +236,8 @@ defmodule __MODULE__Web.Layouts do
             class="flex min-h-11 items-center gap-0.5 text-body font-medium text-accent lg:hidden"
           >
             <Lucideicons.chevron_left aria-hidden="true" class="-ml-1.5 size-6" />
-            {@back.label}
+            <%!-- The shrunk title needs the bar's middle, so the label leaves it to screen readers. --%>
+            <span class={@title && "group-data-[shrunk]:sr-only"}>{@back.label}</span>
           </.link>
           <.link
             navigate={~p"/"}
@@ -262,7 +264,10 @@ defmodule __MODULE__Web.Layouts do
             <summary
               aria-label={gettext("Account menu, %{username}", username: @current_account.username)}
               title={@current_account.username}
-              class="flex size-11 cursor-pointer list-none items-center justify-center rounded-control text-muted hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-accent lg:size-7"
+              class={[
+                "flex size-11 cursor-pointer list-none items-center justify-center rounded-control hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-accent lg:size-7",
+                if(@section == :settings, do: "bg-selection text-accent", else: "text-muted")
+              ]}
             >
               <Lucideicons.circle_user aria-hidden="true" class="size-5 lg:size-4.5" />
             </summary>
@@ -271,8 +276,13 @@ defmodule __MODULE__Web.Layouts do
               class="absolute top-full right-0 z-40 mt-2 w-56 rounded-control border border-line bg-surface p-1 text-label shadow-lg"
             >
               <p class="mb-1 truncate border-b border-line px-3 pt-2 pb-2.5 font-semibold">{@current_account.username}</p>
-              <.link navigate={~p"/account/passkeys"} class="block rounded-control px-3 py-2 hover:bg-ground">{gettext("Manage passkeys")}</.link>
-              <.link navigate={~p"/account/recovery-codes"} class="block rounded-control px-3 py-2 hover:bg-ground">{gettext("Recovery codes")}</.link>
+              <.link
+                navigate={~p"/account/settings"}
+                aria-current={@section == :settings && "page"}
+                class="block rounded-control px-3 py-2 hover:bg-ground aria-[current=page]:font-semibold aria-[current=page]:text-accent"
+              >
+                {gettext("Settings")}
+              </.link>
               <.link href={~p"/session"} method="delete" class="mt-1 block rounded-control border-t border-line px-3 py-2 text-danger hover:bg-danger-surface">{gettext("Sign out")}</.link>
             </nav>
           </details>

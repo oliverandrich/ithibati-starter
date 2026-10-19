@@ -1,4 +1,4 @@
-defmodule __MODULE__Web.InsideLiveTest do
+defmodule __MODULE__Web.InvitationsLiveTest do
   use __MODULE__Web.ConnCase
 
   import Phoenix.LiveViewTest
@@ -28,7 +28,7 @@ defmodule __MODULE__Web.InsideLiveTest do
   # Nobody can be removed from this instance once they are in, so the moment before a link is
   # redeemed is the only say anybody has over who joins. The page has to show it.
   test "the page lists what is outstanding, by whom, and takes one back", %{conn: conn} do
-    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
 
     view |> form("#invitation-form", note: "Grace, from the meetup") |> render_submit()
 
@@ -56,7 +56,7 @@ defmodule __MODULE__Web.InsideLiveTest do
 
   # The link is long, so a button beside it copies it. The hook reads the link from the button.
   test "a new link has a copy button with its own status line", %{conn: conn} do
-    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
 
     html = view |> form("#invitation-form", note: "Grace") |> render_submit()
 
@@ -71,7 +71,7 @@ defmodule __MODULE__Web.InsideLiveTest do
   # The list shows the note and nothing else identifies an open invitation, so one without a note
   # would be a row nobody can tell apart.
   test "a named invitation needs a note", %{conn: conn} do
-    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
 
     assert view |> form("#invitation-form", note: " ") |> render_submit() =~ "Note can&#39;t be blank."
     refute Repo.one(Invitation)
@@ -81,7 +81,7 @@ defmodule __MODULE__Web.InsideLiveTest do
   # raw it raises `Ecto.Query.CastError`, which takes the LiveView down rather than answering
   # whoever pressed the button.
   test "an id that is not one is answered, not raised at", %{conn: conn} do
-    {:ok, view, _html} = live(signed_in(conn, "ada"), "/")
+    {:ok, view, _html} = live(signed_in(conn, "ada"), "/account/invitations")
 
     assert render_click(view, "withdraw", %{"id" => "not-an-id"}) =~ "no longer there"
   end
@@ -90,7 +90,7 @@ defmodule __MODULE__Web.InsideLiveTest do
   # somebody else is holding, spending the operator's mail credentials at a steady drip.
   test "manual invitations stop at the per-account daily budget", %{conn: conn} do
     account = signed_in(conn, "ada")
-    {:ok, view, _html} = live(account, "/")
+    {:ok, view, _html} = live(account, "/account/invitations")
 
     for number <- 1..20 do
       view
@@ -111,7 +111,7 @@ defmodule __MODULE__Web.InsideLiveTest do
       |> Plug.Test.init_test_session(get_session(account))
       |> put_req_header("accept-language", "de")
 
-    {:ok, german_view, _html} = live(german_conn, "/")
+    {:ok, german_view, _html} = live(german_conn, "/account/invitations")
     german_html = german_view |> form("#invitation-form", note: "guest22") |> render_submit()
     assert german_html =~ "Zu viele Einladungen. Versuche es in 24 Stunden erneut."
     assert Repo.aggregate(Invitation, :count) == 20
@@ -124,7 +124,7 @@ defmodule __MODULE__Web.InsideLiveTest do
       })
 
     second_conn = Plug.Test.init_test_session(build_conn(), get_session(second_signed))
-    {:ok, second_view, _html} = live(second_conn, "/")
+    {:ok, second_view, _html} = live(second_conn, "/account/invitations")
     second_view |> form("#invitation-form", note: "fresh_guest") |> render_submit()
 
     assert Repo.get_by!(Invitation, note: "fresh_guest")

@@ -1,6 +1,8 @@
 defmodule __MODULE__Web.HardeningTest do
   use __MODULE__Web.ConnCase
 
+  import Phoenix.LiveViewTest
+
   alias Ithibati.Identity.RecoveryCodes
   alias Ithibati.Identity.Sessions
   alias Ithibati.Web.Gate
@@ -41,6 +43,17 @@ defmodule __MODULE__Web.HardeningTest do
 
     assert conn |> post("/account/recovery-codes", %{"confirm" => "true"}) |> redirected_to() ==
              "/account/confirm/recovery-codes"
+  end
+
+  test "only the account pages are confirmation targets" do
+    {conn, _account} = signed()
+
+    unknown = get(conn, "/account/confirm/elsewhere")
+    assert response(unknown, 404)
+    refute get_session(unknown, :reauth_target)
+
+    # Without a target, the confirmation has nowhere to return to.
+    assert {:error, {:redirect, %{to: "/account/passkeys"}}} = live(conn, "/account/verify")
   end
 
   test "confirmation is bound to the current account and expires" do
