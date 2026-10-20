@@ -1,12 +1,11 @@
-# Adapted from ChapishoWeb.Locale with the author's permission (MIT).
 defmodule __MODULE__Web.Locale do
   @moduledoc """
   Resolves each HTTP request from Accept-Language, then the configured default.
 
   Run the plug after fetching the session and (when present) the current account.
   Add `{__MODULE__Web.Locale, :set}` after authentication hooks in each live_session.
-  The session only carries the current request language into LiveView; its first supported base language
-  wins, matching Chapisho's deliberately minimal parser rather than weighting q-values.
+  The session only carries the current request language into LiveView.
+  The first supported base language wins. q-values are ignored.
   """
   @behaviour Plug
 
