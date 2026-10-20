@@ -25,7 +25,7 @@ cd my_app
 The `ithibati_new` 0.9.0 archive installs `ithibati_starter` 0.9.0 from Hex by
 default. The `ithibati_starter` entry in the generated `mix.lock` records its version
 and checksum. `--starter` accepts another version, a Git revision or a local checkout.
-Starter 0.9.0 generates applications with Ithibati 0.10.0 and schema version 5.
+Starter 0.9.0 generates applications with Ithibati 0.11.0 and schema version 5.
 
 Start developing:
 

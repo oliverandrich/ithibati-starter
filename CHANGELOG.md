@@ -10,37 +10,9 @@ a version to an existing application.
 
 ## [Unreleased]
 
-Requires Ithibati 0.11.0. Ithibati's schema version stays at 5.
+## [0.9.0] - 2026-10-20
 
-### Changed
-
-- `mix.exs` pins `{:ithibati, "~> 0.11.0"}`.
-- `test/features/account_security_test.exs` models the second device with
-  `forget_credentials/1`. Ithibati 0.11 removes `remove_authenticator/2`.
-- An administrator can no longer revoke their own role. `Accounts.revoke_admin/2` in
-  `lib/my_app/accounts.ex` returns `{:error, :self}`, as `remove_account/2` does.
-  One administrator always remains, so `{:error, :last_admin}` and its message are gone.
-  `lib/my_app_web/live/accounts_live.ex` and the gettext files drop it.
-- `test/features/administration_test.exs` clicks Cancel and Confirm in the removal dialog again.
-  Under Playwright, a click right after the dialog opens reaches the LiveView.
-- `docs/localization.md` holds the translation workflow. `CONTRIBUTING.md` links to it.
-
-### Removed
-
-- The installer no longer writes `ITHIBATI_STARTER_NOTICE.md`.
-  Generated files belong to the application and need no attribution.
-  An existing application may delete the file.
-- `lib/my_app_web/locale.ex` no longer names Chapisho.
-
-### Documentation
-
-- HexDocs shows the guides a generated application gets: Authentication, Interface,
-  Localization and Operations, rendered for `MyApp`.
-- The usage guide lists the components in `MyAppWeb.CoreComponents`.
-
-## [0.9.0] - 2026-10-18
-
-Requires Ithibati 0.10.0. Ithibati's schema version stays at 5. One application migration
+Requires Ithibati 0.11.0. Ithibati's schema version stays at 5. One application migration
 adds the administrator flag.
 
 ### Added
@@ -64,7 +36,7 @@ adds the administrator flag.
   `priv/repo/migrations/20261019100000_add_admin_to_users.exs` adds `users.admin` and grants it
   to the account that claimed the instance. `lib/my_app/accounts/user.ex` gains the field, and
   the claim in `lib/my_app_web/auth.ex` sets it. The new `lib/my_app/accounts.ex` grants and
-  revokes the role; the last administrator keeps it. `with_admin/2` runs further administrator
+  revokes the role. An administrator cannot revoke their own role, so one always remains. `with_admin/2` runs further administrator
   functions with the role read from the database. `MyApp.Repo` gains `for_update/1` for that
   lock. The new `rel/overlays/bin/grant-admin` and `lib/my_app/grant_admin.ex` make an account
   an administrator on the host. `docs/operations.md` describes the command.
@@ -85,7 +57,9 @@ adds the administrator flag.
 - Removing an account takes back its open invitations, in the same transaction.
 - `docs/interface.md` explains when to use `Layouts.auth/1` or `Layouts.member/1`, the page shapes
   and the navigation. README and CONTRIBUTING link it.
-
+- HexDocs shows the guides a generated application gets: Authentication, Interface,
+  Localization and Operations, rendered for `MyApp`. The usage guide lists the components
+  in `MyAppWeb.CoreComponents`.
 - `ithibati_starter` and `ithibati_new` are published on Hex. Install the archive with
   `mix archive.install hex ithibati_new 0.9.0`. Versions before 0.9.0 remain available from
   their Git tags only.
@@ -144,13 +118,21 @@ adds the administrator flag.
   removed account, so a removal cannot leave a working invitation behind.
 - `MyAppWeb.Reauth` lists the confirmation targets in `@targets`. `target/1` and `target?/1`
   replace the lists in `account_security_controller.ex` and `verify_identity_live.ex`.
-- `test/support/feature_case.ex` gains `viewport/4` and `scroll_past_heading/1`.
-  `test/features/account_security_test.exs` and `test/features/shell_test.exs` use them.
-- `mix.exs` requires Ithibati `~> 0.9.0`. `docs/authentication.md`, `README.md` and
-  `ITHIBATI_STARTER_NOTICE.md` name the new versions.
+- `test/support/playwright_case.ex` provides `scroll_past_heading/1`.
+  `test/features/account_security_test.exs` and `test/features/shell_test.exs` use it.
+- `mix.exs` requires Ithibati `~> 0.11.0`. `docs/authentication.md` and `README.md` name the
+  new versions.
+- `docs/localization.md` holds the translation workflow. `CONTRIBUTING.md` links to it.
 - `mix ithibati.new` installs `ithibati_starter` 0.9.0 from Hex instead of the Git tag. The
   generated `mix.exs` declares the starter with the requirement `"== 0.9.0"`. An existing
   application replaces its Git dependency with that requirement and keeps the other options.
+
+### Removed
+
+- The installer no longer writes `ITHIBATI_STARTER_NOTICE.md`.
+  Generated files belong to the application and need no attribution.
+  An existing application may delete the file.
+- `lib/my_app_web/locale.ex` no longer names Chapisho.
 
 ## [0.8.1] - 2026-10-18
 
