@@ -1,6 +1,12 @@
 defmodule IthibatiStarter.Files do
   @moduledoc false
 
+  @starter_version Mix.Project.config()[:version]
+  # The pinned Ithibati release. The dependency requirement and the generated docs both read it.
+  @ithibati_version "0.11.0"
+
+  def ithibati_version, do: @ithibati_version
+
   def read(igniter, path) do
     igniter = Igniter.include_existing_file(igniter, path)
     {igniter, igniter.rewrite |> Rewrite.source!(path) |> Rewrite.Source.get(:content)}
@@ -12,6 +18,8 @@ defmodule IthibatiStarter.Files do
     |> String.replace("__APP__", bindings.app)
     |> String.replace("__APP_UPCASE__", String.upcase(bindings.app))
     |> String.replace("__BRAND__", bindings.brand)
+    |> String.replace("__STARTER_VERSION__", @starter_version)
+    |> String.replace("__ITHIBATI_VERSION__", @ithibati_version)
     |> sort_aliases()
   end
 

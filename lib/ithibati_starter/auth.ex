@@ -15,7 +15,7 @@ defmodule IthibatiStarter.Auth do
     igniter
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    |> Deps.add_dep({:ithibati, "~> 0.11.0"}, yes?: true)
+    |> Deps.add_dep({:ithibati, "~> #{Files.ithibati_version()}"}, yes?: true)
     |> Deps.add_dep({:phoenix_test_playwright, "~> 0.19.0", only: :test, runtime: false},
       yes?: true
     )

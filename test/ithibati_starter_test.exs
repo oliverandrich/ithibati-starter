@@ -44,6 +44,7 @@ defmodule IthibatiStarterTest do
       assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
       assert files["docs/authentication.md"] =~ "pins Ithibati 0.11.0"
+      assert files["ITHIBATI_STARTER_NOTICE.md"] =~ "derive from Ithibati 0.11.0"
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["docs/interface.md"] =~ "Layouts.member/1"
       assert files["docs/interface.md"] =~ "SampleWeb.Navigation"

@@ -1,6 +1,6 @@
 defmodule IthibatiStarter do
   @moduledoc """
-  Opinionated Phoenix 1.8/PostgreSQL starter with invitation-only Ithibati 0.9.0.
+  Opinionated Phoenix 1.8/PostgreSQL starter with invitation-only Ithibati.
 
   Call `install/2` from an Igniter task. This installer targets fresh applications;
   it is not an upgrade tool. Reapplying the same profile preserves all user edits.

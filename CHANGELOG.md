@@ -24,6 +24,11 @@ Requires Ithibati 0.11.0. Ithibati's schema version stays at 5.
 - `test/features/administration_test.exs` clicks Cancel and Confirm in the removal dialog again.
   Under Playwright, a click right after the dialog opens reaches the LiveView.
 
+### Fixed
+
+- `ITHIBATI_STARTER_NOTICE.md` names the pinned Ithibati release. It said 0.9.0.
+  The installer now fills the starter and Ithibati versions in generated docs.
+
 ## [0.9.0] - 2026-10-18
 
 Requires Ithibati 0.10.0. Ithibati's schema version stays at 5. One application migration
