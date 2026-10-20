@@ -13,4 +13,10 @@ application and `:default_locale` on its Gettext backend. New `live_session`
 blocks should include the application's `{Locale, :set}` hook after account loading.
 `Locale.accept_locale/1` also works before a session has been fetched.
 
-For translation editing commands, see [Contributing](../CONTRIBUTING.md#translations).
+## Translations
+
+With Ithibati, all auth/member screens, ceremony errors, clipboard messages and
+validation errors have English/German support. English is the source language;
+German catalogs live under `priv/gettext/de/LC_MESSAGES`. Use
+`mix gettext.extract --merge` after adding `gettext` calls, then fill in the PO
+translations. Clipboard messages are translated on the server, not duplicated in JS.

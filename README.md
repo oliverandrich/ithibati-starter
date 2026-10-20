@@ -152,7 +152,8 @@ installer itself does not.
 [Usage guide](docs/usage.md) covers generator options, profiles, mail, generated
 pages and defaults. [Upgrading](docs/upgrading.md) applies later starter versions to a
 generated application. Generated applications include `CONTRIBUTING.md`, `AGENTS.md`
-and application guides under `docs/`.
+and application guides under `docs/`. HexDocs shows these guides rendered for an
+application named `MyApp`.
 
 ## Contributing
 

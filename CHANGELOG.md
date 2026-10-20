@@ -23,6 +23,7 @@ Requires Ithibati 0.11.0. Ithibati's schema version stays at 5.
   `lib/my_app_web/live/accounts_live.ex` and the gettext files drop it.
 - `test/features/administration_test.exs` clicks Cancel and Confirm in the removal dialog again.
   Under Playwright, a click right after the dialog opens reaches the LiveView.
+- `docs/localization.md` holds the translation workflow. `CONTRIBUTING.md` links to it.
 
 ### Removed
 
@@ -30,6 +31,12 @@ Requires Ithibati 0.11.0. Ithibati's schema version stays at 5.
   Generated files belong to the application and need no attribution.
   An existing application may delete the file.
 - `lib/my_app_web/locale.ex` no longer names Chapisho.
+
+### Documentation
+
+- HexDocs shows the guides a generated application gets: Authentication, Interface,
+  Localization and Operations, rendered for `MyApp`.
+- The usage guide lists the components in `MyAppWeb.CoreComponents`.
 
 ## [0.9.0] - 2026-10-18
 

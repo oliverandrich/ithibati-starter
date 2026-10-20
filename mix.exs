@@ -16,7 +16,8 @@ defmodule IthibatiStarter.MixProject do
           "credo --strict",
           "test",
           "cmd --cd installer mix do compile --warnings-as-errors + test + archive.build"
-        ]
+        ],
+        docs: [&render_guides/1, "docs"]
       ],
       description: "Opinionated Phoenix starter with invitation-only Ithibati authentication",
       package: [
@@ -30,15 +31,35 @@ defmodule IthibatiStarter.MixProject do
       ],
       docs: [
         main: "readme",
-        extras: [
-          "README.md",
-          "CHANGELOG.md",
-          "CONTRIBUTING.md",
-          "docs/usage.md",
-          "docs/upgrading.md"
+        extras:
+          ["README.md", "docs/usage.md", "docs/upgrading.md"] ++
+            guides() ++ ["CHANGELOG.md", "CONTRIBUTING.md"],
+        groups_for_extras: [
+          Guides: ["docs/usage.md", "docs/upgrading.md"],
+          "Generated application": guides(),
+          Project: ["CHANGELOG.md", "CONTRIBUTING.md"]
         ]
       ]
     ]
+  end
+
+  @guide_templates "priv/templates/*/docs/*.md.tpl"
+  @guide_dir "tmp/guides"
+
+  defp guides, do: Enum.map(Path.wildcard(@guide_templates), &guide/1)
+  defp guide(template), do: Path.join(@guide_dir, Path.basename(template, ".tpl"))
+
+  # The guides the installer writes into an application, rendered for HexDocs.
+  # The names match the examples in docs/usage.md.
+  defp render_guides(_args) do
+    Mix.Task.run("compile")
+    bindings = %{app: "my_app", module: "MyApp", brand: "violet"}
+    File.mkdir_p!(@guide_dir)
+
+    for template <- Path.wildcard(@guide_templates) do
+      text = template |> File.read!() |> IthibatiStarter.Files.render(bindings)
+      File.write!(guide(template), text)
+    end
   end
 
   def cli, do: [preferred_envs: [precommit: :test]]

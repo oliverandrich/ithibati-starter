@@ -138,6 +138,7 @@ is the only copy there will ever be.
 
 Choose once, before the first account. The generated `docs/operations.md` carries the
 variables and `docs/authentication.md` the policy; this page does not restate them.
+Both appear here as [Operations](operations.md) and [Authentication](authentication.md).
 
 Development messages appear at **`/dev/mailbox`** and tests use the Swoosh test
 adapter; neither sends external mail. Submission is authenticated and the server's
@@ -172,6 +173,25 @@ Customize `Layouts.auth/1` and `Layouts.member/1` to change the shared appearanc
 sidebar, and below `lg` a top bar and a tab bar. A page chooses `layout={:sidebar}` or
 `layout={:columns}` for a list beside its detail. `MyAppWeb.Navigation.items/1` lists the
 places. The generated `docs/interface.md` explains the layouts and when to use each one.
+It appears here as [Interface](interface.md).
+
+## Components
+
+`MyAppWeb.CoreComponents` replaces the Phoenix scaffold's components.
+
+| Component | Renders |
+| --- | --- |
+| `<.alert>` | A message box in the page flow; an error is announced as an alert |
+| `<.card>` | A raised area |
+| `<.group>`, `<.group_link>` | Rows in a card, as on the settings page, and a row that leads to another page |
+| `<.confirm_dialog>` | A modal dialog that asks one question |
+| `<.header>` | A page heading; in the member shell, the top bar shows it once it has scrolled away |
+| `<.button>`, `<.input>` | A button or link, and a form field with label and errors |
+| `<.table>`, `<.list>` | A table and a data list |
+| `<.flash>` | Flash notices |
+
+`MyAppWeb.Layouts` adds `wordmark/1`, `auth_button/1` and `identifier_input/1` for the
+auth screens. [Interface](interface.md) shows `group/1` and `confirm_dialog/1` in use.
 
 ## Colours
 
@@ -189,8 +209,7 @@ once in `@theme` and again for dark mode under `prefers-color-scheme`:
 | `danger`, `danger-surface` | Errors and destructive actions |
 
 Use them as Tailwind utilities, for example `bg-surface` or `text-muted`. The
-`text-link` utility underlines a link in `signal-strong`. `<.alert>` renders an error
-or info box, and `<.card>` a raised area.
+`text-link` utility underlines a link in `signal-strong`.
 
 `--brand` accepts Tailwind's chromatic palettes:
 

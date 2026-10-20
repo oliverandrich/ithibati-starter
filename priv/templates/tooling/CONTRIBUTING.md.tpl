@@ -104,11 +104,7 @@ version, or list the file in `@owned` once this application has taken it over.
 
 ## Translations
 
-With Ithibati, all auth/member screens, ceremony errors, clipboard messages and
-validation errors have English/German support. English is the source language;
-German catalogs live under `priv/gettext/de/LC_MESSAGES`. Use
-`mix gettext.extract --merge` after adding `gettext` calls, then fill in the PO
-translations. Clipboard messages are translated on the server, not duplicated in JS.
+See [Localization](docs/localization.md#translations).
 
 ## License markers
 
