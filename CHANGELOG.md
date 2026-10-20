@@ -16,6 +16,8 @@ a version to an existing application.
   `lib/my_app/accounts.ex` returns `{:error, :self}`, as `remove_account/2` does.
   One administrator always remains, so `{:error, :last_admin}` and its message are gone.
   `lib/my_app_web/live/accounts_live.ex` and the gettext files drop it.
+- `test/features/administration_test.exs` clicks Cancel and Confirm in the removal dialog again.
+  Under Playwright, a click right after the dialog opens reaches the LiveView.
 
 ## [0.9.0] - 2026-10-18
 
