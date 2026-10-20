@@ -10,8 +10,8 @@ Mix manages Tailwind and esbuild.
 Install the pinned generators and the starter archive once:
 
 ```sh
-mix archive.install hex phx_new 1.8.14
-mix archive.install hex igniter_new 0.5.34
+mix archive.install hex phx_new 1.8.16
+mix archive.install hex igniter_new 0.5.35
 mix archive.install hex ithibati_new 0.9.0
 ```
 
@@ -234,7 +234,7 @@ someone. The account that claims the instance is an administrator. There is no
 invitation-management dashboard, billing, teams or background-job framework. Add the
 policies your app needs.
 
-**Fresh applications only.** The tested scaffold is a non-umbrella Phoenix 1.8.14
+**Fresh applications only.** The tested scaffold is a non-umbrella Phoenix 1.8.16
 application with PostgreSQL, HTML, LiveView, Tailwind and esbuild. The installer adds
 SQLite beside PostgreSQL; see [Databases](#databases). Authentication uses
 integer account IDs; `--binary-id` is rejected. Reapplying the same starter

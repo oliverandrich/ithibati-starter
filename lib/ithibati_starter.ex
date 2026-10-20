@@ -103,7 +103,7 @@ defmodule IthibatiStarter do
         not fresh_router?(router_source, bindings) ->
           Igniter.add_issue(
             igniter,
-            "The router differs from the fresh Phoenix 1.8.14 scaffold with a mailer; " <>
+            "The router differs from the fresh Phoenix 1.8.16 scaffold with a mailer; " <>
               "refusing to replace it."
           )
 

@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Ithibati.New do
 
       mix ithibati.new my_app
 
-  Install the Phoenix 1.8.14 and igniter_new 0.5.34 archives first.
+  Install the Phoenix 1.8.16 and igniter_new 0.5.35 archives first.
   Ithibati authentication and invitation delivery are always included. Options:
 
     * `--brand COLOUR` names the Tailwind palette for the brand colour; `violet` by default.
@@ -26,10 +26,7 @@ defmodule Mix.Tasks.Ithibati.New do
   def run(args) do
     arguments = IthibatiNew.arguments(args)
 
-    for {task, package, version} <- [
-          {"phx.new", "phx_new", "1.8.14"},
-          {"igniter.new", "igniter_new", "0.5.34"}
-        ] do
+    for {task, package, version} <- IthibatiNew.generators() do
       unless Mix.Task.get(task) do
         Mix.raise(
           "Install the required generator first: mix archive.install hex #{package} #{version}"

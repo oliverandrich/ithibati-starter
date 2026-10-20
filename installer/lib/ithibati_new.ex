@@ -12,6 +12,14 @@ defmodule IthibatiNew do
     starter: :string
   ]
 
+  # The archives this one is tested with. Docs and scripts name the same versions.
+  @generators [
+    {"phx.new", "phx_new", "1.8.16"},
+    {"igniter.new", "igniter_new", "0.5.35"}
+  ]
+
+  def generators, do: @generators
+
   def arguments(args) do
     {opts, paths} = OptionParser.parse!(args, strict: @switches)
 

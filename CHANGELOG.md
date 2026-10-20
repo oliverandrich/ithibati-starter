@@ -10,6 +10,12 @@ a version to an existing application.
 
 ## [Unreleased]
 
+### Changed
+
+- The starter targets the `phx_new` 1.8.16 and `igniter_new` 0.5.35 archives. `mix ithibati.new`
+  names them when one is missing. A Phoenix 1.8.16 scaffold requires `{:phoenix, "~> 1.8.16"}`
+  and Tailwind 4.3.3; the installer's changes are the same.
+
 ### Removed
 
 - Beans support. The installer writes no `.beans.yml`, `.beans/`, `mise run beans` task or

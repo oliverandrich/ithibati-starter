@@ -32,6 +32,28 @@ defmodule IthibatiNewTest do
     assert "LICENSE" in package[:files]
   end
 
+  # The generator versions are written out in docs and scripts. Each copy must name the pin.
+  test "every file names the generator versions the archive requires" do
+    pins =
+      Map.new(IthibatiNew.generators(), fn {_task, package, version} -> {package, version} end)
+
+    files =
+      ~w(README.md lib/mix/tasks/ithibati.new.ex ../README.md ../docs/usage.md
+         ../CONTRIBUTING.md ../NOTICE ../scripts/integration.sh ../lib/ithibati_starter.ex)
+
+    named =
+      for file <- files,
+          [_, name, version] <-
+            Regex.scan(~r/(phx_new|igniter_new|Phoenix)`? (\d+\.\d+\.\d+)/, File.read!(file)),
+          do: {file, String.replace(name, "Phoenix", "phx_new"), version}
+
+    assert Enum.any?(named)
+
+    for {file, package, version} <- named do
+      assert version == pins[package], "#{file} names #{package} #{version}, not #{pins[package]}"
+    end
+  end
+
   # The package cannot reach the repository root, so it ships a copy of its licence.
   test "the packaged LICENSE is the repository's" do
     assert File.read!("LICENSE") == File.read!("../LICENSE")

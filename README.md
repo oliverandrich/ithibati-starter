@@ -114,8 +114,8 @@ Mix manages Tailwind and esbuild.
 Install the pinned generators and the starter archive once:
 
 ```sh
-mix archive.install hex phx_new 1.8.14
-mix archive.install hex igniter_new 0.5.34
+mix archive.install hex phx_new 1.8.16
+mix archive.install hex igniter_new 0.5.35
 mix archive.install hex ithibati_new 0.9.0
 ```
 

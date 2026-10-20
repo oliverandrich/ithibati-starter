@@ -61,7 +61,7 @@ have been rendered into a generated application. Keep aliases and embedded HTML
 modules compatible with the generated project's quality checks.
 
 Igniter is a required dependency; there is no optional-dependency build mode.
-The initial support floor is Elixir 1.20 / OTP 29 with Phoenix 1.8.14, SQLite and PostgreSQL.
+The initial support floor is Elixir 1.20 / OTP 29 with Phoenix 1.8.16, SQLite and PostgreSQL.
 
 ## Test real generated applications
 

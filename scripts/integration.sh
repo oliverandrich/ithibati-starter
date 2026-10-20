@@ -26,8 +26,8 @@ for archive in "$archive_source"/*; do
   ln -s "$archive" "$fixture_root/archives/$(basename "$archive")"
 done
 export MIX_ARCHIVES="$fixture_root/archives"
-mix archive.install hex phx_new 1.8.14 --force
-mix archive.install hex igniter_new 0.5.34 --force
+mix archive.install hex phx_new 1.8.16 --force
+mix archive.install hex igniter_new 0.5.35 --force
 (cd "$starter_root/installer" && mix archive.build -o "$fixture_root/ithibati_new.ez")
 mix archive.install "$fixture_root/ithibati_new.ez" --force
 
