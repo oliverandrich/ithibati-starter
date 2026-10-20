@@ -5,7 +5,7 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
   alias Ithibati.Identity.RecoveryCodes
 
   test "a member manages passkeys and replaces recovery codes from the settings", %{conn: conn} do
-    first = virtual_authenticator(conn)
+    virtual_authenticator(conn)
 
     conn
     |> unlock_setup()
@@ -28,10 +28,10 @@ defmodule __MODULE__Web.AccountSecurityFeatureTest do
     |> assert_path("/account/passkeys")
     |> connected()
 
-    # A different authenticator models a second device. The first device's existing
-    # credential is correctly excluded from enrollment by Ithibati.
-    conn |> remove_authenticator(first) |> virtual_authenticator()
+    # An emptied authenticator models a second device.
+    # Ithibati excludes the first device's existing credential from enrollment.
     conn
+    |> forget_credentials()
     |> fill("#add-passkey-form input[name=label]", "Phone")
     |> click_button("Add a passkey")
     |> assert_has("article input[value=Phone]")

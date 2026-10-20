@@ -43,7 +43,7 @@ defmodule IthibatiStarterTest do
       assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
       assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
       assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
-      assert files["docs/authentication.md"] =~ "pins Ithibati 0.10.0"
+      assert files["docs/authentication.md"] =~ "pins Ithibati 0.11.0"
       assert files["docs/localization.md"] =~ "Accept-Language"
       assert files["docs/interface.md"] =~ "Layouts.member/1"
       assert files["docs/interface.md"] =~ "SampleWeb.Navigation"
@@ -110,7 +110,7 @@ defmodule IthibatiStarterTest do
 
     # A patch of the library is taken, a minor is not. The lockfile still decides what is
     # installed; this decides what an update may reach for.
-    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.10.0"})
+    assert diff(result, only: "mix.exs") =~ ~s({:ithibati, "~> 0.11.0"})
     assert diff(result, only: "mix.exs") =~ ~s({:phoenix_test_playwright, "~> 0.19.0")
     refute diff(result, only: "mix.exs") =~ ":wallaby"
     assert diff(result, only: "mix.exs") =~ "ithibati.doctor"

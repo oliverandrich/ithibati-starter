@@ -10,8 +10,13 @@ a version to an existing application.
 
 ## [Unreleased]
 
+Requires Ithibati 0.11.0. Ithibati's schema version stays at 5.
+
 ### Changed
 
+- `mix.exs` pins `{:ithibati, "~> 0.11.0"}`.
+- `test/features/account_security_test.exs` models the second device with
+  `forget_credentials/1`. Ithibati 0.11 removes `remove_authenticator/2`.
 - An administrator can no longer revoke their own role. `Accounts.revoke_admin/2` in
   `lib/my_app/accounts.ex` returns `{:error, :self}`, as `remove_account/2` does.
   One administrator always remains, so `{:error, :last_admin}` and its message are gone.
