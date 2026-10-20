@@ -81,9 +81,6 @@ defmodule __MODULE__Web.AccountsLive do
   defp changed(socket, {:ok, _account}), do: listed(socket)
   defp changed(socket, {:error, :forbidden}), do: Admin.turn_away(socket)
 
-  defp changed(socket, {:error, :last_admin}),
-    do: put_flash(socket, :error, gettext("The last administrator keeps the role."))
-
   defp changed(socket, {:error, :not_found}),
     do: socket |> put_flash(:error, gettext("This account no longer exists.")) |> listed()
 

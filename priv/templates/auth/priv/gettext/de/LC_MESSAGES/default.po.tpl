@@ -827,11 +827,6 @@ msgstr "%{username} entfernt."
 msgid "Revoke administrator"
 msgstr "Administratorrolle entziehen"
 
-#: lib/__APP___web/live/accounts_live.ex:88
-#, elixir-autogen, elixir-format
-msgid "The last administrator keeps the role."
-msgstr "Der letzte Administrator behält die Rolle."
-
 #: lib/__APP___web/live/accounts_live.ex:184
 #, elixir-autogen, elixir-format
 msgid "Their passkeys and recovery codes are deleted, and their open sessions end. This cannot be undone."

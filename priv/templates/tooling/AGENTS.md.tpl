@@ -68,9 +68,10 @@ mode. Do not add Ithibati's `:open` mode, a second identifier column, or a
 registration path that skips an invitation.
 
 Administrators are accounts whose `admin` flag is set. The account that claims the
-instance is the first one, and the last administrator keeps the role. Each
-administrator function takes the acting account first and runs through
-`__MODULE__.Accounts.with_admin/2`, which reads the flag from the database.
+instance is the first one. An administrator cannot revoke their own role or
+remove their own account, so one always remains. Each administrator function
+takes the acting account first and runs through `__MODULE__.Accounts.with_admin/2`,
+which reads the flag from the database.
 `bin/grant-admin` is the operator's exception; it runs on the host and only adds the role.
 
 Data an account owns references `users` with `on_delete: :delete_all`. Cleanup the database

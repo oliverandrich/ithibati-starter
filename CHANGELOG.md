@@ -10,6 +10,13 @@ a version to an existing application.
 
 ## [Unreleased]
 
+### Changed
+
+- An administrator can no longer revoke their own role. `Accounts.revoke_admin/2` in
+  `lib/my_app/accounts.ex` returns `{:error, :self}`, as `remove_account/2` does.
+  One administrator always remains, so `{:error, :last_admin}` and its message are gone.
+  `lib/my_app_web/live/accounts_live.ex` and the gettext files drop it.
+
 ## [0.9.0] - 2026-10-18
 
 Requires Ithibati 0.10.0. Ithibati's schema version stays at 5. One application migration

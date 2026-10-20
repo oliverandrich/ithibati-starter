@@ -1,7 +1,8 @@
 defmodule __MODULE__.Accounts do
   @moduledoc """
   The administrator role and what it allows: listing accounts, granting and revoking the role,
-  and removing an account. The last administrator keeps the role.
+  and removing an account. An administrator cannot revoke their own role or remove their own
+  account, so one always remains.
 
   The functions for an administrator take the acting account first and read its flag from the
   database. A stale struct therefore grants nothing. Functions that change data run through
@@ -42,16 +43,16 @@ defmodule __MODULE__.Accounts do
   end
 
   @doc """
-  Takes the role from the account with `account_id`. An administrator may revoke their own.
+  Takes the role from the account with `account_id`.
 
-  Returns `{:error, :last_admin}` when no other administrator would remain, besides the errors
-  of `grant_admin/2`.
+  An administrator cannot revoke their own role: `{:error, :self}`. Otherwise it returns the
+  errors of `grant_admin/2`.
   """
-  def revoke_admin(admin, account_id) do
+  def revoke_admin(%User{id: id} = admin, account_id) do
     admin
-    |> with_admin(fn admins ->
+    |> with_admin(fn _admins ->
       case account(account_id) do
-        %User{id: id} when admins == [id] -> {:error, :last_admin}
+        %User{id: ^id} -> {:error, :self}
         account -> set_admin(account, false)
       end
     end)

@@ -1,6 +1,6 @@
 defmodule __MODULE__.AccountsTest do
   @moduledoc """
-  The administrator role: who grants and revokes it, and that the last one keeps it.
+  The administrator role: who grants and revokes it, and that nobody revokes their own.
   """
   use __MODULE__.DataCase, async: true
 
@@ -40,19 +40,16 @@ defmodule __MODULE__.AccountsTest do
     other = account(%{admin: true})
 
     assert {:ok, %User{admin: false}} = Accounts.revoke_admin(admin, other.id)
-
-    # An administrator may also step down.
-    third = account(%{admin: true})
-    assert {:ok, %User{admin: false}} = Accounts.revoke_admin(admin, admin.id)
-    assert Repo.reload!(third).admin
   end
 
-  test "the last administrator keeps the role" do
+  # Another administrator exists, so the refusal does not depend on keeping one.
+  test "an administrator cannot revoke their own role" do
     admin = account(%{admin: true})
+    account(%{admin: true})
 
-    assert Accounts.revoke_admin(admin, admin.id) == {:error, :last_admin}
+    assert Accounts.revoke_admin(admin, admin.id) == {:error, :self}
     # An id from a form arrives as a string and names the same account.
-    assert Accounts.revoke_admin(admin, to_string(admin.id)) == {:error, :last_admin}
+    assert Accounts.revoke_admin(admin, to_string(admin.id)) == {:error, :self}
     assert Repo.reload!(admin).admin
   end
 
