@@ -12,7 +12,6 @@ defmodule Mix.Tasks.Ithibati.New do
     * `--license mit|agpl` selects MIT (the default) or AGPL-3.0-or-later.
     * `--copyright NAME` names the copyright holder; git's `user.name` by default.
     * `--source-url URL` is the address of the source code; required with `agpl`.
-    * `--without-beans` omits local Beans configuration.
     * `--yes` accepts the generator's installation prompts (the default).
     * `--no-yes` restores interactive installation and diff prompts.
     * `--starter SOURCE` selects a local or pinned Igniter package specification;

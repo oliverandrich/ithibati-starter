@@ -21,7 +21,7 @@ defmodule IthibatiStarter do
   @doc """
   Plans an installation.
 
-  Options: `:without_beans`, `:brand`, `:license`, `:copyright` and `:source_url`.
+  Options: `:brand`, `:license`, `:copyright` and `:source_url`.
   """
   def install(igniter, opts \\ []) do
     brand = Keyword.get(opts, :brand, "violet")
@@ -29,7 +29,7 @@ defmodule IthibatiStarter do
     license = opts[:license]
 
     profile =
-      "#{@version}\nauth=true\nbeans=#{!opts[:without_beans]}\nbrand=#{brand}\nlicense=#{license}\n"
+      "#{@version}\nauth=true\nbrand=#{brand}\nlicense=#{license}\n"
 
     cond do
       brand not in @brands ->
@@ -128,7 +128,7 @@ defmodule IthibatiStarter do
 
         String.contains?(repo, "Ecto.Adapters.Postgres") ->
           igniter
-          |> Tooling.install(bindings, opts)
+          |> Tooling.install(bindings)
           |> Auth.install(bindings)
           |> License.install(bindings, opts)
           |> Igniter.create_new_file(@marker, profile)

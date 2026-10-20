@@ -16,7 +16,7 @@ defmodule IthibatiStarter.Tooling do
     {:mix_audit, "~> 2.1.5", only: [:dev, :test], runtime: false}
   ]
 
-  def install(igniter, bindings, opts) do
+  def install(igniter, bindings) do
     igniter = Enum.reduce(@deps, igniter, &Deps.add_dep(&2, &1, yes?: true))
 
     igniter
@@ -57,7 +57,6 @@ defmodule IthibatiStarter.Tooling do
       Files.template("fragments/source_url_runtime", bindings)
     )
     |> tidy_scaffold(bindings)
-    |> maybe_beans(bindings, opts)
     |> Files.append(".gitignore", "\n/mise.local.toml\n/screenshots/\n")
     |> Deps.set_dep_option(:ithibati_starter, :only, :dev)
     |> Deps.set_dep_option(:ithibati_starter, :runtime, false)
@@ -197,30 +196,5 @@ defmodule IthibatiStarter.Tooling do
       "Ecto.Adapters.SQL.Sandbox.stop_owner",
       "Sandbox.stop_owner"
     )
-  end
-
-  defp maybe_beans(igniter, bindings, opts) do
-    if opts[:without_beans] do
-      igniter
-    else
-      igniter
-      |> Files.append(
-        "mise.toml",
-        "\n[tasks.beans]\nrun = \"beans list --no-status completed --no-status scrapped\"\n"
-      )
-      |> Files.append(
-        ".gitignore",
-        "\n# Local work tracking is intentionally not published.\n/.beans/\n/.beans.yml\n"
-      )
-      |> Igniter.create_new_file(
-        ".beans.yml",
-        "beans:\n  path: .beans\n  prefix: #{bindings.app}-\n  id_length: 4\n  default_status: todo\n  default_type: task\n"
-      )
-      |> Igniter.mkdir(".beans")
-      |> Files.append(
-        "CONTRIBUTING.md",
-        "\n## Local Beans tracking\n\nInstall Beans separately. Search unfinished tickets before creating work; update\nprogress and finish with a Summary of Changes. Run `beans check` after changes.\n`.beans/` and `.beans.yml` are ignored and not backed up by Git pushes.\n"
-      )
-    end
   end
 end

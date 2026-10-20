@@ -4,7 +4,6 @@ defmodule IthibatiNew do
   # The archive and the starter share one version.
   @starter "ithibati_starter@#{Mix.Project.config()[:version]}"
   @switches [
-    without_beans: :boolean,
     brand: :string,
     license: :string,
     copyright: :string,
@@ -24,7 +23,7 @@ defmodule IthibatiNew do
         _ ->
           Mix.raise(
             "Usage: mix ithibati.new PATH [--brand COLOUR] [--license mit|agpl] " <>
-              "[--copyright NAME] [--source-url URL] [--without-beans] [--no-yes]"
+              "[--copyright NAME] [--source-url URL] [--no-yes]"
           )
       end
 
@@ -48,7 +47,6 @@ defmodule IthibatiNew do
           if opts[key], do: [flag, opts[key]], else: []
         end
       ) ++
-      if(opts[:without_beans], do: ["--without-beans"], else: []) ++
       if(Keyword.get(opts, :yes, true), do: ["--yes"], else: [])
   end
 end

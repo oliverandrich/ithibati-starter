@@ -111,10 +111,6 @@ and a generated test keeps new files in line. Third-party code under `vendor/` i
 **`--copyright NAME`** names the copyright holder, with the current year, in the README's
 license section and in an MIT `LICENSE`. Without it the installer takes git's `user.name`, and refuses when that is unset.
 
-**`--without-beans`** omits local tracking. Beans itself is installed separately and
-is not needed to compile, test or run the app. Neither RTK nor personal AI skills are
-required by generated applications.
-
 ## Naming or addressing accounts
 
 **An account is a username or an email address, and the instance decides which**

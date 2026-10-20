@@ -7,7 +7,6 @@ defmodule Mix.Tasks.IthibatiStarter.Install do
 
   Options:
   * `--brand COLOUR`: the Tailwind palette for the brand colour, `violet` by default.
-  * `--without-beans`: omit local Beans tracking configuration and commands.
   * `--license LICENSE`: `mit` (the default) or `agpl` for AGPL-3.0-or-later.
   * `--copyright NAME`: the copyright holder in the README and an MIT `LICENSE`; git's `user.name` by default.
   * `--source-url URL`: the address of the application's source code; required with `agpl`.
@@ -21,13 +20,11 @@ defmodule Mix.Tasks.IthibatiStarter.Install do
     %Igniter.Mix.Task.Info{
       group: :ithibati_starter,
       schema: [
-        without_beans: :boolean,
         brand: :string,
         license: :string,
         copyright: :string,
         source_url: :string
-      ],
-      defaults: [without_beans: false]
+      ]
     }
   end
 

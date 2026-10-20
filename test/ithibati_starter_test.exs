@@ -29,64 +29,61 @@ defmodule IthibatiStarterTest do
     test_project(app_name: :sample, files: Map.merge(files, extra))
   end
 
-  for opts <- [[], [without_beans: true]] do
-    @documentation_opts opts
-    @tag :documentation
-    test "documentation separates contribution workflow from application guides for #{inspect(opts)}" do
-      result = project() |> install(@documentation_opts) |> apply_igniter!()
-      files = result.assigns.test_files
+  @tag :documentation
+  test "documentation separates contribution workflow from application guides" do
+    result = project() |> install() |> apply_igniter!()
+    files = result.assigns.test_files
 
-      assert files["docs/operations.md"] =~ "bin/migrate"
-      assert files["docs/operations.md"] =~ "bin/setup-code"
-      assert files["docs/operations.md"] =~ "Sample.AuthCleanup.run()"
-      assert files["docs/authentication.md"] =~ "invite: {20, 86_400}"
-      assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
-      assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
-      assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
-      assert files["docs/authentication.md"] =~ "pins Ithibati 0.11.0"
-      # Generated files belong to the application and carry no attribution.
-      refute Map.has_key?(files, "ITHIBATI_STARTER_NOTICE.md")
-      refute files["lib/sample_web/locale.ex"] =~ "Chapisho"
-      assert files["docs/localization.md"] =~ "Accept-Language"
-      assert files["docs/interface.md"] =~ "Layouts.member/1"
-      assert files["docs/interface.md"] =~ "SampleWeb.Navigation"
-      assert files["docs/interface.md"] =~ "group_link/1"
-      assert files["README.md"] =~ "[Interface](docs/interface.md)"
-      assert files["CONTRIBUTING.md"] =~ "[Interface](docs/interface.md)"
-      assert files["CONTRIBUTING.md"] =~ "Playwright"
-      refute files["CONTRIBUTING.md"] =~ "Chromedriver"
-      refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
-      refute files["CONTRIBUTING.md"] =~ "## Health, releases"
-      assert files["README.md"] =~ "docs/operations.md"
-      assert files["README.md"] =~ "Ithibati Starter 0.9.0"
-      assert files["README.md"] =~ "mise run setup-code"
-      assert files["AGENTS.md"] =~ "Documentation structure"
-      refute Map.has_key?(files, "docs/development.md")
+    assert files["docs/operations.md"] =~ "bin/migrate"
+    assert files["docs/operations.md"] =~ "bin/setup-code"
+    assert files["docs/operations.md"] =~ "Sample.AuthCleanup.run()"
+    assert files["docs/authentication.md"] =~ "invite: {20, 86_400}"
+    assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
+    assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
+    assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
+    assert files["docs/authentication.md"] =~ "pins Ithibati 0.11.0"
+    # Generated files belong to the application and carry no attribution.
+    refute Map.has_key?(files, "ITHIBATI_STARTER_NOTICE.md")
+    refute files["lib/sample_web/locale.ex"] =~ "Chapisho"
+    assert files["docs/localization.md"] =~ "Accept-Language"
+    assert files["docs/interface.md"] =~ "Layouts.member/1"
+    assert files["docs/interface.md"] =~ "SampleWeb.Navigation"
+    assert files["docs/interface.md"] =~ "group_link/1"
+    assert files["README.md"] =~ "[Interface](docs/interface.md)"
+    assert files["CONTRIBUTING.md"] =~ "[Interface](docs/interface.md)"
+    assert files["CONTRIBUTING.md"] =~ "Playwright"
+    refute files["CONTRIBUTING.md"] =~ "Chromedriver"
+    refute files["CONTRIBUTING.md"] =~ "## Authentication limits"
+    refute files["CONTRIBUTING.md"] =~ "## Health, releases"
+    assert files["README.md"] =~ "docs/operations.md"
+    assert files["README.md"] =~ "Ithibati Starter 0.9.0"
+    assert files["README.md"] =~ "mise run setup-code"
+    assert files["AGENTS.md"] =~ "Documentation structure"
+    refute Map.has_key?(files, "docs/development.md")
 
-      # Delivery is part of the application now, not a profile with a guide of its own.
-      refute Map.has_key?(files, "docs/mail.md")
-      assert files["docs/operations.md"] =~ "SMTP_HOST"
-      assert files["docs/operations.md"] =~ "ACCOUNT_IDENTITY"
-      assert files["docs/authentication.md"] =~ "named or addressed"
-      refute files["CONTRIBUTING.md"] =~ "SMTP_HOST"
+    # Delivery is part of the application now, not a profile with a guide of its own.
+    refute Map.has_key?(files, "docs/mail.md")
+    assert files["docs/operations.md"] =~ "SMTP_HOST"
+    assert files["docs/operations.md"] =~ "ACCOUNT_IDENTITY"
+    assert files["docs/authentication.md"] =~ "named or addressed"
+    refute files["CONTRIBUTING.md"] =~ "SMTP_HOST"
 
-      for {path, content} <- files,
-          String.ends_with?(path, ".md"),
-          [_, link] <- Regex.scan(~r/\[[^\]]+\]\(([^)]+)\)/, content),
-          URI.parse(link).scheme == nil,
-          not String.starts_with?(link, "#") do
-        target =
-          link
-          |> String.split("#")
-          |> hd()
-          |> Path.expand(Path.dirname("/" <> path))
-          |> Path.relative_to("/")
+    for {path, content} <- files,
+        String.ends_with?(path, ".md"),
+        [_, link] <- Regex.scan(~r/\[[^\]]+\]\(([^)]+)\)/, content),
+        URI.parse(link).scheme == nil,
+        not String.starts_with?(link, "#") do
+      target =
+        link
+        |> String.split("#")
+        |> hd()
+        |> Path.expand(Path.dirname("/" <> path))
+        |> Path.relative_to("/")
 
-        assert Map.has_key?(files, target), "#{path} links to missing #{target}"
-      end
-
-      result |> install(@documentation_opts) |> assert_unchanged()
+      assert Map.has_key?(files, target), "#{path} links to missing #{target}"
     end
+
+    result |> install() |> assert_unchanged()
   end
 
   test "default profile installs pinned invitation authentication and tooling" do
@@ -450,20 +447,24 @@ defmodule IthibatiStarterTest do
     assert Enum.sort(String.split(chmod)) == Enum.sort(launchers)
   end
 
-  test "there is one profile left; Beans, the brand colour and the license are the choices" do
+  test "there is one profile left; the brand colour and the license are the choices" do
     info = Install.info([], nil)
     refute Keyword.has_key?(info.schema, :with_mail)
     refute Keyword.has_key?(info.schema, :without_ithibati)
-    assert info.schema[:without_beans] == :boolean
+    refute Keyword.has_key?(info.schema, :without_beans)
     assert info.schema[:brand] == :string
     assert info.schema[:license] == :string
     assert info.schema[:copyright] == :string
     assert info.schema[:source_url] == :string
 
-    result = project() |> install(without_beans: true)
-    assert_creates(result, "lib/sample/accounts/user.ex")
-    refute_creates(result, ".beans.yml")
-    refute diff(result, only: "mise.toml") =~ "beans list"
+    files = installed_files()
+    assert Map.has_key?(files, "lib/sample/accounts/user.ex")
+    refute Map.has_key?(files, ".beans.yml")
+    refute files[".ithibati-starter"] =~ "beans="
+
+    for path <- ~w(mise.toml .gitignore AGENTS.md CONTRIBUTING.md) do
+      refute files[path] =~ ~r/beans/i, "#{path} mentions Beans"
+    end
   end
 
   test "an account is named or addressed, and the instance decides at runtime" do
@@ -620,46 +621,43 @@ defmodule IthibatiStarterTest do
     end)
   end
 
-  for opts <- [[], [without_beans: true]] do
-    @profile_opts opts
-    test "Lucide replaces Heroicons in profile #{inspect(opts)}" do
-      planned = project() |> install(@profile_opts)
-      assert_has_task(planned, "deps.unlock", ["daisyui", "heroicons"])
-      installed = apply_igniter!(planned)
-      files = installed.assigns.test_files
-      assert files["mix.exs"] =~ "{:lucide_icons, \"~> 2.4.0\"}"
-      refute files["mix.exs"] =~ ":heroicons"
-      refute Map.has_key?(files, "assets/vendor/heroicons.js")
-      refute files["assets/css/app.css"] =~ "heroicons"
-      assert files["lib/sample_web/components/core_components.ex"] =~ "Lucideicons.info"
-      assert files["lib/sample_web/components/layouts.ex"] =~ "Lucideicons.loader_circle"
+  test "Lucide replaces Heroicons" do
+    planned = project() |> install()
+    assert_has_task(planned, "deps.unlock", ["daisyui", "heroicons"])
+    installed = apply_igniter!(planned)
+    files = installed.assigns.test_files
+    assert files["mix.exs"] =~ "{:lucide_icons, \"~> 2.4.0\"}"
+    refute files["mix.exs"] =~ ":heroicons"
+    refute Map.has_key?(files, "assets/vendor/heroicons.js")
+    refute files["assets/css/app.css"] =~ "heroicons"
+    assert files["lib/sample_web/components/core_components.ex"] =~ "Lucideicons.info"
+    assert files["lib/sample_web/components/layouts.ex"] =~ "Lucideicons.loader_circle"
 
-      for {path, content} <- files, String.starts_with?(path, "lib/") do
-        refute content =~ "hero-", "Heroicon remains in #{path}"
-      end
+    for {path, content} <- files, String.starts_with?(path, "lib/") do
+      refute content =~ "hero-", "Heroicon remains in #{path}"
+    end
+  end
+
+  test "vanilla Tailwind replaces DaisyUI" do
+    installed = project() |> install() |> apply_igniter!()
+    files = installed.assigns.test_files
+    refute files["mix.exs"] =~ ":daisyui"
+    refute files["assets/css/app.css"] =~ "daisyui"
+    assert files["assets/css/app.css"] =~ "@import \"tailwindcss\""
+    refute files["assets/css/app.css"] =~ "@custom-variant dark"
+    refute files["lib/sample_web/components/layouts.ex"] =~ "theme_toggle"
+    refute files["lib/sample_web/components/layouts/root.html.heex"] =~ "localStorage"
+
+    for {path, source} <- files,
+        String.starts_with?(path, "lib/") do
+      refute source =~
+               ~r/\b(?:btn(?:-[a-z]+)?|alert-(?:info|error|success|warning)|(?:bg|text|border)-base-[a-z0-9]+|(?:input|select|textarea)-error|table-zebra|list-row|rounded-box)\b/,
+             "DaisyUI class remains in #{path}"
     end
 
-    test "vanilla Tailwind replaces DaisyUI in profile #{inspect(opts)}" do
-      installed = project() |> install(@profile_opts) |> apply_igniter!()
-      files = installed.assigns.test_files
-      refute files["mix.exs"] =~ ":daisyui"
-      refute files["assets/css/app.css"] =~ "daisyui"
-      assert files["assets/css/app.css"] =~ "@import \"tailwindcss\""
-      refute files["assets/css/app.css"] =~ "@custom-variant dark"
-      refute files["lib/sample_web/components/layouts.ex"] =~ "theme_toggle"
-      refute files["lib/sample_web/components/layouts/root.html.heex"] =~ "localStorage"
-
-      for {path, source} <- files,
-          String.starts_with?(path, "lib/") do
-        refute source =~
-                 ~r/\b(?:btn(?:-[a-z]+)?|alert-(?:info|error|success|warning)|(?:bg|text|border)-base-[a-z0-9]+|(?:input|select|textarea)-error|table-zebra|list-row|rounded-box)\b/,
-               "DaisyUI class remains in #{path}"
-      end
-
-      assert files["lib/sample_web/components/core_components.ex"] =~ "focus-visible:"
-      assert files["lib/sample_web/components/layouts/root.html.heex"] =~ "bg-ground"
-      assert files["assets/css/app.css"] =~ "@media (prefers-color-scheme: dark)"
-    end
+    assert files["lib/sample_web/components/core_components.ex"] =~ "focus-visible:"
+    assert files["lib/sample_web/components/layouts/root.html.heex"] =~ "bg-ground"
+    assert files["assets/css/app.css"] =~ "@media (prefers-color-scheme: dark)"
   end
 
   test "the brand colour is named once, in the stylesheet's tokens" do

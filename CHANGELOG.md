@@ -10,6 +10,13 @@ a version to an existing application.
 
 ## [Unreleased]
 
+### Removed
+
+- Beans support. The installer writes no `.beans.yml`, `.beans/`, `mise run beans` task or
+  Beans sections in `AGENTS.md` and `CONTRIBUTING.md`. `--without-beans` is no longer an
+  option. `.ithibati-starter` drops its `beans=` line.
+  An existing application may delete those files and sections.
+
 ## [0.9.0] - 2026-10-20
 
 Requires Ithibati 0.11.0. Ithibati's schema version stays at 5. One application migration

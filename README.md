@@ -81,7 +81,6 @@ Powered by **Ithibati 0.11.0**, with passkeys and accounts that are named or add
 | ExUnit + Playwright | Application tests and real browser/WebAuthn flows using virtual authenticators |
 | GitHub Actions | Check workflows plus a separate dependency-audit workflow |
 | Dependabot | Grouped dependency and Actions updates |
-| Beans, optional | Local, Git-ignored work tracking |
 
 `mise run check` compiles, checks formatting and unused locks, runs Credo and xref,
 scans with Sobelow, builds assets and runs tests. It also checks the Ithibati setup.

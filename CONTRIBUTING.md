@@ -32,8 +32,7 @@ running database or browser. The integration suite does; see below.
 | `mise exec -- mix hex.build` | Build a local package without publishing it |
 | `mise run release-check` | Refuse a release that is not the commit a pushed version tag points at |
 
-The archive shares the root mise runtimes, Credo rules, formatting, CI, audits and
-Beans tracking. It has no dependencies of its own. `mise run check` additionally
+The archive shares the root mise runtimes, Credo rules, formatting, CI and audits. It has no dependencies of its own. `mise run check` additionally
 compiles it, runs its tests and builds the archive; `mise run test` runs both suites.
 This keeps the installable archive small without a separate tooling stack.
 
@@ -134,19 +133,6 @@ Keep explanations in one place and update links when moving them.
 Generated application guides live in the profile's `docs/` template directory.
 Authentication and operations are always documented, including how an account is
 named or addressed. Keep the installer tests covering it.
-
-## Local work tracking
-
-The maintainer uses [Beans](https://github.com/hmans/beans) locally. `.beans/` and
-`.beans.yml` are ignored and are not included in Git pushes; Beans is not required
-to build or test this repository.
-
-When working in a checkout configured for Beans, search unfinished work before
-creating a ticket, update progress, finish with a **Summary of Changes**, and run:
-
-```sh
-beans check
-```
 
 ## Release a version
 

@@ -25,23 +25,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and checks.
 - Do not run unattended migrations, resets or measurements against development
   data. Use disposable databases for experiments; a reset requires explicit scope.
 
-## Work tracking
-
-When local Beans tracking is configured:
-
-- Search unfinished work before creating a ticket. Read the matching ticket and
-  its parent/dependencies. Track progress there; do not create parallel TODO files
-  or backlog comments in source. Complete one task before starting unrelated work.
-- Mark work completed only after its acceptance criteria and checks pass, and add
-  a `Summary of Changes`. For scrapped work, add `Reasons for Scrapping`.
-- `beans list --ready` omits some unfinished work. Use `mise run beans` where
-  available, or `beans list --no-status completed --no-status scrapped`.
-- Keep new `.beans/` files and `.beans.yml` local and ignored. Do not force-add them,
-  add ignore exceptions or remove already tracked tickets without instruction.
-  Archive only when requested. Git pushes do not back up ignored tickets.
-- Keep Bean IDs in Beans, not application code, tests, assets or README.
-  Run `beans check` before finishing tracked work.
-
 ## Documentation structure
 
 Keep the same division in the starter and all applications:

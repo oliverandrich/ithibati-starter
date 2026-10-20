@@ -17,6 +17,7 @@ beans=true
 
 From 0.7.0 on, a fourth line records the brand colour, for example `brand=violet`.
 From 0.9.0 on, a fifth line records the license, `license=mit` or `license=agpl`.
+From 0.9.1 on, the `beans=` line is gone, because generated applications no longer configure Beans.
 
 The `ithibati_starter` entry in `mix.lock` records the exact version, or the commit for a
 version installed from Git.
@@ -36,7 +37,7 @@ diff -ruN -x deps -x _build -x mix.lock -x .git old/my_app new/my_app > upgrade.
 
 Versions before 0.9.0 are not on Hex. For one of those, pass its Git tag instead, for
 example `--starter ithibati_starter@github:oliverandrich/ithibati-starter@v0.8.1`.
-Add `--without-beans` to both commands if the profile says `beans=false`. Add
+Before 0.9.1, add `--without-beans` to the source command if the profile says `beans=false`. Add
 `--brand COLOUR` to the target command if the application should keep a colour other
 than violet. Add `--license agpl --source-url URL` to the target command for an AGPL
 application, and `--copyright NAME` when git has no `user.name`.
@@ -67,10 +68,8 @@ Reapplying the installer is then a no-op again.
 
 ## Profile changes
 
-The installer refuses to change a profile. Beans, the brand colour and the license are
-the remaining choices. To add or remove Beans, generate reference applications of both
-profiles at the installed version and apply their diff. Then update the `beans=` line
-in `.ithibati-starter`. To change the brand colour, edit the `signal` tokens in
+The installer refuses to change a profile. The brand colour and the license are the
+remaining choices. To change the brand colour, edit the `signal` tokens in
 `assets/css/app.css` and the `brand=` line. To change the license, replace `LICENSE`,
 the README's license section and the `license=` line. Moving to AGPL also needs
 `:source_url` in `config/config.exs`.

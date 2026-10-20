@@ -43,20 +43,23 @@ defmodule IthibatiNewTest do
   end
 
   test "accepts installation prompts by default" do
-    for options <- [[], ["--without-beans"]] do
-      assert "--yes" in IthibatiNew.arguments(["my_app" | options])
-      refute "--yes" in IthibatiNew.arguments(["my_app", "--no-yes" | options])
-    end
+    assert "--yes" in IthibatiNew.arguments(["my_app"])
+    refute "--yes" in IthibatiNew.arguments(["my_app", "--no-yes"])
   end
 
   # Every application ships the mailer, so nothing asks Phoenix to leave it out.
   test "the Phoenix mailer is kept, and no flag contradicts it" do
-    args = IthibatiNew.arguments(["my_app", "--without-beans", "--yes"])
+    args = IthibatiNew.arguments(["my_app", "--yes"])
 
-    assert "--without-beans" in args
     assert "--yes" in args
     refute Enum.any?(args, &String.contains?(&1, "mailer"))
     assert Enum.count(args, &(&1 == "phx.new")) == 1
+  end
+
+  test "Beans is no option" do
+    assert_raise OptionParser.ParseError, fn ->
+      IthibatiNew.arguments(["my_app", "--without-beans"])
+    end
   end
 
   # The starter validates the name, so this archive keeps no list of colours of its own.
