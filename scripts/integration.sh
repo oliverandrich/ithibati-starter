@@ -2,6 +2,15 @@
 set -euo pipefail
 
 starter_root=$(cd "$(dirname "$0")/.." && pwd)
+# The license is the only variation. CI runs agpl on a push and both before a release.
+profiles=("$@")
+((${#profiles[@]})) || profiles=(mit agpl)
+for profile in "${profiles[@]}"; do
+  if [[ "$profile" != mit && "$profile" != agpl ]]; then
+    echo "Unknown profile $profile; use mit or agpl" >&2
+    exit 1
+  fi
+done
 # The SQLite release check reads the migrated file directly.
 if ! command -v sqlite3 >/dev/null; then
   echo "The integration suite needs the sqlite3 command" >&2
@@ -31,10 +40,9 @@ mix archive.install hex igniter_new 0.5.35 --force
 (cd "$starter_root/installer" && mix archive.build -o "$fixture_root/ithibati_new.ez")
 mix archive.install "$fixture_root/ithibati_new.ez" --force
 
-# One profile. The license is the variation.
 # The holder is named, because a CI runner has no git user.name to fall back to.
 source_url="https://example.com/starter_agpl"
-for profile in mit agpl; do
+for profile in "${profiles[@]}"; do
   app="starter_${profile}"
   target="$fixture_root/$app"
   options=(--yes --copyright "Integration Suite")

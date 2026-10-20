@@ -27,7 +27,7 @@ running database or browser. The integration suite does; see below.
 | `mise run test` | Installer tests only |
 | `mise run format` | Format Elixir source explicitly |
 | `mise run credo` | Compile and run strict Credo |
-| `mise run integration` | Generate and check both real Phoenix profiles, including browser tests and production release builds and HTTP smoke checks |
+| `mise run integration [mit\|agpl]` | Generate and check real Phoenix applications, both profiles by default, including browser tests, release builds and HTTP smoke checks |
 | `mise run audit` | Dependency advisories and retired Hex packages, separate from the check gate |
 | `mise exec -- mix hex.build` | Build a local package without publishing it |
 | `mise run release-check` | Refuse a release that is not the commit a pushed version tag points at |
@@ -75,6 +75,9 @@ export PGUSER=postgres
 export PGPASSWORD=postgres
 mise run integration
 ```
+
+CI runs `.github/workflows/integration.yml` only when a change can reach a generated application.
+A push or pull request generates the `agpl` profile. A manual run and the release generate both.
 
 Each generated application installs Playwright and its Chrome for Testing through its own
 `mise run browser`; no installed Chrome is needed. Missing browser tooling must fail the suite

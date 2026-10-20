@@ -22,5 +22,5 @@ run = "bash scripts/release-check.sh"
 run = "beans list --no-status completed --no-status scrapped"
 
 [tasks.integration]
-description = "Generate and check both starter profiles with PostgreSQL and Chrome"
+description = "Generate and check the mit and agpl profiles, or the ones named, with PostgreSQL and Chrome"
 run = "bash scripts/integration.sh"

@@ -29,10 +29,13 @@ jobs:
   verify:
     needs: tag
     uses: ./.github/workflows/ci.yml # zizmor: ignore[self-repository]
+  integration:
+    needs: tag
+    uses: ./.github/workflows/integration.yml # zizmor: ignore[self-repository]
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: verify
+    needs: [verify, integration]
     if: github.event_name == 'push'
     # The environment has a required reviewer and the only copy of HEX_API_KEY.
     environment: hex
