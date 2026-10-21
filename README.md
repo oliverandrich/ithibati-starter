@@ -161,9 +161,6 @@ real-project integration checks and the contribution workflow.
 
 ## License
 
-**[MIT](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)** — including the starter's application templates.
-Adapted Ithibati and Phoenix sources retain their upstream notices in
-[NOTICE](https://github.com/oliverandrich/ithibati-starter/blob/main/NOTICE) and [THIRD_PARTY_LICENSES.md](https://github.com/oliverandrich/ithibati-starter/blob/main/THIRD_PARTY_LICENSES.md).
-Dependencies retain their respective licenses.
+**[MIT](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)**.
 Files the installer generates belong to the application and need no attribution.
 Choose their license with `--license`.

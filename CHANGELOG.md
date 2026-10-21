@@ -22,6 +22,8 @@ a version to an existing application.
   Beans sections in `AGENTS.md` and `CONTRIBUTING.md`. `--without-beans` is no longer an
   option. `.ithibati-starter` drops its `beans=` line.
   An existing application may delete those files and sections.
+- `NOTICE` and `THIRD_PARTY_LICENSES.md`. The repository's Phoenix fixtures are unmodified
+  `phx.new` output, and the vendored topbar keeps its own license header.
 
 ## [0.9.0] - 2026-10-20
 

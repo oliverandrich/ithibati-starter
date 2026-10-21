@@ -179,8 +179,7 @@ The repository needs this setup once:
 
 ## Licensing and publication
 
-Contributions are included under the [MIT license](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE). Preserve [NOTICE](https://github.com/oliverandrich/ithibati-starter/blob/main/NOTICE)
-and [THIRD_PARTY_LICENSES.md](https://github.com/oliverandrich/ithibati-starter/blob/main/THIRD_PARTY_LICENSES.md) when adapting upstream code.
+Contributions are included under the [MIT license](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE).
 Generated application code belongs in the consuming application's repository;
 it does not load templates from this source checkout at runtime.
 

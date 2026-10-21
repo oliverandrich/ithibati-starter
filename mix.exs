@@ -25,8 +25,7 @@ defmodule IthibatiStarter.MixProject do
           "GitHub" => "https://github.com/oliverandrich/ithibati-starter",
           "Ithibati" => "https://github.com/oliverandrich/ithibati"
         },
-        files:
-          ~w(lib priv docs mix.exs README.md CHANGELOG.md CONTRIBUTING.md LICENSE NOTICE THIRD_PARTY_LICENSES.md),
+        files: ~w(lib priv docs mix.exs README.md CHANGELOG.md CONTRIBUTING.md LICENSE),
         licenses: ["MIT"]
       ],
       docs: [

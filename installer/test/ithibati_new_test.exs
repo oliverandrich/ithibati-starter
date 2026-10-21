@@ -39,7 +39,7 @@ defmodule IthibatiNewTest do
 
     files =
       ~w(README.md lib/mix/tasks/ithibati.new.ex ../README.md ../docs/usage.md
-         ../CONTRIBUTING.md ../NOTICE ../scripts/integration.sh ../lib/ithibati_starter.ex)
+         ../CONTRIBUTING.md ../scripts/integration.sh ../lib/ithibati_starter.ex)
 
     named =
       for file <- files,
