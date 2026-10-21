@@ -1,263 +1,133 @@
 # Using Ithibati Starter
 
-## Get started
+The [README](../README.md) shows how to create an application. This page covers the
+options and what the generated application contains. Examples use an application
+named `my_app`, module `MyApp`.
 
-You'll need **mise** and **Elixir 1.20.4 / OTP 29.0.6**. Development runs on SQLite;
-**PostgreSQL 18** is needed for the generated checks, which test against both databases.
-The browser tests run in Playwright's Chrome for Testing on Node.js, which mise installs.
-Mix manages Tailwind and esbuild.
-
-Install the pinned generators and the starter archive once:
+## Options
 
 ```sh
-mix archive.install hex phx_new 1.8.16
-mix archive.install hex igniter_new 0.5.35
-mix archive.install hex ithibati_new 0.9.0
+mix ithibati.new PATH [--brand COLOUR] [--license mit|agpl] [--copyright NAME] \
+  [--source-url URL] [--starter SOURCE] [--no-yes]
 ```
 
-Create a Phoenix app with the starter:
-
-```sh
-mix ithibati.new my_app
-cd my_app
-```
-
-The `ithibati_new` 0.9.0 archive installs `ithibati_starter` 0.9.0 from Hex by
-default. The `ithibati_starter` entry in the generated `mix.lock` records its version
-and checksum. `--starter` accepts another version, a Git revision or a local checkout.
-Starter 0.9.0 generates applications with Ithibati 0.11.0 and schema version 5.
-
-Start developing:
-
-```sh
-mise trust
-mise install
-mise run setup
-mise run setup-code
-mise run dev
-```
-
-Open **http://localhost:4000**, enter the printed code and claim your instance. The generated
-`CONTRIBUTING.md` covers development and checks; `docs/operations.md` covers deployment.
-`mise run setup` explicitly creates and migrates the development database; the
-installer itself does not.
-
-The archive lives in this repository under `installer/`; it is separate from the
-Ithibati authentication package. `mix ithibati.new` automatically selects Phoenix
-and installs the starter as a development-only dependency. Installation prompts,
-including Igniter's large-diff preview prompt, are accepted automatically. Pass
-`--no-yes` to restore interactive confirmation.
-
-The archive and Starter share one version. To reproduce a generated application
-later, keep the Starter version from `mix.lock`, the selected profile and your
-dependency lockfile. Versions before 0.9.0 are not on Hex. Install them from their
-Git tag, for example `--starter ithibati_starter@github:oliverandrich/ithibati-starter@v0.8.1`.
-
-<details>
-<summary>Use Igniter directly</summary>
-
-After installing the generators above:
-
-```sh
-mix igniter.new my_app \
-  --with phx.new \
-  --install ithibati_starter@0.9.0 \
-  --only dev
-```
-
-Then enter `my_app` and run the mise setup steps above.
-
-</details>
-
-<details>
-<summary>Install from a local starter checkout</summary>
-
-Build the archive from the checkout's `installer/` directory:
-
-```sh
-mix archive.build
-mix archive.install ithibati_new-0.9.0.ez
-```
-
-Then, from the directory where the new project should live:
-
-```sh
-mix ithibati.new my_app \
-  --starter ithibati_starter@path:/absolute/path/to/ithibati-starter
-```
-
-</details>
-
-## One profile, three choices left to the operator
-
-Every generated application gets the same thing: the Phoenix tooling, checks and CI,
-vanilla Tailwind with Lucide and browser locale detection, passkeys with invitations
-and account security, a Swoosh mailer with a local mailbox preview, and the
-healthcheck, release helpers and auth cleanup. What an account is called is not
-chosen when you generate it but when you run it.
-
-**`--brand COLOUR`** names the Tailwind palette for the brand colour, `violet` by
-default. Grey palettes are refused. See [Colours](#colours) for the accepted names.
-
-**`--license mit|agpl`** chooses the application's license, `mit` by default. The
-installer writes `LICENSE` and a license section in the README. `agpl` means
-`AGPL-3.0-or-later` and needs **`--source-url URL`**, the address of the application's
-source code. Every layout then links to it, as AGPL §13 requires. Generated `docs/operations.md`
-describes `SOURCE_URL`, which a deployment of modified code sets to its own source.
-
-Every source file of the application gets an `SPDX-License-Identifier` line for that license,
-and a generated test keeps new files in line. Third-party code under `vendor/` is left alone.
-
-**`--copyright NAME`** names the copyright holder, with the current year, in the README's
-license section and in an MIT `LICENSE`. Without it the installer takes git's `user.name`, and refuses when that is unset.
-
-## Naming or addressing accounts
-
-**An account is a username or an email address, and the instance decides which**
-through `ACCOUNT_IDENTITY`. Named is the default. Ithibati binds the identifier
-field when a schema compiles, so the two modes are one column and the format is the
-whole difference; `MyApp.Identity` answers it, and both schemas ask.
-
-Named, an invitation is a link its maker passes on however they like. Nothing is
-sent and no mail is configured. The maker writes a note that says whom the link is
-for, and the invitee chooses the username when accepting it. The form allows 20 creations per signed-in account
-per day per node, counted against the account rather than the browser. A day rather
-than an hour, because an addressed invitation spends the operator's mail
-credentials, and the risk is a held account dripping rather than a burst.
-
-Addressed, the invitee's identifier is an email address, the link is delivered to
-it, and that delivery is what proves the address. It requires `MAIL_ENABLED=true`
-and the `SMTP_*` variables; an instance that asks for addresses without being able
-to send any refuses to start. A delivery that fails is reported and the link stays
-shareable by hand, because the invitation exists before the delivery and the link
-is the only copy there will ever be.
-
-Choose once, before the first account. The generated `docs/operations.md` carries the
-variables and `docs/authentication.md` the policy; this page does not restate them.
-Both appear here as [Operations](operations.md) and [Authentication](authentication.md).
-
-Development messages appear at **`/dev/mailbox`** and tests use the Swoosh test
-adapter; neither sends external mail. Submission is authenticated and the server's
-certificate is verified; port 465 is taken as implicit TLS and anything else as
-STARTTLS. Other providers can replace the Swoosh adapter.
-
-## Generated pages
-
-| Route | Purpose |
+| Option | Effect |
 | --- | --- |
-| `/` | Protected home |
-| `/account/settings` | Account settings, leading to passkeys, recovery codes and invitations |
-| `/account/invitations` | Invitation creation and the outstanding invitations |
-| `/accounts` | Every account with its role; administrators grant, revoke and remove |
-| `/setup` | Operator-code entry and first-account setup; closes after the instance is claimed |
-| `/login` | Passkey sign-in |
-| `/recover` | Recovery-code sign-in |
-| `/invite` | Accept an invitation with a passkey; the link carries its token after `#` |
-| `/recovery-codes` | One-time code display and copying |
-| `/account/passkeys` | Passkey management and sign out on all devices |
-| `/account/recovery-codes` | Remaining code count and confirmed regeneration |
-| `/account/verify` | Identity confirmation for sensitive changes |
+| `--brand` | Tailwind palette for the brand colour, `violet` by default. See [Colours](#colours). |
+| `--license` | `mit` (default) or `agpl`, meaning `AGPL-3.0-or-later`. Writes `LICENSE` and the README's license section. |
+| `--source-url` | Required with `agpl`. Every layout links to it, as AGPL §13 requires. |
+| `--copyright` | Copyright holder. Defaults to git's `user.name`. |
+| `--starter` | Starter source for Igniter, `ithibati_starter@0.9.0` by default. |
+| `--no-yes` | Ask before each installation step. |
+
+Every source file gets an `SPDX-License-Identifier` line, and a generated test checks new
+files. Code under `vendor/` keeps its own header.
+
+`--starter` also takes a Git revision or a local checkout:
+
+```sh
+mix ithibati.new my_app --starter ithibati_starter@github:oliverandrich/ithibati-starter@v0.8.1
+mix ithibati.new my_app --starter ithibati_starter@path:/absolute/path/to/ithibati-starter
+```
+
+A local checkout needs the archive from the same checkout: run `mix archive.build` and
+`mix archive.install` in its `installer/` directory. Versions before 0.9.0 are only on GitHub. The generated `mix.lock` records the starter
+version.
+
+The archive wraps Igniter. This command is equivalent:
+
+```sh
+mix igniter.new my_app --with phx.new --install ithibati_starter@0.9.0 --only dev
+```
+
+## Accounts
+
+`ACCOUNT_IDENTITY` decides at runtime whether an account is a username or an email
+address. It is a runtime setting so that one release can serve both kinds of instance.
+Each instance chooses once, before the first account. Identifiers keep the format they
+were written in. A release that migrates on start refuses to start when its accounts
+contradict the setting.
+
+- **Named** (default): an invitation is a link with a note. The invitee chooses the
+  username. No mail is sent.
+- **Addressed**: the link is mailed to the invitee, which proves the address. The
+  instance refuses to start without `MAIL_ENABLED=true` and the `SMTP_*` variables.
+
+A signed-in account can create 20 invitations per day. The account that claims the
+instance is an administrator. [Authentication](authentication.md) has the policy and
+[Operations](operations.md) the variables.
+
+In development, mail appears at `/dev/mailbox`. Tests use the Swoosh test adapter.
+
+## Routes
+
+| Route | Page |
+| --- | --- |
+| `/` | Home, signed in |
+| `/setup` | Operator code and first account; closes once the instance is claimed |
+| `/login`, `/recover` | Sign-in with a passkey or a recovery code |
+| `/invite` | Accept an invitation |
+| `/recovery-codes` | Show new recovery codes once |
+| `/account/settings` | Account settings |
+| `/account/passkeys` | Passkeys, and sign-out on all devices |
+| `/account/recovery-codes` | Remaining codes and regeneration |
+| `/account/invitations` | Create and list invitations |
+| `/account/verify` | Confirm identity before a sensitive change |
+| `/accounts` | Accounts and roles, managed by administrators |
 | `/health` | Liveness probe |
-| `/dev/mailbox` | Development mail preview |
+| `/dev/mailbox` | Development mail |
 
-Customize `Layouts.auth/1` and `Layouts.member/1` to change the shared appearance.
-`Layouts.wordmark/1` renders the project's module name with a dot in the brand colour.
+## Layouts and components
 
-## The member shell
+`Layouts.auth/1` frames the sign-in screens. `Layouts.member/1` frames signed-in pages:
+a sidebar from `lg`, a top bar and tab bar below. `MyAppWeb.Navigation.items/1` lists the
+places. A page can choose `layout={:sidebar}` or `layout={:columns}`.
+[Interface](interface.md) explains both.
 
-`Layouts.member/1` is the shell of every signed-in page in the navigation. From `lg` it has a
-sidebar, and below `lg` a top bar and a tab bar. A page chooses `layout={:sidebar}` or
-`layout={:columns}` for a list beside its detail. `MyAppWeb.Navigation.items/1` lists the
-places. The generated `docs/interface.md` explains the layouts and when to use each one.
-It appears here as [Interface](interface.md).
-
-## Components
-
-`MyAppWeb.CoreComponents` replaces the Phoenix scaffold's components.
+`MyAppWeb.CoreComponents` replaces the Phoenix components:
 
 | Component | Renders |
 | --- | --- |
-| `<.alert>` | A message box in the page flow; an error is announced as an alert |
+| `<.alert>` | A message in the page flow |
 | `<.card>` | A raised area |
-| `<.group>`, `<.group_link>` | Rows in a card, as on the settings page, and a row that leads to another page |
-| `<.confirm_dialog>` | A modal dialog that asks one question |
-| `<.header>` | A page heading; in the member shell, the top bar shows it once it has scrolled away |
-| `<.button>`, `<.input>` | A button or link, and a form field with label and errors |
+| `<.group>`, `<.group_link>` | Rows in a card, and a row linking to another page |
+| `<.confirm_dialog>` | A modal with one question |
+| `<.header>` | A page heading |
+| `<.button>`, `<.input>` | A button or link, and a form field |
 | `<.table>`, `<.list>` | A table and a data list |
 | `<.flash>` | Flash notices |
 
-`MyAppWeb.Layouts` adds `wordmark/1`, `auth_button/1` and `identifier_input/1` for the
-auth screens. [Interface](interface.md) shows `group/1` and `confirm_dialog/1` in use.
-
 ## Colours
 
-Templates name colours by role, never by hue. `assets/css/app.css` defines the roles
-once in `@theme` and again for dark mode under `prefers-color-scheme`:
+Templates name colours by role. `assets/css/app.css` defines the roles in `@theme`, and
+again for dark mode.
 
 | Token | Role |
 | --- | --- |
-| `ground`, `surface` | Page background and raised areas such as cards and inputs |
-| `ink`, `muted` | Text and secondary text |
-| `line`, `edge` | Dividers, and the borders of inputs and secondary buttons |
-| `accent`, `on-accent` | Primary buttons and focus outlines, and the text on them |
+| `ground`, `surface` | Page background, raised areas |
+| `ink`, `muted` | Text, secondary text |
+| `line`, `edge` | Dividers, input borders |
+| `accent`, `on-accent` | Primary buttons and focus, text on them |
 | `selection` | Hover and selected rows |
-| `signal`, `signal-strong` | The brand colour, and its shade for text and link underlines |
-| `danger`, `danger-surface` | Errors and destructive actions |
+| `signal`, `signal-strong` | Brand colour, its shade for text and links |
+| `danger`, `danger-surface` | Errors, destructive actions |
 
-Use them as Tailwind utilities, for example `bg-surface` or `text-muted`. The
-`text-link` utility underlines a link in `signal-strong`.
-
-`--brand` accepts Tailwind's chromatic palettes:
-
-`red` `orange` `amber` `yellow` `lime` `green` `emerald` `teal` `cyan` `sky` `blue`
-`indigo` `violet` `purple` `fuchsia` `pink` `rose`
-
-The brand palette appears only in the `signal` tokens. To change it later, replace
-the palette name in those four lines.
+`--brand` accepts `red` `orange` `amber` `yellow` `lime` `green` `emerald` `teal` `cyan`
+`sky` `blue` `indigo` `violet` `purple` `fuchsia` `pink` `rose`. Only the `signal` tokens
+use it.
 
 ## Databases
 
-A generated application serves SQLite and PostgreSQL from one build. `MY_APP_DATABASE`
-chooses one at runtime, `sqlite` by default. Ecto fixes a repository's adapter at compile
-time, so `MyApp.Repo` delegates to `MyApp.Repo.SQLite` or `MyApp.Repo.Postgres`.
-Migrations are shared and must work on both.
+`MY_APP_DATABASE` chooses `sqlite` (default) or `postgres` at runtime. `MyApp.Repo`
+delegates to `MyApp.Repo.SQLite` or `MyApp.Repo.Postgres`. Migrations must work on both.
+`mise run check` runs the tests on both.
 
-Development uses `tmp/my_app_dev.db`. `mise run check` runs every check on SQLite and the
-tests again on PostgreSQL; the browser features run on SQLite alone. A release needs an
-absolute `DATABASE_PATH` for SQLite or `DATABASE_URL` for PostgreSQL. The generated
-`docs/operations.md` describes both.
+## Limits
 
-## Deliberate defaults
-
-**A starting point, not an admin product.** Every authenticated member can invite
-someone. The account that claims the instance is an administrator. There is no
-invitation-management dashboard, billing, teams or background-job framework. Add the
-policies your app needs.
-
-**Fresh applications only.** The tested scaffold is a non-umbrella Phoenix 1.8.16
-application with PostgreSQL, HTML, LiveView, Tailwind and esbuild. The installer adds
-SQLite beside PostgreSQL; see [Databases](#databases). Authentication uses
-integer account IDs; `--binary-id` is rejected. Reapplying the same starter
-version/profile is a no-op that preserves edits. Switching profiles is refused.
-This is not an upgrade manager for generated apps; see [Upgrading](upgrading.md).
-
-**The browser chooses the language.** Each request resolves the first supported
-base language in `Accept-Language`, with English as fallback. The session only
-passes that choice to LiveView. Connected views keep their language until the next
-full load. There is no account preference or language switch; q-value weighting is
-not implemented. Add translations through Gettext in the generated app.
-
-**Deployment remains yours.** Generate the setup code with the release command in
-the generated operations guide and enter it over HTTPS. Without a code, an empty
-instance cannot be claimed. Rate limits are in-memory and per node; restarts reset
-them. Configure trusted proxies or edge limits for client-IP requests, and use a
-shared account-keyed limit if manual-link quotas must hold across multiple nodes.
-The generated operations guide includes a recurring auth-cleanup command.
-The healthcheck proves HTTP liveness, not database readiness. A release migrates
-its database on start unless `MY_APP_MIGRATE_ON_START=false`. Development servers
-never migrate on start. Auth cleanup never runs automatically.
-
-Generated applications share `mise dev`, `mise reset`, `mise migrate`, `mise setup-code` and
-`mise release`. Reset explicitly recreates the development database; release
-builds provide `bin/migrate`, `bin/setup-code`, `bin/server` and `bin/grant-admin` for the
-target machine.
+- Tested on fresh Phoenix 1.8.16 applications. `--binary-id` is refused.
+- Rerunning with the same version, brand and license is a no-op. Any change is refused.
+  [Upgrading](upgrading.md) covers newer versions.
+- The browser's `Accept-Language` picks English or German. There is no language switch.
+- Rate limits live in memory, per node.
+- `/health` does not check the database.
+- Auth cleanup does not run on its own. [Operations](operations.md) has the command.

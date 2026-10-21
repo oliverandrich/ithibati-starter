@@ -1,166 +1,56 @@
 # Ithibati Starter
 
-**Start with a Phoenix app that already feels like your app.**
-
 [![CI](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/oliverandrich/ithibati-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)
-[![Phoenix 1.8](https://img.shields.io/badge/Phoenix-1.8-orange.svg)](https://phoenixframework.org)
 [![Ithibati 0.11.0](https://img.shields.io/badge/Ithibati-0.11.0-violet.svg)](https://github.com/oliverandrich/ithibati)
 
-An opinionated [Igniter](https://github.com/ash-project/igniter) installer for fresh
-Phoenix applications: passkeys, invitation-only accounts, vanilla Tailwind,
-English/German screens, and a development workflow you can keep using.
+An [Igniter](https://github.com/ash-project/igniter) installer for new Phoenix 1.8 applications.
+It adds passkey sign-in with invitations, a finished interface and a check pipeline.
+The generated code is yours; the starter is not a runtime dependency.
 
-The installer writes ordinary application code. You own it, customize it, and run
-it without the starter as a runtime dependency.
+## What you get
 
-[Get started](#get-started) · [What's included](#whats-included) ·
-[Profiles](docs/usage.md#choose-your-profile) · [Changelog](CHANGELOG.md) ·
-[Contributing](CONTRIBUTING.md)
-
-## What's included
-
-### Authentication and account security
-
-Powered by **Ithibati 0.11.0**, with passkeys and accounts that are named or addressed:
-
-- **Claim the site:** an operator-issued setup code authorizes the first account;
-  subsequent registrations require an invitation.
-- **Named or addressed accounts:** `ACCOUNT_IDENTITY` decides whether an account
-  is a username or an email address. One column, one format, chosen at runtime.
-- **Invitations:** signed-in members can create expiring, single-use links, limited
-  to 20 per account per day. Named, the inviter writes a note and the invitee chooses
-  the username. Addressed, the link is delivered to the invitee and that delivery is
-  what proves the address. The token travels after `#`, so no request carries it.
-- **Mail included:** every application ships a Swoosh mailer, a development mailbox
-  and authenticated SMTP. An instance that addresses accounts without one does not start.
-- **Separate sign-in and recovery screens:** use a passkey, or a recovery code
-  when your passkey is unavailable.
-- **Passkey settings:** add, rename and remove your own passkeys. The last one
-  cannot be removed.
-- **Recovery-code settings:** see the remaining count and replace the old batch
-  after confirmation. New codes are shown once with a copy button.
-- **Fresh identity confirmation:** adding a passkey or generating new recovery
-  codes requires confirmation with the current account's passkey or recovery code,
-  valid for five minutes.
-- **Revocable sessions:** sign out here or on every device, including connected
-  LiveViews. Session cookies are encrypted.
-- **One claim mode:** `initial_claim: :operator_code` is checked where the
-  application starts, so a misconfigured instance refuses to boot.
-- **Auth rate limits:** 10 setup-code submissions, 10 recovery requests and 120
-  other ceremony requests per visitor address per minute, per running instance.
-- **Real client addresses:** behind a reverse proxy, `X-Forwarded-For` is believed
-  on a connection from the loopback or from `TRUSTED_PROXIES`, and nowhere else.
-  No other forwarding header is read, and private visitor addresses are told apart.
-  Budgets count one IPv6 `/64` as one visitor.
-- **Request protection:** CSRF checks, a baseline Content Security Policy and
-  request-log filtering for tokens, recovery codes and WebAuthn credentials.
-
-### A small, finished interface
-
-- **Vanilla Tailwind CSS 4** and **[Lucide SVG components](https://github.com/zoedsoupe/lucide_icons)**.
-  No DaisyUI or Heroicons plugin.
-- Centered auth screens with the project name as a wordmark and responsive layouts.
-- Colour tokens named by role. Neutral greys and ink carry the interface; one brand
-  colour, violet unless `--brand` names another Tailwind palette, marks the wordmark and links.
-- A member shell: a sidebar on wide screens, a top bar and tab bar on phones, and
-  a list/detail layout a page can switch to.
-- Light/dark styling follows the operating system, without a theme switch or stored override.
-- **English and German** auth screens, validation messages and ceremony feedback.
-  The browser determines the language on each HTTP request.
-- Keyboard-friendly native controls, visible focus states and clipboard fallback.
-
-### Development tooling
-
-| Included | What it does |
+| Area | Included |
 | --- | --- |
-| mise | Pins Elixir, Erlang/OTP and workflow-audit tooling; provides setup, dev and check tasks |
-| Credo | Strict checks, with selected ExSlop, Jump and migration checks |
-| Sobelow | Security analysis in the application check gate |
-| gitleaks | Secret scan over every commit and the staged and unstaged changes in the check gate |
-| ExUnit + Playwright | Application tests and real browser/WebAuthn flows using virtual authenticators |
-| GitHub Actions | Check workflows plus a separate dependency-audit workflow |
-| Dependabot | Grouped dependency and Actions updates |
-
-`mise run check` compiles, checks formatting and unused locks, runs Credo and xref,
-scans with Sobelow, builds assets and runs tests. It also checks the Ithibati setup.
-Dependency advisories run separately through `mise run audit`.
-
-### Operations, without choosing your hosting
-
-- **`GET /health`**: public, session-free liveness endpoint returning `{"status":"ok"}`.
-- **Release helpers**: a release migrates on start unless opted out. Explicit
-  migration and rollback commands remain, documented in the generated `docs/operations.md`.
-- **Auth cleanup**: `mix auth.cleanup` or `MyApp.AuthCleanup.run/0` removes expired
-  sessions, abandoned challenges and expired, unaccepted invitations.
-- **SQLite or PostgreSQL from one build**: `MY_APP_DATABASE` chooses at runtime, SQLite by
-  default. `mise run check` tests against both.
-- **JSON logs in production**: one object per line at `LOG_LEVEL`, with allowlisted
-  metadata and no access log.
-- Environment-based database configuration and a documented release workflow.
-- **MIT or AGPL**: `--license` writes `LICENSE` and the README's license section. An AGPL
-  application links its source code from every layout, as AGPL §13 requires.
-
-Cleanup is explicit. The generated operations guide gives a recurring release
-command; the starter installs no scheduler.
+| Accounts | Passkeys and recovery codes through [Ithibati](https://github.com/oliverandrich/ithibati). An operator code claims the instance; everyone else needs an invitation. |
+| Account pages | Settings, passkeys, recovery codes, invitations, an administrator's account list. |
+| Interface | A sidebar shell with a phone tab bar, Tailwind 4 colour tokens, Lucide icons, light and dark mode, English and German. |
+| Databases | SQLite or PostgreSQL from one build, chosen at runtime. |
+| Mail | Swoosh with a development mailbox and SMTP. |
+| Checks | `mise run check`: format, Credo, Sobelow, gitleaks, tests on both databases, Playwright browser tests. |
+| CI | GitHub Actions, Dependabot, a dependency audit. |
+| Operations | Releases that migrate on start, `/health`, JSON logs, auth cleanup. |
+| License | `--license mit` or `agpl`. |
 
 ## Get started
 
-You'll need **mise** and **Elixir 1.20.4 / OTP 29.0.6**. Development runs on SQLite;
-**PostgreSQL 18** is needed for the generated checks, which test against both databases.
-The browser tests run in Playwright's Chrome for Testing on Node.js, which mise installs.
-Mix manages Tailwind and esbuild.
-
-Install the pinned generators and the starter archive once:
+You need Elixir 1.20 on OTP 29 for the archives, and [mise](https://mise.jdx.dev) for the
+application. PostgreSQL 18 is needed for `mise run check`.
 
 ```sh
 mix archive.install hex phx_new 1.8.16
 mix archive.install hex igniter_new 0.5.35
 mix archive.install hex ithibati_new 0.9.0
-```
 
-Create a Phoenix app with the starter:
-
-```sh
 mix ithibati.new my_app
 cd my_app
-```
-
-The `ithibati_new` 0.9.0 archive installs `ithibati_starter` 0.9.0 from Hex by
-default. The generated `mix.lock` records its version and checksum. Use `--starter`
-to choose a local checkout or another version. Starter 0.9.0 generates applications
-with Ithibati 0.11.0 and schema version 5.
-
-Start developing:
-
-```sh
-mise trust
-mise install
+mise trust && mise install
 mise run setup
 mise run setup-code
 mise run dev
 ```
 
-Open **http://localhost:4000**, enter the printed code and claim your instance. The generated
-`CONTRIBUTING.md` covers development and checks; `docs/operations.md` covers deployment.
-`mise run setup` explicitly creates and migrates the development database; the
-installer itself does not.
+Open http://localhost:4000, enter the printed code and register the first account.
 
 ## Documentation
 
-[Usage guide](docs/usage.md) covers generator options, profiles, mail, generated
-pages and defaults. [Upgrading](docs/upgrading.md) applies later starter versions to a
-generated application. Generated applications include `CONTRIBUTING.md`, `AGENTS.md`
-and application guides under `docs/`. HexDocs shows these guides rendered for an
-application named `MyApp`.
-
-## Contributing
-
-See **[CONTRIBUTING.md](CONTRIBUTING.md)** for a copyable setup, command reference,
-real-project integration checks and the contribution workflow.
+- [Usage](docs/usage.md): options, routes, components, colours.
+- [Upgrading](docs/upgrading.md): apply a newer starter to a generated application.
+- The guides a generated application gets: on [HexDocs](https://hexdocs.pm/ithibati_starter).
+- [Changelog](CHANGELOG.md), [Contributing](CONTRIBUTING.md).
 
 ## License
 
-**[MIT](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE)**.
-Files the installer generates belong to the application and need no attribution.
+[MIT](https://github.com/oliverandrich/ithibati-starter/blob/main/LICENSE).
+Generated files belong to your application and need no attribution.
 Choose their license with `--license`.
