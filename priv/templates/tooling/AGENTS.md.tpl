@@ -39,8 +39,8 @@ Keep each fact in one place and link to it.
 - Ship a Mix release. It migrates on start unless `__APP_UPCASE___MIGRATE_ON_START=false`.
 - Runtime settings go in `config/runtime.exs` and environment variables. Data lives
   outside the release, at configurable absolute paths.
-- Hosting is the operator's: no Dockerfiles, deployment scripts, backups or schedulers
-  unless asked.
+- Hosting is the operator's. The `Dockerfile` builds an image; no Compose stacks,
+  deployment scripts, registries, backups or schedulers unless asked.
 - Keep the mise tasks `setup`, `dev`, `debugserver`, `reset`, `migrate`, `setup-code` and
   `release`.
 

@@ -11,6 +11,10 @@ for profile in "${profiles[@]}"; do
     exit 1
   fi
 done
+if [[ "${INTEGRATION_IMAGE:-false}" == true ]] && ! command -v docker >/dev/null; then
+  echo "INTEGRATION_IMAGE=true needs the docker command" >&2
+  exit 1
+fi
 # The SQLite release check reads the migrated file directly.
 if ! command -v sqlite3 >/dev/null; then
   echo "The integration suite needs the sqlite3 command" >&2
@@ -199,5 +203,33 @@ for profile in "${profiles[@]}"; do
       start_server
       "$release/bin/migrate"
     )
+    # The image build takes minutes, so CI runs it before a release and on request only.
+    if [[ "${INTEGRATION_IMAGE:-false}" == true ]]; then
+      image="$app:integration-$$"
+      container="${app}_$$"
+      image_port=$((PORT + 1))
+      cleanup_image() {
+        docker rm -fv "$container" >/dev/null 2>&1 || true
+        docker rmi -f "$image" >/dev/null 2>&1 || true
+      }
+      trap cleanup_image EXIT
+      docker build -t "$image" .
+      # SQLite in the image's volume, as the Dockerfile sets it up.
+      docker run -d --name "$container" -p "127.0.0.1:$image_port:4000" \
+        -e SECRET_KEY_BASE="$(elixir -e 'IO.write(Base.encode64(:crypto.strong_rand_bytes(64)))')" \
+        -e PHX_HOST=localhost "$image"
+      # Docker's port proxy accepts before the release listens, so every error is retried.
+      if ! curl --fail --silent --show-error --retry 30 --retry-all-errors --retry-delay 1 \
+        --max-time 2 -H 'x-forwarded-proto: https' \
+        "http://localhost:$image_port/health" | grep -F '"status":"ok"'; then
+        docker logs "$container" >&2
+        exit 1
+      fi
+      image_setup_lines=$(docker exec "$container" bin/setup-code | grep -Ec '^Initial setup code: [A-Za-z0-9_-]{43}$' || true)
+      if [[ "$image_setup_lines" != 1 ]]; then
+        echo "The image's setup command did not print exactly one setup code" >&2
+        exit 1
+      fi
+    fi
   )
 done

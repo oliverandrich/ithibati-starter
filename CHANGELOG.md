@@ -12,6 +12,10 @@ a version to an existing application.
 
 ### Added
 
+- A `Dockerfile` and `.dockerignore` build the release into a Debian image with a `/data`
+  volume. `docs/operations.md` separates configuration from deployment. An existing
+  application may copy both files from a fresh one and set the `ARG` versions to its own
+  `mise.toml`.
 - A release that migrates on start refuses to start when its accounts contradict
   `ACCOUNT_IDENTITY`. `MyApp.IdentityCheck` runs after `Ecto.Migrator` and is skipped with it.
   Copy `lib/my_app/identity_check.ex`, its test, and the child after `Ecto.Migrator` in

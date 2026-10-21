@@ -42,10 +42,12 @@ concurrency:
 jobs:
   integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       # A push or pull request runs one profile. A manual run and the release run both.
       PROFILES: ${{ inputs.profiles || 'agpl' }}
+      # The image check runs where the profiles were named: a manual run and the release.
+      INTEGRATION_IMAGE: ${{ inputs.profiles && 'true' || 'false' }}
       PGHOST: localhost
       PGPORT: "5432"
       PGUSER: postgres

@@ -278,6 +278,24 @@ defmodule IthibatiStarterTest do
     assert files["test/sample_web/prod_config_test.exs"] =~ "force_ssl"
   end
 
+  # The image must build the release mise builds, so both name the same runtimes.
+  test "the Dockerfile builds the release on the runtimes mise pins" do
+    files = installed_files()
+    dockerfile = files["Dockerfile"]
+
+    [elixir, otp] =
+      Regex.run(~r/elixir = "(\S+)-otp-\d+"\nerlang = "(\S+)"/, files["mise.toml"],
+        capture: :all_but_first
+      )
+
+    assert dockerfile =~ "ARG ELIXIR_VERSION=#{elixir}\n"
+    assert dockerfile =~ "ARG OTP_VERSION=#{otp}\n"
+    assert dockerfile =~ "RUN mix release\n"
+    assert dockerfile =~ "ENV DATABASE_PATH=/data/sample.db\n"
+    assert dockerfile =~ ~s|CMD ["/app/bin/server"]|
+    assert files[".dockerignore"] =~ "/_build/"
+  end
+
   test "a release migrates before it serves, unless the operator opts out" do
     files = installed_files()
 

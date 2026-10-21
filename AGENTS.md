@@ -41,7 +41,7 @@ Generated applications follow the same division.
   `bin/setup-code`, `bin/server` and `bin/grant-admin` ship in `rel/overlays/bin`.
 - Runtime settings go in `config/runtime.exs` and environment variables. Data lives
   outside the release, at configurable absolute paths.
-- Hosting is the operator's: no Dockerfiles, deployment scripts, backups or schedulers
-  unless asked.
+- Hosting is the operator's. The `Dockerfile` builds an image; no Compose stacks,
+  deployment scripts, registries, backups or schedulers unless asked.
 - The mise tasks `setup`, `dev`, `debugserver`, `reset`, `migrate`, `setup-code` and
   `release` keep the same names in every application.

@@ -50,7 +50,8 @@ installer, and starts a release on PostgreSQL and SQLite. The test endpoint uses
 43129; set `PORT` to change it.
 
 CI runs it only when a change can reach a generated application. Pushes and pull requests
-run `agpl`; manual runs and releases run both.
+run `agpl`; manual runs and releases run both and build the `Dockerfile` image.
+`INTEGRATION_IMAGE=true` builds it locally too, which needs `docker`.
 
 ## Changes
 

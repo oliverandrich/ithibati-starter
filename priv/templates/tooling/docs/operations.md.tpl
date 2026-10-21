@@ -2,7 +2,7 @@
 
 ## Configuration
 
-A release reads these environment variables.
+A release and the container image read the same environment variables.
 
 | Variable | Effect |
 | --- | --- |
@@ -45,6 +45,23 @@ target, copy it there, set the variables and run:
 bin/setup-code
 bin/server
 ```
+
+### Container
+
+The `Dockerfile` builds the same release into a Debian image. It runs `bin/server` as
+`nobody`, listens on port 4000 and keeps the SQLite file in the volume `/data`:
+
+```sh
+docker build -t __APP__ .
+docker run -d --name __APP__ --env-file __APP__.env -p 127.0.0.1:4000:4000 \
+  -v __APP__-data:/data __APP__
+docker exec __APP__ bin/setup-code
+```
+
+Behind a proxy on the host, requests reach the container from the Docker bridge gateway.
+Name that address in `TRUSTED_PROXIES`, or every visitor shares one rate-limit budget.
+Where the image is built, stored and run is up to you. The Elixir and OTP versions in the
+`Dockerfile` match `mise.toml`; update both together.
 
 ## Claim the instance
 
