@@ -10,6 +10,13 @@ a version to an existing application.
 
 ## [Unreleased]
 
+### Added
+
+- A release that migrates on start refuses to start when its accounts contradict
+  `ACCOUNT_IDENTITY`. `MyApp.IdentityCheck` runs after `Ecto.Migrator` and is skipped with it.
+  Copy `lib/my_app/identity_check.ex`, its test, and the child after `Ecto.Migrator` in
+  `lib/my_app/application.ex`.
+
 ### Changed
 
 - The starter targets the `phx_new` 1.8.16 and `igniter_new` 0.5.35 archives. `mix ithibati.new`

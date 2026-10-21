@@ -31,6 +31,14 @@ defmodule IthibatiStarter.Auth do
         children = [
           #{b.module}.AuthRateLimiter,\
     """)
+    |> Files.replace(
+      "lib/#{b.app}/application.ex",
+      "skip: !Application.get_env(:#{b.app}, :migrate_on_start, false)},\n",
+      """
+      skip: !Application.get_env(:#{b.app}, :migrate_on_start, false)},
+            {#{b.module}.IdentityCheck, skip: !Application.get_env(:#{b.app}, :migrate_on_start, false)},
+      """
+    )
     |> Config.configure("config.exs", :phoenix, [:filter_parameters], [
       "password",
       "secret",

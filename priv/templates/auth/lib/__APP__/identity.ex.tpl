@@ -12,8 +12,8 @@ defmodule __MODULE__.Identity do
   whatever shape this answers with — including the guards that skip minting a token and asking
   the accounts table for a value already refused.
 
-  The mode is chosen once, before the first account. Turning an instance that already has accounts
-  from names to addresses would leave every identifier it holds failing the new format.
+  The mode is chosen once, before the first account. Identifiers keep the format they were written
+  in, and `__MODULE__.IdentityCheck` refuses a release that contradicts them.
   """
   alias Ithibati.Schema.Identifier
 

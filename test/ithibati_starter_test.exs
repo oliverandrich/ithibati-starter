@@ -496,6 +496,24 @@ defmodule IthibatiStarterTest do
     assert started =~ "children = ["
   end
 
+  # The mode is read on every start, but the identifiers keep the mode they were written in.
+  test "a release whose identifiers contradict the mode refuses to start" do
+    files = installed_files()
+
+    assert [_, after_migrator] =
+             String.split(files["lib/sample/application.ex"], "{Ecto.Migrator,")
+
+    assert [_, after_check] =
+             String.split(
+               after_migrator,
+               "{Sample.IdentityCheck, skip: !Application.get_env(:sample, :migrate_on_start, false)}"
+             )
+
+    assert after_check =~ "SampleWeb.Endpoint"
+    assert files["lib/sample/identity_check.ex"] =~ "like("
+    assert Map.has_key?(files, "test/sample/identity_check_test.exs")
+  end
+
   test "every application ships the mailer, and the Phoenix one is adopted rather than replaced" do
     original = project()
     result = install(original)

@@ -87,8 +87,8 @@ Submission is authenticated and the server's certificate is verified; port 465 i
 as implicit TLS and anything else as STARTTLS. An instance that asks for addresses
 without being able to send any refuses to start and says so.
 
-Choose once, before the first account. Turning an instance that already has accounts
-from names to addresses would leave every identifier it holds failing the new format.
+Choose once, before the first account. Identifiers keep the format they were written in.
+A release that migrates on start refuses to start when its accounts contradict `ACCOUNT_IDENTITY`.
 
 ## Migrating and starting
 
