@@ -1,47 +1,32 @@
 # Interface
 
-Pages render inside one of two layouts in `__MODULE__Web.Layouts`. The layouts are named
-for the situation, not the shape. A page's shape is an attribute of `Layouts.member/1`.
+## Layouts
 
-## Choosing a layout
-
-| Layout | Use it for | Examples |
+| Layout | For | Examples |
 | --- | --- | --- |
-| `Layouts.auth/1` | One focused step without navigation | `/login`, `/setup`, `/invite`, `/account/verify`, `/recovery-codes` |
-| `Layouts.member/1` | Every page a signed-in account reaches through the navigation | `/`, `/account/settings`, `/account/passkeys` |
+| `Layouts.auth/1` | One step without navigation | `/login`, `/setup`, `/invite`, `/account/verify` |
+| `Layouts.member/1` | Signed-in pages in the navigation | `/`, `/account/settings`, `/account/passkeys` |
 
-`Layouts.auth/1` centres a narrow card under the wordmark. It takes a `title` and a
-`subtitle`. Some of its steps run while signed in, such as confirming the identity.
-`Layouts.auth_button/1` is the primary action on these screens.
+`Layouts.auth/1` shows a narrow card under the wordmark, with `title` and `subtitle`.
+`Layouts.auth_button/1` is its primary action.
 
 `Layouts.member/1` needs `flash` and `current_account`. Its routes belong in the router's
-`:members` live session, which requires a signed-in account.
+`:members` live session. From `lg` it shows a sidebar; below, a top bar and, with two or more
+places, a tab bar. The account menu in the header leads to the settings and signs out. Add
+entries to the `<nav>` in `#user-menu`. The sidebar's foot links the source code when
+`source_url/0` returns an address.
 
-`Layouts.app/1` and `PageController` come from the Phoenix scaffold. No route renders them.
+`Layouts.app/1` comes from the Phoenix scaffold and is unused.
 
-## The member shell
+## Shapes
 
-From `lg`, the header and the navigation form a sidebar on the left. Below `lg`, the header
-is a sticky top bar. A tab bar at the bottom appears once the navigation has two places.
-The bars keep clear of the safe-area insets of phones with a notch.
-
-The account menu sits in the header. It opens from an icon whose accessible name carries
-the username. It leads to the settings and signs out. Add entries to the `<nav>` inside
-`#user-menu`. On wide screens, the sidebar's foot links the source code when `source_url/0`
-returns an address.
-
-## Choosing a shape
-
-`layout` selects the shape of a member page.
-
-| `layout` | Use it for | Slots |
+| `layout` | For | Slots |
 | --- | --- | --- |
-| `:sidebar` (default) | One piece of content: an overview, a form, settings | the inner block |
-| `:columns` | A list and the item selected from it: messages, entries, accounts | `:list` and `:detail` |
+| `:sidebar` (default) | One piece of content | inner block |
+| `:columns` | A list and its selected item | `:list`, `:detail` |
 
-In `:columns`, both panes stand side by side from `lg` and scroll on their own. A phone
-shows one pane. It shows the detail when `selected` is true, otherwise the list. Set
-`selected` and `back` from the same assign, so the phone's back link returns to the list:
+From `lg`, `:columns` shows both panes side by side. A phone shows the detail when `selected`
+is true, otherwise the list. Derive `selected` and `back` from the same assign:
 
 ```heex
 <Layouts.member
@@ -57,58 +42,21 @@ shows one pane. It shows the detail when `selected` is true, otherwise the list.
 </Layouts.member>
 ```
 
-`:columns` renders nothing outside its slots. The panes fill the screen's height.
-
 ## Navigation
 
-`__MODULE__Web.Navigation.items/1` lists the places. The sidebar and the tab bar render the
-same list. Each entry is a map:
+`__MODULE__Web.Navigation.items/1` lists the places for the signed-in account. Sidebar and
+tab bar render the same list:
 
 ```elixir
 %{section: :reports, label: gettext("Reports"), to: ~p"/reports", icon: :chart_bar}
 ```
 
-`icon` names a [Lucide](https://lucide.dev/icons/) icon in snake case. A page passes its
-entry's `section`, which marks the entry as the current page:
+`icon` is a [Lucide](https://lucide.dev/icons/) name in snake case. A page passes its
+`section` to mark the current entry. `navigation` overrides the list for one page.
 
-```heex
-<Layouts.member flash={@flash} current_account={@current_account} section={:reports}>
-```
+## Subpages
 
-`items/1` receives the signed-in account, so the list can depend on it. A page can pass its
-own list through `navigation` instead.
-
-## Settings
-
-`/account/settings` is not a place in the navigation. The account menu leads to it. The
-settings page and every page under it pass `section={:settings}`, which marks the menu.
-
-The page groups its rows with `group/1` from `CoreComponents`. `group_link/1` is a row that
-leads to another page. Its `detail` shows a short value, such as a count:
-
-```heex
-<.group id="settings-account" heading={gettext("Account & security")} tag="nav">
-  <.group_link to={~p"/account/passkeys"} detail={@passkeys}>{gettext("Passkeys")}</.group_link>
-</.group>
-```
-
-Add a group for each new topic. A page under the settings sets
-`back={%{to: ~p"/account/settings", label: gettext("Settings")}}` and `breadcrumb`.
-
-An administrator page stays in the `:members` live_session, so it opens without a page
-load. It declares `on_mount {__MODULE__Web.Admin, :require_admin}`, which sends members
-back to the settings. Its `__MODULE__.Accounts` calls check the role again.
-`__MODULE__Web.AccountRole` keeps `current_account.admin` current on every page of that
-live_session. A page may show controls by it.
-
-## Confirmations
-
-`confirm_dialog/1` asks one question before a change that cannot be undone. `/accounts` uses
-it to remove an account. Its documentation in `CoreComponents` names the events it sends.
-
-## Pages below another page
-
-A page reached from another one sets `title` and `back`:
+A page below another sets `title` and `back`:
 
 ```heex
 <Layouts.member
@@ -121,13 +69,25 @@ A page reached from another one sets `title` and `back`:
 >
 ```
 
-- `back` is `%{to: path, label: text}`. A phone's top bar links to it. Write `patch:`
-  instead of `to:` to stay in the same LiveView.
-- `title` appears in the top bar once the page's large heading has scrolled away.
-- `breadcrumb` shows `back` and `title` as a breadcrumb on wide screens, which have no
-  back link. It needs both.
-  `:columns` never shows it, because the list stands beside the detail.
+- `back` is `%{to: path, label: text}`, or `patch:` to stay in the LiveView. Phones show it
+  as a back link.
+- `title` appears in the top bar once the `.header` heading has scrolled away.
+- `breadcrumb` shows both on wide screens. `:columns` ignores it.
 
-The large heading is the element with `data-large-title`. `.header` from `CoreComponents`
-sets it. The `ShrinkTitle` hook in `assets/js/shrink_title.js` watches that heading. It
-sets `data-shrunk` on `#app-header` while the heading is out of view.
+## Settings
+
+`/account/settings` is reached through the account menu, and its pages pass
+`section={:settings}`. Rows come from `group/1`, and `group_link/1` links to a subpage:
+
+```heex
+<.group id="settings-account" heading={gettext("Account & security")} tag="nav">
+  <.group_link to={~p"/account/passkeys"} detail={@passkeys}>{gettext("Passkeys")}</.group_link>
+</.group>
+```
+
+An administrator page declares `on_mount {__MODULE__Web.Admin, :require_admin}`.
+`__MODULE__.Accounts` checks the role again. `current_account.admin` stays current on every
+page of the live session.
+
+`confirm_dialog/1` asks before a change that cannot be undone. `CoreComponents` documents
+its events.

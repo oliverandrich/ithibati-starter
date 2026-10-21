@@ -18,9 +18,6 @@ run = ["mix deps.audit", "mix hex.audit"]
 [tasks.release-check]
 description = "Refuse a release that is not the commit a pushed version tag points at"
 run = "bash scripts/release-check.sh"
-[tasks.beans]
-run = "beans list --no-status completed --no-status scrapped"
-
 [tasks.integration]
 description = "Generate and check the mit and agpl profiles, or the ones named, with PostgreSQL and Chrome"
 run = "bash scripts/integration.sh"

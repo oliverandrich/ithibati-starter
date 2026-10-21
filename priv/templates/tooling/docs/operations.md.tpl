@@ -1,198 +1,134 @@
 # Operations
 
-`GET /health` is a public liveness endpoint returning `{"status":"ok"}`. It does
-not query the database, set cookies, expose configuration or require authentication.
-It proves the HTTP application can answer, not that every dependency is ready.
+## Configuration
 
-Build with the project's pinned Elixir/OTP versions on a system compatible with
-the deployment target:
+A release reads these environment variables.
+
+| Variable | Effect |
+| --- | --- |
+| `SECRET_KEY_BASE` | Signs and encrypts cookies; create one with `mix phx.gen.secret` |
+| `PHX_HOST` | The public host name |
+| `PORT` | HTTP port, 4000 by default |
+| `__APP_UPCASE___DATABASE` | `sqlite` (default) or `postgres` |
+| `DATABASE_PATH` | Absolute path of the SQLite file |
+| `DATABASE_URL` | `ecto://USER:PASS@HOST/DATABASE` for PostgreSQL |
+| `POOL_SIZE` | Connections; 5 for SQLite, 10 for PostgreSQL |
+| `LOG_LEVEL` | `info` (default), `notice`, `warning`, `error`, `critical`, `alert` or `emergency` |
+| `ACCOUNT_IDENTITY` | `username` (default) or `email` |
+| `MAIL_ENABLED` | `true` or `false` (default); `true` sends invitations and is required by `ACCOUNT_IDENTITY=email` |
+| `MAIL_FROM` | Sender address |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Submission server; port 587 by default |
+| `__APP_UPCASE___MIGRATE_ON_START` | `true` (default) or `false` to migrate by hand |
+| `TRUSTED_PROXIES` | Proxy addresses or ranges, comma separated |
+| `SOURCE_URL` | Absolute URL of this deployment's source code |
+
+A value outside the listed ones stops the boot. `LOG_LEVEL=debug` is refused, because it
+logs sessions and query parameters.
+
+## Deployment
+
+A start migrates the database first, including `bin/setup-code` and `bin/grant-admin`.
+With `__APP_UPCASE___MIGRATE_ON_START=false`, run `bin/migrate` before `bin/server`. Use that
+for migrations that outlast the supervisor's start timeout. Neither path creates a
+PostgreSQL database.
+
+### Release
 
 ```sh
 mise run release
 ```
 
-The release is in `_build/prod/rel/__APP__`. Set the database variables described in
-[Choosing a database](#choosing-a-database), `SECRET_KEY_BASE`, `PHX_HOST` and `PORT`
-for the deployment, `TRUSTED_PROXIES` when a reverse proxy runs on another host, and
-`ACCOUNT_IDENTITY` with the mail variables when accounts are addressed rather than named.
-
-| Variable | What it decides |
-| --- | --- |
-| `__APP_UPCASE___DATABASE` | `sqlite` (the default) or `postgres`; anything else stops the boot |
-| `DATABASE_PATH` | The SQLite file, as an absolute path; required with `sqlite` |
-| `DATABASE_URL` | The PostgreSQL connection, `ecto://USER:PASS@HOST/DATABASE`; required with `postgres` |
-| `POOL_SIZE` | Database connections; 5 for SQLite and 10 for PostgreSQL by default |
-| `LOG_LEVEL` | `info` by default, or `notice`, `warning`, `error`, `critical`, `alert`, `emergency`; any other value, `debug` included, stops the boot |
-| `ACCOUNT_IDENTITY` | `username` (the default) or `email`; anything else stops the boot. `email` requires the mail settings below |
-| `MAIL_ENABLED` | `true` to deliver invitations; required by `ACCOUNT_IDENTITY=email` |
-| `MAIL_FROM` | The address invitations come from |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Submission server; the port defaults to 587 |
-| `__APP_UPCASE___MIGRATE_ON_START` | `false` to migrate by hand with `bin/migrate`; unset or `true` migrates on start; anything else stops the boot |
-| `SOURCE_URL` | The address of this deployment's source code; any value that is not an absolute http or https URL stops the boot |
-
-## Source code
-
-Every layout links to the source code when `:source_url` is set. An AGPL application sets
-it in `config/config.exs` when it is generated, because AGPL §13 requires the offer to its
-users. A deployment of modified code sets `SOURCE_URL` to its own source. Without either,
-the link is not shown.
-
-## Choosing a database
-
-One release serves SQLite and PostgreSQL. `__APP_UPCASE___DATABASE` chooses one when the
-release starts. Ecto fixes a repository's adapter at compile time, so the application has
-one repository per database. `__MODULE__.Repo` delegates every call to the chosen one.
-
-SQLite needs no database server. Keep its file outside the release directory, for
-example `DATABASE_PATH=/var/lib/__APP__/__APP__.db`. The directory must exist and be
-writable by the service user. SQLite creates the file on the first start. While the
-release runs, back it up with `sqlite3 "$DATABASE_PATH" ".backup BACKUP_FILE"`. Copy the file
-with its `-wal` and `-shm` files only while the release is stopped.
-
-PostgreSQL needs `__APP_UPCASE___DATABASE=postgres` and `DATABASE_URL`. The database must
-exist before the first start.
-
-Development and tests read the same variable. `mise run check` runs every check on
-SQLite and the tests again on PostgreSQL.
-
-## Logs
-
-A release writes one JSON object per line to stdout. The service manager collects it. Each
-line has `time`, `severity`, `message` and `metadata`. The metadata contains only Phoenix's
-`request_id`. `__MODULE__.Logging` holds that list; add a key there before logging it.
-
-The application writes no access log. A reverse proxy can write one. Logging the `x-request-id`
-response header there matches its lines with `request_id`. An invitation link carries its token
-after `#`, which no request sends, so no access log records it.
-
-A failed request is logged at `error` with its stack trace, without the request's path, address
-or user agent. A crashed LiveView process logs its last message and state. The invitation page
-holds the token once it has opened the invitation, so a crash there can log it. Messages are not
-filtered, and a stack trace may contain other data.
-`LOG_LEVEL=warning` drops `notice` and `info` lines. `debug` is not supported, because it logs
-sessions and query parameters.
-
-## Naming or addressing accounts
-
-An account is called one of two things here, and the instance chooses which before
-anybody registers.
-
-By default it is a username, and an invitation is a link whoever made it passes on
-however they like. Nothing is sent and no mail is configured.
-
-`ACCOUNT_IDENTITY=email` makes it an address instead. The invitation is then addressed
-to that address and delivered to it, which is also what proves the address belongs to
-whoever answers. That requires `MAIL_ENABLED=true` and the `SMTP_*` variables beside it.
-Submission is authenticated and the server's certificate is verified; port 465 is taken
-as implicit TLS and anything else as STARTTLS. An instance that asks for addresses
-without being able to send any refuses to start and says so.
-
-Choose once, before the first account. Identifiers keep the format they were written in.
-A release that migrates on start refuses to start when its accounts contradict `ACCOUNT_IDENTITY`.
-
-## Migrating and starting
-
-Every start of the application migrates its database first. That includes
-`bin/setup-code`, `bin/grant-admin` and `bin/server`, so the server never serves an outdated schema.
-Issue the first-account setup code on the server, then start the application:
+The release lands in `_build/prod/rel/__APP__`. Build it on a system compatible with the
+target, copy it there, set the variables and run:
 
 ```sh
 bin/setup-code
 bin/server
 ```
 
-The setup command prints a random code to your terminal; capture it there, not in
-service logs or a deployment artifact. Ithibati stores only its digest in the
-version 3 setup-code table. Open `https://YOUR_HOST/setup`, enter the code,
-enter the identifier this instance asks for, and register a passkey.
-The authorization in that browser session lasts ten minutes; re-enter the code if
-it expires. A successful claim consumes the code in the account transaction and
-closes `/setup`. A server started before a code is issued stays locked for claims.
-To replace a lost or exposed code before claiming the instance, run the same command
-again. The previous code and sessions authorized by it stop working. On a shared
-server, keep the command output visible only to the operator.
+## Claim the instance
 
-The usual deployment is a release behind a reverse proxy on the same host. Every
-request then arrives from one socket, so authentication budgets would be shared by
-everybody behind it. `__MODULE__Web.ClientIp` takes the visitor's address from
-`X-Forwarded-For` instead, and believes that header only on a connection from the
-loopback or from an address named in `TRUSTED_PROXIES`, comma separated. An entry is an
-address, or a range such as `172.20.0.0/16` for a proxy in a container whose address changes.
-A name that is neither stops the boot
-rather than being dropped quietly, so an instance exposed directly still counts the
-address it actually sees.
-
-A production release redirects plain HTTP to HTTPS and sends HSTS. Over HTTPS, Plug marks
-the session cookie `Secure`, so browsers never send it over plain HTTP. The proxy terminates
-TLS and must set `X-Forwarded-Proto`. `config/prod.exs` trusts that header from any client,
-so make the application reachable only through the proxy. Requests whose `Host` header is
-`localhost` or `127.0.0.1` are not redirected.
+Open `https://YOUR_HOST/setup`, enter the code from `bin/setup-code` and register a passkey.
+The code is printed once; keep it out of logs. The browser's authorization lasts ten
+minutes. Running the command again replaces the code. The first claim closes `/setup` and
+makes that account an administrator.
 
 The application refuses to start unless `config :ithibati, initial_claim: :operator_code`
-is set. An unprotected claim would hand the instance to the first stranger who finds the
-host, so this is a refusal to boot rather than a setup page nobody can satisfy.
+is set. A release that migrates on start also refuses when its accounts contradict
+`ACCOUNT_IDENTITY`.
 
-A migration that fails stops the start and is logged. A supervisor that restarts
-the service tries it again each time. A long migration can outlast the supervisor's
-start timeout; migrate such a release by hand. Set `__APP_UPCASE___MIGRATE_ON_START=false`
-to migrate by hand, with `bin/migrate` before `bin/server`. That command starts the
-repo without the HTTP server. It is a no-op once all migrations are applied. Neither
-path creates a PostgreSQL database. Provide the database and take backups through your
-deployment's normal workflow.
+## Databases
 
-Back up the database before an update, because the new release migrates it as it
-starts. Replacing the release does not undo migrations. The old release works again
-only if it supports the resulting schema.
+SQLite needs no server. Put the file outside the release, for example
+`DATABASE_PATH=/var/lib/__APP__/__APP__.db`, in a directory the service user can write.
+Back it up while running with `sqlite3 "$DATABASE_PATH" ".backup BACKUP_FILE"`.
+
+PostgreSQL needs `__APP_UPCASE___DATABASE=postgres` and `DATABASE_URL`, and an existing database.
+
+Back up before every update. A new release migrates on start, and replacing it does not undo
+that.
+
+## Mail
+
+`ACCOUNT_IDENTITY=email` mails each invitation to its address. It needs `MAIL_ENABLED=true`
+and the `SMTP_*` variables; without them the release does not start. Submission is
+authenticated and the certificate verified. Port 465 uses implicit TLS, any other port
+STARTTLS. Choose the mode before the first account.
+
+## Proxy and HTTPS
+
+Behind a reverse proxy, `__MODULE__Web.ClientIp` reads the visitor's address from
+`X-Forwarded-For`. It believes the header only from the loopback or from `TRUSTED_PROXIES`.
+An entry is an address or a range such as `172.20.0.0/16`.
+
+Production redirects HTTP to HTTPS and sends HSTS. The proxy terminates TLS and sets
+`X-Forwarded-Proto`. That header is trusted from any client, so expose the application only
+through the proxy.
+
+## Health
+
+`GET /health` answers `{"status":"ok"}` without a session. It does not query the database.
+
+## Logs
+
+Stdout gets one JSON object per line with `time`, `severity`, `message` and `metadata`.
+Metadata holds only `request_id`; `__MODULE__.Logging` lists the allowed keys. There is no
+access log. A failed request logs its stack trace, which may contain request data. A crash of the
+invitation page can log the invitation token.
+
+## Source code
+
+Every layout links to `:source_url` when it is set. An AGPL application sets it in
+`config/config.exs`. A deployment of modified code sets `SOURCE_URL` to its own source.
 
 ## Administrators
-
-The account that claims the instance is its administrator. Upgrading an existing
-application with the `add_admin_to_users` migration makes the claiming account an
-administrator if it still exists. An instance whose first account was deleted has
-none. On the host, this makes an account an administrator:
 
 ```sh
 bin/grant-admin USERNAME
 ```
 
-In email mode, pass the account's address. The command exits with status 1 when
-no account has that username or address.
+In email mode, pass the address. The command exits with 1 when no account matches.
 
-## Authentication maintenance
+## Auth cleanup
 
-Arrange a recurring job on the host, for example daily, to run this against the
-already-running release:
+Run this daily against the running release:
 
 ```sh
 bin/__APP__ rpc '__MODULE__.AuthCleanup.run()'
 ```
 
-The command reports counts of expired sessions, abandoned challenges and expired,
-unaccepted invitations removed. It disconnects the LiveViews of each expired session.
-A connected LiveView outlives its session by up to the job's interval. It is safe to
-repeat and leaves active credentials, recovery codes and accepted invitations untouched. In development, run
-`mix auth.cleanup` explicitly. The release does not install a scheduler or cron job.
+It removes expired sessions, abandoned challenges and expired invitations, and reports the
+counts. In development, run `mix auth.cleanup`. Nothing schedules it.
 
-Authentication request limits and manual-link invitations use in-memory counters
-on each application node. A restart resets their windows. In a multi-node deployment,
-use a trusted reverse proxy or shared limiter for a client-IP budget across nodes.
-Making an invitation is limited too, but per signed-in account rather than per
-address: 20 in a 24-hour window, configurable with the other budgets. The counter
-lives in memory on the node that served the request, so several nodes each keep
-their own, and an edge rule keyed by address does not replace one keyed by account.
-Use a shared account-keyed limiter if a cluster-wide quota is needed.
-See [Authentication](authentication.md#authentication-limits-and-maintenance) for
-the default limits and configuration.
+Rate limits live in memory, per node, and reset on restart. [Authentication](authentication.md)
+lists them.
 
-For an explicitly reviewed rollback, replace the example version below with the
-oldest migration version to undo (the boundary version is also rolled back). Stop
-the new release first, so a restart cannot migrate again:
+## Rollback
+
+Stop the new release, then roll back to and including a migration version:
 
 ```sh
 bin/__APP__ eval '__MODULE__.Release.rollback(__MODULE__.Repo, 20260918000000)'
 ```
 
-Then start the old release. Starting the new one again re-applies the migrations
-unless `__APP_UPCASE___MIGRATE_ON_START=false` is set.
-
-No deployment service, container image or job scheduler is imposed by the starter.
+Start the old release. The new one would migrate again on start.

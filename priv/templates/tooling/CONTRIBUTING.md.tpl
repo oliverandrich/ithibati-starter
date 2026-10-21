@@ -1,128 +1,72 @@
 # Contributing
 
-## Get started
-
-Install **mise**, then prepare and start the application. **PostgreSQL 18** is needed
-for `mise run check` and `mise run test`, which also test against it:
+## Setup
 
 ```sh
-mise trust
-mise install
+mise trust && mise install
 mise run setup
 mise run setup-code
 mise run dev
 ```
 
-Open **http://localhost:4000**. `mise run setup` explicitly creates, migrates and
-seeds the development database, then builds assets. Enter the printed setup code
-to claim the first account.
+Open http://localhost:4000 and enter the printed code. `mise run check` also needs
+PostgreSQL 18.
 
-## Configure the database
+## Databases
 
-Development uses SQLite in `tmp/__APP___dev.db` by default. Set
-`__APP_UPCASE___DATABASE=postgres` to develop against PostgreSQL instead. Its local defaults
-are `localhost:5432`, user `postgres`, password `postgres`. Override them through the
-environment when needed:
+Development uses SQLite in `tmp/__APP___dev.db`. `__APP_UPCASE___DATABASE=postgres` switches
+to PostgreSQL, which reads `PGHOST`, `PGPORT`, `PGUSER` and `PGPASSWORD`. Tests use
+`__APP___test`, suffixed with `MIX_TEST_PARTITION` when set. [Operations](docs/operations.md)
+covers production.
 
-```sh
-export PGHOST=127.0.0.1
-export PGPORT=5432
-export PGUSER=postgres
-export PGPASSWORD=postgres
-```
+## Commands
 
-Tests use a separate `__APP___test` database, `tmp/__APP___test.db` on SQLite, optionally
-suffixed with `MIX_TEST_PARTITION`. Never point tests at development or production data.
-SQLite tests run one module at a time, because SQLite allows one writer. The browser
-features run on SQLite alone. Production settings are in [Operations](docs/operations.md).
-
-## Command reference
-
-| Command | Purpose |
+| Command | Does |
 | --- | --- |
-| `mise run check` | Workflow audit, secret scan, compilation, format check, Credo, xref, Sobelow, assets and tests on SQLite, then the tests on PostgreSQL |
-| `mise run test` | Tests on SQLite, with their test-database setup; takes a test path |
-| `mise run test:postgres` | The same tests on PostgreSQL, without the browser features |
-| `mise run format` | Explicit formatting |
-| `mise run credo` | Compile then strict Credo |
-| `mise run audit` | Dependency advisories and retired Hex packages |
-| `mise run migrate` | Explicit development migrations |
-| `mise run setup-code` | Issue or replace the first-account setup code |
-| `mise run dev` | Start the development server in the foreground |
-| `mise run reset` | Drop and recreate the development database, migrate and seed |
-| `mise run debugserver` | IEx Phoenix server |
-| `mise run release` | Build a production release for the current OS and architecture |
+| `mise run check` | gitleaks, compile, format, Credo, xref, Sobelow, assets, tests on SQLite and PostgreSQL |
+| `mise run test [PATH]` | Tests on SQLite |
+| `mise run test:postgres` | Tests on PostgreSQL, without browser features |
+| `mise run format` | Format the source |
+| `mise run audit` | Dependency advisories |
+| `mise run dev` | Development server |
+| `mise run debugserver` | Development server in IEx |
+| `mise run migrate` | Development migrations |
+| `mise run setup-code` | Issue or replace the setup code |
+| `mise run reset` | Drop and recreate the development database |
+| `mise run release` | Production release for this platform |
 
-`mise run check` runs gitleaks over every commit and over staged and unstaged changes. It
-does not read untracked files until they are staged. A secret removed in a later commit still
-fails the check. Rotate a leaked secret, since the old commit stays public. `.gitleaks.toml`
-allows only the development and test `secret_key_base`. Add an exception there with its
-reason beside it.
-
-Keep migration history unchanged. Credo scans source, tests and all migrations;
-Jump inspects inline HEEx and files reached through embed_templates. ExSlop and
-Jump rules are explicitly selected. Audit findings are separate from PR gates.
-Tailwind/esbuild are Mix-managed. Node runs only Playwright for the browser tests.
-Use Lucide components directly, for example `<Lucideicons.chevron_down class="size-4" aria-hidden="true" />`.
-Decorative icons are hidden from assistive technology; label icon-only buttons.
-The `lucide_icons` dependency supplies SVG components without a Tailwind icon plugin. The UI helpers use the CSP's inline-script/style allowances.
-
-Read AGENTS.md for TDD and commit review rules. Generated code belongs to this
-application. Re-running the same starter/profile does nothing; it does not upgrade
-or overwrite your edits. To apply a later starter version, follow
-[Upgrading](https://github.com/oliverandrich/ithibati-starter/blob/main/docs/upgrading.md).
-Review dependency updates through normal PRs.
-
-`mise dev`, `mise reset`, `mise migrate`, `mise setup-code` and `mise release` are the short forms
-of `mise run …`. Development tasks explicitly use `MIX_ENV=dev`; release builds
-use `prod`. `mise reset` deletes the development database and runs its migrations
-and seeds again. It is an explicit local action, never part of startup or checks.
+`check` does not format. gitleaks scans every commit and the staged changes. A secret in an
+old commit still fails; rotate it. `.gitleaks.toml` holds the allowed exceptions.
 
 ## Browser tests
 
-Browser tests are mandatory. They run in Playwright's Chrome for Testing. No installed Chrome
-is needed. `mise run browser` installs the pinned `playwright` package from
-`assets/package.json` and its headless Chrome. `mise run setup`, `mise run check` and
-`mise run test` run it first. `mise run check` builds assets before browser tests;
-for direct `mise run test`, build them with `mix assets.build` first. Tests start
-an endpoint on port 4102; override PORT to isolate concurrent suites. Missing browser
-infrastructure fails instead of silently skipping coverage.
-
-Each feature gets a new browser context from `test/support/playwright_case.ex`, so cookies,
-storage and emulation start empty. `Ithibati.Testing.Passkeys` adds the virtual authenticator.
-`PW_SCREENSHOT=true mix test --failed` reruns failed features and keeps a screenshot of each in
+Browser tests run in Playwright's Chrome for Testing; `mise run browser` installs it. They
+use port 4102; set `PORT` to change it. Before `mise run test`, build assets with
+`mix assets.build`. `PW_SCREENSHOT=true mix test --failed` keeps screenshots in
 `screenshots/`.
 
-`mix ithibati.doctor` is part of the test-environment gate after schema setup.
+## Starter drift
 
-## Following the starter
-
-`test/__APP__/starter_drift_test.exs` compares every generated Elixir file with its template in
-the locked `ithibati_starter`. Formatting, comments, docs and alias order do not count. After
-`mix deps.update ithibati_starter`, it names the files the new version changed. Take the new
-version, or list the file in `@owned` once this application has taken it over.
-
-## Translations
-
-See [Localization](docs/localization.md#translations).
+`test/__APP__/starter_drift_test.exs` compares generated files with the locked
+`ithibati_starter`. After `mix deps.update ithibati_starter`, it names the changed files. Take
+the new version, or list the file in `@owned`.
+[Upgrading](https://github.com/oliverandrich/ithibati-starter/blob/main/docs/upgrading.md)
+describes the full process.
 
 ## License markers
 
-Every source file states the application's license in its first five lines, as
-`SPDX-License-Identifier` in the comment syntax of its language. A copied file keeps its terms
-without the `LICENSE` file. `mix.exs` names the license.
-`test/__APP__/license_marker_test.exs` checks every file under the paths it lists. Add the line
-to each new file, including one that `mix phx.gen.*` writes. Third-party code under `vendor/`
-keeps its own terms.
+Every source file names its license as `SPDX-License-Identifier` in its first five lines.
+`test/__APP__/license_marker_test.exs` checks it. Add the line to new files, including those
+from `mix phx.gen.*`. Code under `vendor/` keeps its own.
 
-## Making changes
+## Icons
 
-Use focused regression tests for behavior changes and run `mise check` before
-submitting. Follow the TDD and Conventional Commit rules in [AGENTS.md](AGENTS.md).
+Use Lucide components, for example
+`<Lucideicons.chevron_down class="size-4" aria-hidden="true" />`. Label icon-only buttons.
 
 ## Further reading
 
-- [Operations](docs/operations.md): configuration, releases and migrations.
-- [Authentication](docs/authentication.md): accounts, invitations and security.
-- [Localization](docs/localization.md): language selection and translations.
-- [Interface](docs/interface.md): layouts, page shapes and navigation.
+- [Operations](docs/operations.md): configuration, releases, migrations.
+- [Authentication](docs/authentication.md): accounts, invitations, limits.
+- [Localization](docs/localization.md): languages and [translations](docs/localization.md#translations).
+- [Interface](docs/interface.md): layouts and navigation.

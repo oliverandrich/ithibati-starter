@@ -1,22 +1,13 @@
 # Localization
 
-The application resolves the language from `Accept-Language` on every HTTP
-request, falling back to `en`. Supported defaults are `en` and `de`. There is no
-stored account preference. A changed browser language takes effect on the next
-HTTP request/full page load; an already connected LiveView keeps its current
-language until then. The session only transports the latest HTTP choice to
-LiveView and never overrides a new request header.
+Every HTTP request picks the first supported base language in `Accept-Language`, `en` or
+`de`, and falls back to `en`. q-values are ignored. There is no stored preference. A
+connected LiveView keeps its language until the next full page load.
 
-Header parsing follows the first supported base language in tag order;
-q-value weighting is not implemented. Configure `:locales` on the
-application and `:default_locale` on its Gettext backend. New `live_session`
-blocks should include the application's `{Locale, :set}` hook after account loading.
-`Locale.accept_locale/1` also works before a session has been fetched.
+`:locales` on the application and `:default_locale` on the Gettext backend configure the
+choice. A new `live_session` needs the `{Locale, :set}` hook after the account is loaded.
 
 ## Translations
 
-With Ithibati, all auth/member screens, ceremony errors, clipboard messages and
-validation errors have English/German support. English is the source language;
-German catalogs live under `priv/gettext/de/LC_MESSAGES`. Use
-`mix gettext.extract --merge` after adding `gettext` calls, then fill in the PO
-translations. Clipboard messages are translated on the server, not duplicated in JS.
+English is the source language. German catalogs live in `priv/gettext/de/LC_MESSAGES`.
+After adding `gettext` calls, run `mix gettext.extract --merge` and fill in the PO files.

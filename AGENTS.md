@@ -1,119 +1,47 @@
 # Ithibati Starter
 
-Elixir library containing an Igniter installer and Phoenix application templates.
-The shared application conventions below apply to the generated templates; this
-library itself has no Phoenix development server or application database.
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and checks.
+An Igniter installer and the Phoenix templates it writes. The repository has no server and
+no database of its own. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup, commands and
+release steps.
 
 ## Workflow
 
-- Implement only the requested work. Backlog items do not authorize additional
-  features. Preserve existing tooling during ordinary feature work.
-- Use TDD for behavior changes: write a focused test, confirm the intended failure,
-  implement the smallest passing change, then refactor with tests green. Reproduce
-  bugs with a regression test first. For new tests of existing behavior, verify the
-  assertion with a temporary targeted fault and restore the code. Setup failures
-  do not count as red. Documentation-only changes need no new tests; explain when
-  a meaningful red phase cannot be demonstrated.
-- Run `mise run check` after changes; format explicitly with `mise run format`.
-  Run dependency audits separately with `mise run audit`. Report check results
-  and any checks that could not run. Read CONTRIBUTING for project-specific gates.
-- Before a requested commit, review for bugs, regressions, security issues and
-  rule violations. Simplify unnecessary branches and duplication without expanding
-  scope, and rerun affected checks after edits. For documentation, review wording,
-  consistency and links.
-- Use Conventional Commits (`type(scope): short description`) with a short body
-  explaining why and what changed; omit the body for self-explanatory changes.
-  Commit or push only when explicitly requested.
-- Do not run unattended migrations, resets or measurements against development
-  data. Use disposable databases for experiments; a reset requires explicit scope.
+- Do only the requested work. A backlog item is no licence for more.
+- Write a failing test first, and confirm it fails for the intended reason. For a test of
+  existing behaviour, break the code briefly and restore it. A setup error is not red.
+- Run `mise run check` after every change. Run the integration suite when generated code
+  changes. Report what ran and what failed.
+- Commit or push only when asked. Review the diff first. Use Conventional Commits.
+- Never run migrations or resets against development data you did not create.
 
-## Work tracking
+## Templates
 
-When local Beans tracking is configured:
+- Generated behaviour and its tests live in `priv/templates/`. Installer steps live in `lib/`.
+- `__APP__` and `__MODULE__` are replaced everywhere in a `.tpl` file, including inside a
+  module body. Write `__MODULE__.Name` where the module itself is meant.
+- One profile. `ACCOUNT_IDENTITY` names or addresses accounts at runtime. `MyApp.Identity`
+  answers it, and neither schema carries a literal `:format`.
+- `:operator_code` is the only claim mode. The generated application checks it at start.
+- Every change to a generated file gets a changelog entry that says what an existing
+  application has to do.
 
-- Search unfinished work before creating a ticket. Read the matching ticket and
-  its parent/dependencies. Track progress there; do not create parallel TODO files
-  or backlog comments in source. Complete one task before starting unrelated work.
-- Mark work completed only after its acceptance criteria and checks pass, and add
-  a `Summary of Changes`. For scrapped work, add `Reasons for Scrapping`.
-- `beans list --ready` omits some unfinished work. Use `mise run beans` where
-  available, or `beans list --no-status completed --no-status scrapped`.
-- Keep new `.beans/` files and `.beans.yml` local and ignored. Do not force-add them,
-  add ignore exceptions or remove already tracked tickets without instruction.
-  Archive only when requested. Git pushes do not back up ignored tickets.
-- Keep Bean IDs in Beans, not application code, tests, assets or README.
-  Run `beans check` before finishing tracked work.
+## Documentation
 
-## Documentation structure
+- `README.md`: what it is, how to start, links.
+- `CONTRIBUTING.md`: development and release.
+- `AGENTS.md`: rules for agents.
+- `docs/`: usage, configuration and operations.
 
-Keep the same division in the starter and all applications:
+Keep each fact in one place and link to it. Keep docs short: one sentence, one fact.
+Generated applications follow the same division.
 
-- `README.md`: project overview, features, a short getting-started path and links.
-- `CONTRIBUTING.md`: development setup, mise commands, tests and contribution workflow.
-- `AGENTS.md`: authoritative instructions for coding agents and project-specific rules.
-- `docs/`: actual application or library documentation: usage, configuration,
-  operations, architecture and public extension interfaces.
+## Generated applications
 
-Do not put agent instructions or a second contributor guide under `docs/`.
-Keep detailed explanations in one place and link to them. Update links when moving
-content. Preserve project-specific documentation; common structure does not imply
-identical application features. Other agent entry points such as `CLAUDE.md` refer
-to `AGENTS.md` and do not maintain another set of rules.
-
-## Deployment scope
-
-Ship the application as a Mix release with its runtime: unpack, configure, run.
-Every start of a release migrates its database, including `bin/setup-code`,
-unless `<APP>_MIGRATE_ON_START=false`.
-`bin/migrate` and the rollback command remain for explicit runs. Persistent
-application data and secrets belong outside the release directory.
-
-Database provisioning, process supervision, TLS, database dumps and OS-level
-file backups are the operator's responsibility. Do not add Dockerfiles, Compose
-stacks, deployment installers, self-updaters, or application-owned backup/restore
-commands, retention, remote copies or schedules unless explicitly requested.
-Database migration rollback and restoring user content are application concerns,
-not infrastructure backup automation. CI service containers are unaffected.
-Build and test for specific OS versions and architectures before claiming support.
-
-## Common commands
-
-Use mise as the entry point; `mise TASK` and `mise run TASK` are equivalent.
-For application repositories and generated templates, keep these commands aligned
-with Ithibati Starter:
-
-- `setup`: install dependencies, prepare the development database and build assets.
-- `debugserver`: development server with IEx in `MIX_ENV=dev`.
-- `dev`: foreground Phoenix server in `MIX_ENV=dev`, without tmux or an agent.
-- `reset`: `mix ecto.reset` in `MIX_ENV=dev`; drops and recreates the development
-  database, including migrations and seeds. Run only when explicitly requested.
-- `migrate`: explicit development migrations.
-- `release`: compile assets and build a production release for the build platform.
-- In the unpacked release, `bin/setup-code` and `bin/server` migrate the database
-  first; `bin/server` then starts the HTTP server. `bin/migrate` applies
-  migrations on their own. `bin/grant-admin USERNAME` makes an account an administrator.
-
-Application-specific asset builds and quality checks remain in Mix aliases.
-
-Deployment-specific configuration belongs in `config/runtime.exs` and environment
-variables, not compiled installation paths. Keep releases movable, and put writable
-data outside the release using configurable absolute paths. `rel/overlays/bin`
-contains application start and migration commands, not host provisioning.
-Validate native libraries and OS/architecture compatibility on the actual target.
-VM resource settings must remain operator-configurable; do not promise memory usage
-or pin shared-host tuning as a universal default without measurements.
-
-## Starter development
-
-- Keep generated instructions and documentation aligned with these conventions.
-- Preserve established tooling for ordinary features. For explicit Elixir/Phoenix
-  scaffolding or overall tooling modernization, use the personal
-  `elixir-project-setup` skill; Credo-only setup uses `elixir-quality`.
-  Routine project checks do not trigger skill adoption.
-- Generate one profile. An account is named or addressed, chosen at runtime through
-  `ACCOUNT_IDENTITY` and answered by the generated `Identity` module; neither schema
-  may carry `:format`. `:operator_code` is the only claim mode, and a generated
-  application verifies both where it starts.
-- Keep upstream attribution and generated documentation aligned with the templates.
+- A release migrates on start unless `MY_APP_MIGRATE_ON_START=false`. `bin/migrate`,
+  `bin/setup-code`, `bin/server` and `bin/grant-admin` ship in `rel/overlays/bin`.
+- Runtime settings go in `config/runtime.exs` and environment variables. Data lives
+  outside the release, at configurable absolute paths.
+- Hosting is the operator's: no Dockerfiles, deployment scripts, backups or schedulers
+  unless asked.
+- The mise tasks `setup`, `dev`, `debugserver`, `reset`, `migrate`, `setup-code` and
+  `release` keep the same names in every application.

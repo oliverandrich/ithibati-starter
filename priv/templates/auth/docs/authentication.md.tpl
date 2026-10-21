@@ -1,132 +1,71 @@
 # Authentication
 
-The application pins Ithibati __ITHIBATI_VERSION__ and applies its schema version 5. On an empty
-database, an operator-issued code must unlock `/setup` before the first account
-can register a username and passkey. Issue
-the code after migration as described in [Operations](operations.md); enter it over
-HTTPS. The code is printed only by that command, stored only as a digest, and
-consumed with the first account claim. Later registrations require a valid
-invitation; every authenticated member can create links on `/account/invitations`. Links are
-shown once, expire, and are accepted once. The account that claims the instance
-is an administrator. `bin/grant-admin` makes another account one; see
-[Operations](operations.md#administrators). `__MODULE__.Accounts` grants and
-revokes the role. An administrator cannot revoke their own role or remove their
-own account, so one always remains.
+The application pins Ithibati __ITHIBATI_VERSION__ at schema version 5. Accounts sign in with
+passkeys, or with a recovery code when no passkey is at hand.
 
-The same page lists what is outstanding: for whom, by whom and when it runs
-out. A member takes back the invitations they sent; an administrator takes back
-any. The link stops working at once. Removing an account takes back its open
-invitations. `__MODULE__.Invitations` holds the queries,
-and they come from Ithibati rather than being written again: `pending_query/0`
-is the predicate `fetch/1` uses, and `withdraw/1` rechecks the acceptance
-inside its delete.
+## Claim and invitations
 
-An account is named or addressed, which `__MODULE__.Identity` answers from
-`ACCOUNT_IDENTITY`. Named is the default: the link is shared through whatever
-channel its sender likes. A named invitation is open: the inviting member writes a
-note that says whom it is for, and the invitee chooses the username on accepting.
-The name is checked for format and for an existing account before the passkey
-dialog opens. Addressed means the invitee's identifier is an email address, the link
-is delivered to it, and that delivery is what proves the address. An addressed
-invitation keeps its address and may carry a note as well.
+An empty instance opens `/setup` only for an operator's code. The claim mode is fixed to
+`config :ithibati, initial_claim: :operator_code`, and `__MODULE__.Claim` refuses to start
+with any other. [Operations](operations.md) shows how to issue a code.
 
-An invitation link is `/invite#TOKEN`. The token sits after `#`, which no request
-sends. `assets/js/invitation_link.js` removes it from the address before the
-page's socket joins and hands it to the page once it has joined.
-Both schemas leave Ithibati's `:format` off and take it from the mode instead,
-because the identifier field itself is fixed when the schema compiles. An instance
-that addresses accounts without a mail configuration does not start. A delivery
-that fails is reported and the link stays shareable by hand. See
-[Operations](operations.md) for the variables.
+Every later account needs an invitation. Any signed-in member creates them on
+`/account/invitations`. A link is shown once, expires and works once. Its token sits after
+`#` in `/invite#TOKEN`, so no request carries it. A member withdraws their own invitations;
+an administrator withdraws any.
 
-The claim mode is fixed to `config :ithibati, initial_claim: :operator_code`, and
-`__MODULE__.Claim` checks it where the application starts. Ithibati's `:open` mode is
-therefore a refusal to boot rather than a setup page offering a field nobody can satisfy.
+## Named or addressed
 
-Sessions are revocable and cookies are encrypted because they temporarily carry
-recovery codes. Recovery codes are displayed once after registration. Adapt the
-account policy to the application.
+An account is named or addressed. `__MODULE__.Identity` answers which from
+`ACCOUNT_IDENTITY`.
 
-The session cookie's max age equals Ithibati's `session_validity`. It survives a
-browser restart until the session expires.
+- **Named**: the inviter writes a note and passes the link on. The invitee chooses the
+  username.
+- **Addressed**: the link is mailed to the invitee, which proves the address. A failed
+  delivery is reported, and the link can still be passed on by hand.
 
-The public auth screens are `/login` (passkey), `/recover` (recovery code), and
-`/setup` (first account only). Signed-in visitors go to `/`. The project name and
-auth appearance live in `Layouts.auth/1`; the one-time code screen includes a copy
-button and a manual-copy fallback when clipboard permission is unavailable.
+The identifier field is fixed when a schema compiles, so both schemas take `:format` from
+`__MODULE__.Identity` at runtime.
 
-The account menu in the header of `Layouts.member/1` opens from an icon and names the
-account at its top. It leads to `/account/settings`. That page counts the passkeys and
-the unused recovery codes. It also links the invitations. For an administrator, an
-Administration group links `/accounts`. That page lists every account with its join
-date and role. A member who opens it is sent back to the settings. There an
-administrator grants or revokes the role on another account's row, or removes that
-account. Each change asks for the passkey, as the security settings do. A new
-administrator could remove any account. Revoking could leave a stolen session the
-only administrator.
-A grant or revocation reaches the account's open pages without a reload. A revoked
-administrator on `/accounts` is sent to the settings. `bin/grant-admin`
-runs in its own VM, so open pages show its grant after a reload.
-Removing deletes the account's passkeys and recovery codes and revokes its sessions
-in the same transaction. Its open pages are disconnected after the commit. An
-administrator cannot remove their own account there.
+## Administrators
 
-`/account/passkeys` supports enrollment, naming and removal; the last passkey cannot
-be removed. `/account/recovery-codes` shows the unused count and requires explicit confirmation before replacing every old code. New codes
-use the same one-time display and copy flow as registration.
+The account that claims the instance is an administrator. `/accounts` lets an administrator
+grant or revoke the role and remove accounts, each confirmed with a passkey. Nobody revokes
+their own role or removes their own account, so one administrator remains. `bin/grant-admin`
+grants the role from the host.
 
-Passkey changes and code regeneration use controller requests with a freshly
-validated session and CSRF protection. Enrollment binds the challenge to the
-signed-in account and checks the account again when registration completes.
-Adding a passkey or generating new recovery codes also requires a confirmation
-with the current account's passkey or recovery code within the last five minutes.
-Enrollment rechecks confirmation at both challenge creation and completion. All settings and feedback are translated into English
-and German.
+Removing an account deletes its passkeys and recovery codes, revokes its sessions and
+withdraws its open invitations.
 
-## Authentication limits and maintenance
+## Account security
 
-`AuthRateLimit` allows 10 recovery requests and 120 other ceremony requests per
-visitor address in a 60-second fixed window. Responses use HTTP 429, `Retry-After`, and a
-translated ceremony message. Making an invitation allows 20 per signed-in account in a
-24-hour window. Configure `:auth_rate_limits` on the application as
-`[recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, invite: {20, 86_400}]`
-(positive counts and seconds). A refused inviter is told how long to wait, in minutes
-for a window shorter than an hour and in hours otherwise.
+- `/account/passkeys` adds, renames and removes passkeys. The last one stays.
+- `/account/recovery-codes` shows the unused count and replaces all codes after
+  confirmation. New codes are shown once.
+- Adding a passkey or new recovery codes needs a confirmation from the last five minutes.
+- **Sign out on all devices** revokes every session and disconnects open LiveViews.
+- Session cookies are encrypted, because they briefly carry recovery codes. They last as
+  long as Ithibati's `session_validity`.
+- `:filter_parameters` keeps tokens, codes and WebAuthn credentials out of the request log.
 
-The invitation budget is counted against the account through `AuthRateLimit.key/2`,
-not the browser: a session, a name or an address would each let the same person start
-over. It is spent before the form is validated, so an attempt that fails for any other
-reason still costs one; otherwise the budget is emptied by typing nonsense. A refusal
-writes no invitation, sends nothing, and leaves a link already on screen where it is,
-because that link exists nowhere else. A day rather than an hour, because what this
-guards against is not a burst but an account somebody else is holding, spending the
-operator's mail credentials at a steady drip.
-The setup-code form allows 10 submissions per visitor address per minute by default.
-Replacing a code revokes earlier authorizations but does not reset that budget.
-The form redirects with `Retry-After` and a translated message when the budget
-is exhausted.
+## Rate limits
 
-The supervised in-memory counters are atomic and bounded to 10,000 keys per node;
-their windows expire and a restart resets them. Ceremony and setup limits count per
-`conn.remote_ip`, which `__MODULE__Web.ClientIp` takes from `X-Forwarded-For` only on a
-connection from the loopback or an address named in `TRUSTED_PROXIES`; see
-[Operations](operations.md). No other forwarding header is read, because a proxy
-hands those through exactly as the visitor wrote them. One IPv6 allocation is one
-budget: `ClientIp.bucket/1` counts the `/64`, which a visitor cannot rotate out of. Behind a reverse proxy every
-request otherwise arrives from one socket, and one stranger would spend the budget
-of everybody sharing it.
-Multiple nodes need a shared client-IP limit, and a shared account-keyed
-limiter if the manual-link quota must hold across nodes. These defaults are not a
-distributed rate-limit service.
+| Budget | Default | Counted per |
+| --- | --- | --- |
+| `setup` | 10 per minute | Visitor address |
+| `recovery` | 10 per minute | Visitor address |
+| `ceremony` | 120 per minute | Visitor address |
+| `invite` | 20 per day | Signed-in account |
 
-The passkey settings page provides **Sign out on all devices**, including the
-current session. Ithibati revokes stored sessions and broadcasts disconnects to
-live sockets. Passkeys remain valid for future logins.
+Change them in the application config:
 
-Schedule [auth cleanup](operations.md#authentication-maintenance) on the running
-release. It removes expired sessions, abandoned challenges and expired,
-unaccepted invitations. Valid credentials, recovery codes and accepted invitations
-are preserved.
+```elixir
+config :__APP__, :auth_rate_limits,
+  recovery: {10, 60}, ceremony: {120, 60}, setup: {10, 60}, invite: {20, 86_400}
+```
 
-Phoenix request logs filter passwords, secrets, tokens, recovery codes and WebAuthn
-credentials through `:filter_parameters`. Preserve this filtering when adding logging.
+A refusal answers HTTP 429 with `Retry-After`. An invitation attempt costs one even when the
+form is invalid. One IPv6 `/64` counts as one visitor. The counters live in memory on each
+node, hold up to 10,000 keys and reset on restart. A cluster needs a shared limiter.
+
+[Operations](operations.md) covers the proxy setup, auth cleanup and `TRUSTED_PROXIES`.

@@ -19,6 +19,8 @@ a version to an existing application.
 
 ### Changed
 
+- The generated `AGENTS.md`, `CONTRIBUTING.md` and guides under `docs/` are rewritten short.
+  An existing application may take them as they are.
 - The starter targets the `phx_new` 1.8.16 and `igniter_new` 0.5.35 archives. `mix ithibati.new`
   names them when one is missing. A Phoenix 1.8.16 scaffold requires `{:phoenix, "~> 1.8.16"}`
   and Tailwind 4.3.3; the installer's changes are the same.
