@@ -83,6 +83,35 @@ defmodule __MODULE__Web.CoreComponentsTest do
     assert dialog.(false) |> LazyHTML.query("dialog#remove-confirm:not([data-show])") |> Enum.count() == 1
   end
 
+  # The status line sits outside the button, and a patch must not clear its sentence.
+  test "a copy field shows its value beside a button that copies it, and has its own status line" do
+    assigns = %{}
+
+    html =
+      ~H(<CoreComponents.copy_field id="code-1" value="abc-123" label="Copy code" copied="Code copied." />)
+      |> rendered_to_string()
+      |> LazyHTML.from_fragment()
+
+    assert html |> LazyHTML.query("code") |> LazyHTML.text() == "abc-123"
+
+    button = LazyHTML.query(html, "button#code-1-copy[phx-hook=CopyText][type=button]")
+    assert LazyHTML.attribute(button, "data-copy-text") == ["abc-123"]
+    assert LazyHTML.attribute(button, "data-copy-status") == ["code-1-status"]
+    assert LazyHTML.attribute(button, "data-copy-success") == ["Code copied."]
+    assert LazyHTML.attribute(button, "aria-label") == ["Copy code"]
+    assert [_blocked] = LazyHTML.attribute(button, "data-copy-error")
+
+    assert html |> LazyHTML.query("#code-1-status[role=status][phx-update=ignore]") |> Enum.count() == 1
+  end
+
+  test "a copy field without labels names its button generically" do
+    assigns = %{}
+    html = rendered_to_string(~H(<CoreComponents.copy_field id="token" value="t" />))
+
+    assert html =~ ~s(aria-label="Copy")
+    assert html =~ ~s(data-copy-success="Copied.")
+  end
+
   test "a group of rows names its section, and a group without a heading names nothing" do
     assigns = %{}
     named = rendered_to_string(~H(<CoreComponents.group id="rows" heading="Rows">Row</CoreComponents.group>))

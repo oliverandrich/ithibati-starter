@@ -308,6 +308,21 @@ msgstr "Das Kopieren wurde blockiert. Markiere den Link und kopiere ihn selbst."
 msgid "Link copied."
 msgstr "Link kopiert."
 
+#: lib/__APP___web/components/core_components.ex:128
+#, elixir-autogen, elixir-format
+msgid "Copy"
+msgstr "Kopieren"
+
+#: lib/__APP___web/components/core_components.ex:129
+#, elixir-autogen, elixir-format
+msgid "Copied."
+msgstr "Kopiert."
+
+#: lib/__APP___web/components/core_components.ex:130
+#, elixir-autogen, elixir-format
+msgid "Copying was blocked. Select the text and copy it yourself."
+msgstr "Das Kopieren wurde blockiert. Markiere den Text und kopiere ihn selbst."
+
 #: lib/__APP___web/live/invite_live.ex:88
 #, elixir-autogen, elixir-format
 msgid "You’re invited"

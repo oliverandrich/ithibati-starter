@@ -174,7 +174,7 @@ defmodule __MODULE__Web.InvitationTest do
     }})
     """)
     |> click_button("Copy link")
-    |> assert_has("[id^=copy-link-status-]", text: "Link copied.")
+    |> assert_has("[id^=invitation-link-][id$=-status]", text: "Link copied.")
     |> assert_has("[phx-hook=CopyText][data-copied]")
     |> evaluate("window.copiedText", fn copied -> assert copied == link end)
     |> fill("input[name=note]", "Ada")
@@ -195,6 +195,6 @@ defmodule __MODULE__Web.InvitationTest do
     navigator.clipboard.writeText = async () => { throw new Error('permission denied') }
     """)
     |> click_button("Copy link")
-    |> assert_has("[id^=copy-link-status-]", text: "Copying was blocked")
+    |> assert_has("[id^=invitation-link-][id$=-status]", text: "Copying was blocked")
   end
 end

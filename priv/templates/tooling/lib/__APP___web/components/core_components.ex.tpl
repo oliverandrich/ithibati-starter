@@ -106,6 +106,56 @@ defmodule __MODULE__Web.CoreComponents do
   defp box_colors(:error), do: "border-danger bg-danger-surface"
 
   @doc """
+  Renders a value with a button that copies it, and a status line that announces the result.
+
+  The `CopyText` hook does the copying. A new value needs a new `id`, so the button starts
+  without the last copy's check. Keep the field out of an `alert/1`: both are live regions.
+
+  ## Examples
+
+      <.copy_field id="invitation-link" value={@link} label={gettext("Copy link")} />
+  """
+  attr :id, :string, required: true, doc: "prefixes the ids of the button and the status line"
+  attr :value, :string, required: true
+  attr :label, :string, default: nil, doc: "the button's accessible name"
+  attr :copied, :string, default: nil, doc: "announced after a copy"
+  attr :blocked, :string, default: nil, doc: "announced when the browser refuses the copy"
+  attr :class, :any, default: nil
+
+  def copy_field(assigns) do
+    assigns =
+      assign(assigns,
+        label: assigns.label || gettext("Copy"),
+        copied: assigns.copied || gettext("Copied."),
+        blocked: assigns.blocked || gettext("Copying was blocked. Select the text and copy it yourself.")
+      )
+
+    ~H"""
+    <div class={@class}>
+      <div class="flex items-start gap-2">
+        <code class="min-w-0 flex-1 break-all rounded-control border border-line bg-surface px-3 py-2 text-label text-ink">{@value}</code>
+        <button
+          type="button"
+          id={"#{@id}-copy"}
+          phx-hook="CopyText"
+          data-copy-text={@value}
+          data-copy-status={"#{@id}-status"}
+          data-copy-success={@copied}
+          data-copy-error={@blocked}
+          aria-label={@label}
+          title={@label}
+          class="group inline-flex size-9 shrink-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 items-center justify-center rounded-control border border-edge bg-surface text-muted hover:bg-ground hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <Lucideicons.copy aria-hidden="true" class="size-4 group-data-copied:hidden" />
+          <Lucideicons.check aria-hidden="true" class="hidden size-4 text-signal-strong group-data-copied:block" />
+        </button>
+      </div>
+      <span id={"#{@id}-status"} role="status" phx-update="ignore" class="mt-2 block min-h-5 text-sm text-muted"></span>
+    </div>
+    """
+  end
+
+  @doc """
   Renders a raised area. Callers set the padding through `class`.
 
   ## Examples

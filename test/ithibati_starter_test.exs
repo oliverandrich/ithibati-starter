@@ -732,16 +732,33 @@ defmodule IthibatiStarterTest do
     assert text_link =~ "text-decoration-color: var(--color-signal-strong);"
   end
 
-  test "alerts and cards are components, not copied class lists" do
+  # Templates are meant to use these tokens, so the guide names each one.
+  test "the interface guide names every colour role and type token of the theme" do
+    files = installed_files()
+    [_, theme] = Regex.run(~r/@theme \{(.*?)\n\}/s, files["assets/css/app.css"])
+    prefixes = %{"color" => "", "text" => "text-", "radius" => "rounded-"}
+
+    for [kind, name] <-
+          Regex.scan(~r/--(color|text|radius)-([a-z]+(?:-[a-z]+)*):/, theme,
+            capture: :all_but_first
+          ) do
+      utility = prefixes[kind] <> name
+      assert files["docs/interface.md"] =~ "`#{utility}`", "docs/interface.md omits #{utility}"
+    end
+  end
+
+  test "alerts, cards and copy fields are components, not copied class lists" do
     files = installed_files()
 
     components = "lib/sample_web/components/core_components.ex"
     assert files[components] =~ "def alert(assigns)"
     assert files[components] =~ "def card(assigns)"
+    assert files[components] =~ "def copy_field(assigns)"
 
     for {path, source} <- files, String.starts_with?(path, "lib/"), path != components do
       refute source =~ ~r/(?<![\w:-])bg-danger-surface/, "#{path} copies the alert classes"
       refute source =~ "ring-1 ring-line", "#{path} copies the card classes"
+      refute source =~ ~s(phx-hook="CopyText"), "#{path} copies the copy field"
     end
   end
 

@@ -24,6 +24,11 @@ a version to an existing application.
   and keeps five compressed predecessors. Copy `MyApp.Logging.handler_config/1` into
   `lib/my_app/logging.ex`, its tests, and the `config:` line of the logging block in
   `config/runtime.exs`.
+- `MyAppWeb.CoreComponents.copy_field/1` shows a value with a copy button and its own status
+  line. The invitations page uses it, below the info box. Copy the component, its tests and
+  the three gettext entries, then replace the copy markup in `invitations_live.ex`.
+- `docs/interface.md` lists the colour roles and type tokens of `assets/css/app.css`. An
+  existing application may take the two sections as they are.
 
 ### Changed
 

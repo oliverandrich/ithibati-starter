@@ -91,3 +91,37 @@ page of the live session.
 
 `confirm_dialog/1` asks before a change that cannot be undone. `CoreComponents` documents
 its events.
+
+## Colours
+
+`assets/css/app.css` defines colour roles as Tailwind theme variables in `@theme`. Each role
+becomes a utility for every colour property: `bg-surface`, `text-muted`, `border-edge`,
+`outline-accent`, `ring-line`.
+
+| Role | For |
+| --- | --- |
+| `ground`, `surface` | Page background, raised areas |
+| `ink`, `muted` | Text, secondary text |
+| `line`, `edge` | Dividers, input borders |
+| `accent`, `on-accent` | Primary buttons and focus, text on them |
+| `selection` | Hover and selected rows |
+| `signal`, `signal-strong` | Brand colour, its shade for text and links |
+| `danger`, `danger-surface` | Errors, destructive actions |
+| `scrim` | The backdrop behind a dialog |
+
+The dark block in `app.css` redefines the roles for `prefers-color-scheme: dark`. A template
+that names roles needs no `dark:` variant. Write `text-muted`, not `text-neutral-600`: a
+palette colour looks the same in both modes. The `signal` roles carry the brand colour.
+
+Add a role to `@theme` and to the dark block, named for its use. `text-link` underlines a
+link in running text.
+
+## Type and shape
+
+| Token | Size | For |
+| --- | --- | --- |
+| `text-meta` | 12px | Counts, group headings, secondary lines |
+| `text-label` | 13px | Field labels, alerts, errors |
+| `text-body` | 15px | Running text, rows |
+| `text-title` | 22px | Titles of the `Layouts.auth/1` screens |
+| `rounded-control` | 6px | Inputs, buttons, boxes |

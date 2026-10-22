@@ -315,6 +315,21 @@ msgstr ""
 msgid "Link copied."
 msgstr ""
 
+#: lib/__APP___web/components/core_components.ex:128
+#, elixir-autogen, elixir-format
+msgid "Copy"
+msgstr ""
+
+#: lib/__APP___web/components/core_components.ex:129
+#, elixir-autogen, elixir-format
+msgid "Copied."
+msgstr ""
+
+#: lib/__APP___web/components/core_components.ex:130
+#, elixir-autogen, elixir-format
+msgid "Copying was blocked. Select the text and copy it yourself."
+msgstr ""
+
 #: lib/__APP___web/live/invite_live.ex:88
 #, elixir-autogen, elixir-format
 msgid "You’re invited"

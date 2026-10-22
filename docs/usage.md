@@ -89,6 +89,7 @@ places. A page can choose `layout={:sidebar}` or `layout={:columns}`.
 | Component | Renders |
 | --- | --- |
 | `<.alert>` | A message in the page flow |
+| `<.copy_field>` | A value with a copy button and a status line |
 | `<.card>` | A raised area |
 | `<.group>`, `<.group_link>` | Rows in a card, and a row linking to another page |
 | `<.confirm_dialog>` | A modal with one question |
@@ -99,18 +100,10 @@ places. A page can choose `layout={:sidebar}` or `layout={:columns}`.
 
 ## Colours
 
-Templates name colours by role. `assets/css/app.css` defines the roles in `@theme`, and
-again for dark mode.
-
-| Token | Role |
-| --- | --- |
-| `ground`, `surface` | Page background, raised areas |
-| `ink`, `muted` | Text, secondary text |
-| `line`, `edge` | Dividers, input borders |
-| `accent`, `on-accent` | Primary buttons and focus, text on them |
-| `selection` | Hover and selected rows |
-| `signal`, `signal-strong` | Brand colour, its shade for text and links |
-| `danger`, `danger-surface` | Errors, destructive actions |
+Templates name colours by role: `bg-surface`, `text-muted`, `border-edge`. `assets/css/app.css`
+defines the roles as Tailwind theme variables, once for light and once for dark mode. A
+template that uses them needs no `dark:` variant. [Interface](interface.md) lists the roles
+and the type scale.
 
 `--brand` accepts `red` `orange` `amber` `yellow` `lime` `green` `emerald` `teal` `cyan`
 `sky` `blue` `indigo` `violet` `purple` `fuchsia` `pink` `rose`. Only the `signal` tokens
