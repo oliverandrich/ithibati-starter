@@ -40,6 +40,7 @@ defmodule IthibatiStarterTest do
     assert files["docs/authentication.md"] =~ "invite: {20, 86_400}"
     assert files["docs/authentication.md"] =~ "initial_claim: :operator_code"
     assert files["docs/operations.md"] =~ "TRUSTED_PROXIES"
+    assert files["docs/operations.md"] =~ "`192.168.0.0/16`, `fc00::/7`"
     assert files["docs/authentication.md"] =~ "[Operations](operations.md)"
     assert files["docs/authentication.md"] =~ "pins Ithibati 0.11.0"
     # Generated files belong to the application and carry no attribution.

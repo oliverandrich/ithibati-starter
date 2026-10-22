@@ -20,7 +20,7 @@ A release and the container image read the same environment variables.
 | `MAIL_FROM` | Sender address |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Submission server; port 587 by default |
 | `__APP_UPCASE___MIGRATE_ON_START` | `true` (default) or `false` to migrate by hand |
-| `TRUSTED_PROXIES` | Proxy addresses or ranges, comma separated |
+| `TRUSTED_PROXIES` | Further proxy addresses or ranges, comma separated |
 | `SOURCE_URL` | Absolute URL of this deployment's source code |
 
 A value outside the listed ones stops the boot. `LOG_LEVEL=debug` is refused, because it
@@ -59,8 +59,17 @@ docker run -d --name __APP__ --env-file __APP__.env -p 127.0.0.1:4000:4000 \
 docker exec __APP__ bin/setup-code
 ```
 
-Behind a proxy on the host, requests reach the container from the Docker bridge gateway.
-Name that address in `TRUSTED_PROXIES`, or every visitor shares one rate-limit budget.
+`__APP__.env` holds the [configuration](#configuration), for example:
+
+```sh
+SECRET_KEY_BASE=...
+PHX_HOST=app.example.com
+```
+
+A proxy on the host reaches the container from the Docker bridge gateway, a proxy in another
+container from their shared network. Both addresses are private, so neither needs
+`TRUSTED_PROXIES`.
+
 Docker collects stdout. A `LOG_FILE` belongs under `/data`, the only directory `nobody` can
 write.
 Where the image is built, stored and run is up to you. The Elixir and OTP versions in the
@@ -98,12 +107,21 @@ STARTTLS. Choose the mode before the first account.
 ## Proxy and HTTPS
 
 Behind a reverse proxy, `__MODULE__Web.ClientIp` reads the visitor's address from
-`X-Forwarded-For`. It believes the header only from the loopback or from `TRUSTED_PROXIES`.
-An entry is an address or a range such as `172.20.0.0/16`.
+`X-Forwarded-For`. The header counts only on a connection from one of these:
+
+- A private address (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7`). The entry
+  that proxy appended is the visitor.
+- The loopback or `TRUSTED_PROXIES`. The visitor is the rightmost entry that is none of them,
+  so a chain of proxies works.
+
+Name the proxies of a chain, and a proxy with a public address, in `TRUSTED_PROXIES`.
+An entry is an address or a range such as `172.20.0.0/16`. Without a believed header, every
+visitor shares one rate-limit budget.
 
 Production redirects HTTP to HTTPS and sends HSTS. The proxy terminates TLS and sets
 `X-Forwarded-Proto`. That header is trusted from any client, so expose the application only
-through the proxy.
+through the proxy. A client that reaches it directly from a private network can also choose
+its address.
 
 ## Health
 

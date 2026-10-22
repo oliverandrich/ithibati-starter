@@ -13,7 +13,13 @@ defmodule __MODULE__Web.ClientIp do
 
   So it is believed on one condition, which is the connection it arrived on. The loopback is
   trusted because that is where a proxy on the same host speaks from. `:trusted_proxies` names
-  any others, as addresses `config/runtime.exs` has already parsed and checked.
+  any others, as addresses `config/runtime.exs` has already parsed and checked. From these the
+  header is walked from the right past every one of them.
+
+  A peer in a private range is believed for one hop without being named: a proxy on the host
+  reaches a container from the bridge gateway, and one in a container from a shared network.
+  Only the entry that proxy appended counts. Walking further would pass a visitor with a private
+  address of their own and land on whatever they wrote before it.
 
   The header is read here rather than by a library. The one for this reads three further headers
   by default, which a proxy does not write and a visitor therefore can; and its notion of a
@@ -29,6 +35,14 @@ defmodule __MODULE__Web.ClientIp do
 
   @localhost {0, 0, 0, 0, 0, 0, 0, 1}
 
+  # RFC 1918 and IPv6 unique local addresses.
+  @private [
+    {{10, 0, 0, 0}, 8},
+    {{172, 16, 0, 0}, 12},
+    {{192, 168, 0, 0}, 16},
+    {{0xFC00, 0, 0, 0, 0, 0, 0, 0}, 7}
+  ]
+
   @impl true
   def init(opts), do: opts
 
@@ -36,7 +50,13 @@ defmodule __MODULE__Web.ClientIp do
   def call(conn, _opts) do
     proxies = Enum.map(configured(), &unmapped/1)
     peer = unmapped(conn.remote_ip)
-    visitor = if trusted?(peer, proxies), do: forwarded(conn, proxies) || peer, else: peer
+
+    visitor =
+      cond do
+        trusted?(peer, proxies) -> walked(conn, proxies) || peer
+        private?(peer) -> conn |> entries() |> List.last() || peer
+        true -> peer
+      end
 
     # The socket is kept as well. `remote_ip` answers who the request is from, which behind a
     # proxy is the visitor, and that is what a log line and every budget should name. Which
@@ -56,13 +76,19 @@ defmodule __MODULE__Web.ClientIp do
   def bucket({_, _, _, _} = address), do: address
   def bucket({a, b, c, d, _, _, _, _}), do: {a, b, c, d, 0, 0, 0, 0}
 
-  defp forwarded(conn, proxies) do
+  defp walked(conn, proxies) do
+    conn
+    |> entries()
+    |> Enum.reverse()
+    |> Enum.find(&(&1 && not trusted?(&1, proxies)))
+  end
+
+  # Every entry in order, `nil` for one that is not an address.
+  defp entries(conn) do
     conn
     |> Plug.Conn.get_req_header(@header)
     |> Enum.flat_map(&String.split(&1, ","))
     |> Enum.map(&address/1)
-    |> Enum.reverse()
-    |> Enum.find(&(&1 && not trusted?(&1, proxies)))
   end
 
   # Bytes rather than `to_charlist/1`, which raises on a header that is not valid UTF-8. A
@@ -80,6 +106,8 @@ defmodule __MODULE__Web.ClientIp do
   defp trusted?({127, _, _, _}, _proxies), do: true
   defp trusted?(@localhost, _proxies), do: true
   defp trusted?(address, proxies), do: Enum.any?(proxies, &covers?(&1, address))
+
+  defp private?(address), do: Enum.any?(@private, &covers?(&1, address))
 
   # A range covers the addresses that share its leading bits, in its own family only.
   defp covers?({network, bits}, address) when tuple_size(network) == tuple_size(address),

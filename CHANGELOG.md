@@ -32,6 +32,10 @@ a version to an existing application.
 
 ### Changed
 
+- `MyAppWeb.ClientIp` believes `X-Forwarded-For` from a private address for one hop, without
+  `TRUSTED_PROXIES`. A proxy on the Docker host or in a shared network needs no configuration.
+  `TRUSTED_PROXIES` remains for chains and public proxies. Copy `lib/my_app_web/client_ip.ex`
+  and its test, and drop entries for single private proxies.
 - The generated `AGENTS.md`, `CONTRIBUTING.md` and guides under `docs/` are rewritten short.
   An existing application may take them as they are.
 - The starter targets the `phx_new` 1.8.16 and `igniter_new` 0.5.35 archives. `mix ithibati.new`
