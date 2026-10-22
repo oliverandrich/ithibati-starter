@@ -360,6 +360,10 @@ defmodule IthibatiStarterTest do
     assert files["config/runtime.exs"] =~ ~s{Sample.Logging.level(System.get_env("LOG_LEVEL"))}
     assert files["config/runtime.exs"] =~ "formatter: Sample.Logging.formatter()"
     assert files["config/runtime.exs"] =~ "filters: Sample.Logging.filters()"
+
+    assert files["config/runtime.exs"] =~
+             ~s{config: Sample.Logging.handler_config(System.get_env("LOG_FILE"))}
+
     assert files["config/prod.exs"] =~ "config :phoenix, :logger, false"
     assert files["docs/operations.md"] =~ "LOG_LEVEL"
   end

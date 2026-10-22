@@ -62,6 +62,30 @@ defmodule __MODULE__.LoggingTest do
     assert config[:logger][:default_handler][:filters] == Logging.filters()
   end
 
+  test "without LOG_FILE the handler stays on stdout" do
+    assert Logging.handler_config(nil) == []
+    assert Logging.handler_config(" ") == []
+    assert RuntimeConfig.read(:prod, %{})[:logger][:default_handler][:config] == []
+  end
+
+  test "LOG_FILE moves the lines into a file that rotates" do
+    config = RuntimeConfig.read(:prod, %{"LOG_FILE" => "/var/log/app/app.log"})
+
+    assert config[:logger][:default_handler][:config] == [
+             file: ~c"/var/log/app/app.log",
+             max_no_bytes: 10_000_000,
+             max_no_files: 5,
+             compress_on_rotate: true
+           ]
+  end
+
+  # A relative path would depend on the directory the release starts in.
+  test "a relative LOG_FILE is refused" do
+    assert_raise ArgumentError, ~r/LOG_FILE must be an absolute path/, fn ->
+      Logging.handler_config("log/app.log")
+    end
+  end
+
   # `debug` enables LiveView and Ecto logs, which include session data and query parameters.
   test "the level comes from LOG_LEVEL, info unless it says otherwise, and never debug" do
     assert Logging.level(nil) == :info

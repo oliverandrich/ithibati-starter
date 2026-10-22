@@ -14,6 +14,7 @@ A release and the container image read the same environment variables.
 | `DATABASE_URL` | `ecto://USER:PASS@HOST/DATABASE` for PostgreSQL |
 | `POOL_SIZE` | Connections; 5 for SQLite, 10 for PostgreSQL |
 | `LOG_LEVEL` | `info` (default), `notice`, `warning`, `error`, `critical`, `alert` or `emergency` |
+| `LOG_FILE` | Absolute path of a log file instead of stdout |
 | `ACCOUNT_IDENTITY` | `username` (default) or `email` |
 | `MAIL_ENABLED` | `true` or `false` (default); `true` sends invitations and is required by `ACCOUNT_IDENTITY=email` |
 | `MAIL_FROM` | Sender address |
@@ -60,6 +61,8 @@ docker exec __APP__ bin/setup-code
 
 Behind a proxy on the host, requests reach the container from the Docker bridge gateway.
 Name that address in `TRUSTED_PROXIES`, or every visitor shares one rate-limit budget.
+Docker collects stdout. A `LOG_FILE` belongs under `/data`, the only directory `nobody` can
+write.
 Where the image is built, stored and run is up to you. The Elixir and OTP versions in the
 `Dockerfile` match `mise.toml`; update both together.
 
@@ -109,6 +112,8 @@ through the proxy.
 ## Logs
 
 Stdout gets one JSON object per line with `time`, `severity`, `message` and `metadata`.
+With `LOG_FILE`, the lines go to that file instead. The release creates its directory. The
+file rotates at 10 MB and keeps five gzipped predecessors.
 Metadata holds only `request_id`; `__MODULE__.Logging` lists the allowed keys. There is no
 access log. A failed request logs its stack trace, which may contain request data. A crash of the
 invitation page can log the invitation token.

@@ -20,6 +20,10 @@ a version to an existing application.
   `ACCOUNT_IDENTITY`. `MyApp.IdentityCheck` runs after `Ecto.Migrator` and is skipped with it.
   Copy `lib/my_app/identity_check.ex`, its test, and the child after `Ecto.Migrator` in
   `lib/my_app/application.ex`.
+- `LOG_FILE` writes the JSON log lines to a file instead of stdout. The file rotates at 10 MB
+  and keeps five compressed predecessors. Copy `MyApp.Logging.handler_config/1` into
+  `lib/my_app/logging.ex`, its tests, and the `config:` line of the logging block in
+  `config/runtime.exs`.
 
 ### Changed
 

@@ -1,6 +1,6 @@
 defmodule __MODULE__.Logging do
   @moduledoc """
-  Production logging: one JSON object per line on stdout, at `LOG_LEVEL`.
+  Production logging: one JSON object per line at `LOG_LEVEL`, on stdout or in `LOG_FILE`.
 
   Only the metadata named here reaches a line. Messages are not filtered, so callers keep names,
   codes and tokens out of them. See docs/operations.md.
@@ -34,6 +34,29 @@ defmodule __MODULE__.Logging do
   and user agent.
   """
   def drop_request(%{meta: meta} = event, _config), do: %{event | meta: Map.delete(meta, :conn)}
+
+  @doc """
+  Returns the handler's output config for `LOG_FILE`. Without a value the handler writes to
+  stdout. A file rotates at 10 MB and keeps five compressed predecessors.
+  Raises `ArgumentError` for a relative path.
+  """
+  def handler_config(value) do
+    case value |> to_string() |> String.trim() do
+      "" ->
+        []
+
+      "/" <> _ = path ->
+        [
+          file: String.to_charlist(path),
+          max_no_bytes: 10_000_000,
+          max_no_files: 5,
+          compress_on_rotate: true
+        ]
+
+      _ ->
+        raise ArgumentError, "LOG_FILE must be an absolute path, not #{inspect(value)}"
+    end
+  end
 
   @doc """
   Parses `LOG_LEVEL` case-insensitively. Returns `:info` for `nil` or a blank value.
