@@ -21,3 +21,7 @@ run = "bash scripts/release-check.sh"
 [tasks.integration]
 description = "Generate and check the mit and agpl profiles, or the ones named, with PostgreSQL and Chrome"
 run = "bash scripts/integration.sh"
+# Not `beans list --ready`, which also hides in-progress and draft.
+[tasks.beans]
+description = "List the live backlog (everything not completed or scrapped)"
+run = "beans list --no-status completed --no-status scrapped"
