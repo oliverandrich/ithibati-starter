@@ -15,7 +15,7 @@ code with the same command if needed; only the latest code works.
 
 SQLite is the default database, in `tmp/__APP___dev.db` during development. Set
 `__APP_UPCASE___DATABASE=postgres` to use PostgreSQL instead. A release needs
-`DATABASE_PATH` or `DATABASE_URL`; see [Operations](docs/operations.md#choosing-a-database).
+`DATABASE_PATH` or `DATABASE_URL`; see [Operations](docs/operations.md#databases).
 
 Use `mise reset` to explicitly recreate the development database (deletes its data),
 `mise migrate` for pending development migrations, and `mise release` to build the

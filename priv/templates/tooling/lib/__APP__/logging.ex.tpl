@@ -37,8 +37,8 @@ defmodule __MODULE__.Logging do
 
   @doc """
   Returns the handler's output config for `LOG_FILE`. Without a value the handler writes to
-  stdout. A file rotates at 10 MB and keeps five compressed predecessors.
-  Raises `ArgumentError` for a relative path.
+  stdout. A file rotates at 10 MB and keeps five compressed predecessors. Creates its directory.
+  Raises `ArgumentError` for a relative path or one that cannot be written.
   """
   def handler_config(value) do
     case value |> to_string() |> String.trim() do
@@ -46,6 +46,8 @@ defmodule __MODULE__.Logging do
         []
 
       "/" <> _ = path ->
+        writable!(path)
+
         [
           file: String.to_charlist(path),
           max_no_bytes: 10_000_000,
@@ -55,6 +57,20 @@ defmodule __MODULE__.Logging do
 
       _ ->
         raise ArgumentError, "LOG_FILE must be an absolute path, not #{inspect(value)}"
+    end
+  end
+
+  # Logger only warns on stderr when it cannot open the file, and the release then logs nothing.
+  # The path comes from the operator's environment, not from a request.
+  # sobelow_skip ["Traversal.FileModule"]
+  defp writable!(path) do
+    with :ok <- File.mkdir_p(Path.dirname(path)),
+         {:ok, file} <- File.open(path, [:append]) do
+      File.close(file)
+    else
+      {:error, reason} ->
+        raise ArgumentError,
+              "LOG_FILE cannot be written: #{inspect(path)} (#{:file.format_error(reason)})"
     end
   end
 

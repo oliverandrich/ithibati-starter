@@ -19,7 +19,7 @@ release steps.
 - Generated behaviour and its tests live in `priv/templates/`. Installer steps live in `lib/`.
 - `__APP__` and `__MODULE__` are replaced everywhere in a `.tpl` file, including inside a
   module body. Write `__MODULE__.Name` where the module itself is meant.
-- One profile. `ACCOUNT_IDENTITY` names or addresses accounts at runtime. `MyApp.Identity`
+- One account profile. `ACCOUNT_IDENTITY` names or addresses accounts at runtime. `MyApp.Identity`
   answers it, and neither schema carries a literal `:format`.
 - `:operator_code` is the only claim mode. The generated application checks it at start.
 - Every change to a generated file gets a changelog entry that says what an existing

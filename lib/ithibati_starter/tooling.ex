@@ -69,7 +69,8 @@ defmodule IthibatiStarter.Tooling do
       "format --check-formatted",
       "credo --strict",
       "xref graph --label compile-connected --fail-above 0",
-      "sobelow --exit",
+      # --skip honours a `sobelow_skip` comment, which names one call and says why.
+      "sobelow --exit --skip",
       "ecto.create --quiet",
       "ecto.migrate --quiet",
       "ithibati.doctor",

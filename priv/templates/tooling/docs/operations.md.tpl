@@ -70,8 +70,9 @@ A proxy on the host reaches the container from the Docker bridge gateway, a prox
 container from their shared network. Both addresses are private, so neither needs
 `TRUSTED_PROXIES`.
 
-Docker collects stdout. A `LOG_FILE` belongs under `/data`, the only directory `nobody` can
-write.
+Docker collects stdout. A `LOG_FILE` belongs in the `/data` volume, so it outlives the
+container.
+
 Where the image is built, stored and run is up to you. The Elixir and OTP versions in the
 `Dockerfile` match `mise.toml`; update both together.
 
@@ -107,21 +108,22 @@ STARTTLS. Choose the mode before the first account.
 ## Proxy and HTTPS
 
 Behind a reverse proxy, `__MODULE__Web.ClientIp` reads the visitor's address from
-`X-Forwarded-For`. The header counts only on a connection from one of these:
+`X-Forwarded-For`. The header counts only on a connection from the loopback, a private address
+(`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7`) or `TRUSTED_PROXIES`. The
+visitor is the rightmost entry that is neither the loopback nor in `TRUSTED_PROXIES`.
 
-- A private address (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7`). The entry
-  that proxy appended is the visitor.
-- The loopback or `TRUSTED_PROXIES`. The visitor is the rightmost entry that is none of them,
-  so a chain of proxies works.
+Name a proxy with a public address, such as a CDN, in `TRUSTED_PROXIES`. An entry is an
+address or a range such as `172.20.0.0/16`. Without a believed header, every visitor shares
+one rate-limit budget.
 
-Name the proxies of a chain, and a proxy with a public address, in `TRUSTED_PROXIES`.
-An entry is an address or a range such as `172.20.0.0/16`. Without a believed header, every
-visitor shares one rate-limit budget.
+Run the application only behind an HTTP proxy that sets `X-Forwarded-For`. A TCP forwarder or
+NAT that hands on internet clients from a private address adds no header, so every client
+writes its own address and its own rate-limit budget. Kubernetes with SNAT, a TCP load
+balancer, rootless Podman and a port published without a proxy are such forwarders.
 
 Production redirects HTTP to HTTPS and sends HSTS. The proxy terminates TLS and sets
 `X-Forwarded-Proto`. That header is trusted from any client, so expose the application only
-through the proxy. A client that reaches it directly from a private network can also choose
-its address.
+through the proxy.
 
 ## Health
 
@@ -130,8 +132,8 @@ its address.
 ## Logs
 
 Stdout gets one JSON object per line with `time`, `severity`, `message` and `metadata`.
-With `LOG_FILE`, the lines go to that file instead. The release creates its directory. The
-file rotates at 10 MB and keeps five gzipped predecessors.
+With `LOG_FILE`, the lines go to that file instead. The release creates its directory. A path
+it cannot write stops the boot. The file rotates at 10 MB and keeps five gzipped predecessors.
 Metadata holds only `request_id`; `__MODULE__.Logging` lists the allowed keys. There is no
 access log. A failed request logs its stack trace, which may contain request data. A crash of the
 invitation page can log the invitation token.

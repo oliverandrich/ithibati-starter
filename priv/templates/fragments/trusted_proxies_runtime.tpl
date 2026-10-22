@@ -1,8 +1,8 @@
 
 # Which addresses may speak for somebody else. Behind a reverse proxy every request arrives from
 # the same socket, so the address a budget is counted against comes from the proxy's header, and
-# that header is only believed on a connection from here. The loopback is trusted already, and
-# a private address for one hop. Name chains and public proxies here. See docs/operations.md.
+# that header is only believed on a connection from here. The loopback and private addresses are
+# trusted already. Name proxies with public addresses here. See docs/operations.md.
 case "TRUSTED_PROXIES" |> System.get_env("") |> String.trim() do
   "" ->
     :ok

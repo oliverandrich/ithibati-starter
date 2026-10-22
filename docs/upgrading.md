@@ -16,24 +16,26 @@ license=mit
 ```
 
 Older files may lack `brand=` (before 0.7.0) or `license=` (before 0.9.0), or carry a
-`beans=` line (before 0.9.1).
+`beans=` line (before 0.10.0).
 
 ## Diff two fresh applications
 
-Generate the installed and the target version with the application's name and options:
+Generate the installed version `OLD` and the target version `NEW` with the application's
+name and options:
 
 ```sh
 mkdir old new
-(cd old && mix ithibati.new my_app --starter ithibati_starter@0.9.0)
-(cd new && mix ithibati.new my_app --starter ithibati_starter@NEXT)
+(cd old && mix igniter.new my_app --with phx.new --only dev --yes \
+  --install ithibati_starter@github:oliverandrich/ithibati-starter@vOLD)
+(cd new && mix igniter.new my_app --with phx.new --only dev --yes \
+  --install ithibati_starter@NEW)
 diff -ruN -x deps -x _build -x mix.lock -x .git old/my_app new/my_app > upgrade.diff
 ```
 
-Pass `--brand`, `--license`, `--source-url` and `--copyright` to each command that knows
-them: `--brand` exists from 0.7.0, the license options from 0.9.0. Versions before
-0.9.0 come from GitHub, for example
-`--starter ithibati_starter@github:oliverandrich/ithibati-starter@v0.8.1`. Before 0.9.1,
-add `--without-beans` if the old file says `beans=false`.
+Versions before 0.10.0 come from GitHub, later ones from Hex. Pass `--brand`, `--license`,
+`--source-url` and `--copyright` to each command that knows them: `--brand` exists from
+0.7.0, the license options from 0.9.0. Before 0.10.0, add `--without-beans` if the old file
+says `beans=false`.
 
 ## Apply the diff
 

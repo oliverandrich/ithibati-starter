@@ -12,41 +12,43 @@ a version to an existing application.
 
 ### Added
 
-- Oban runs `MyApp.AuthCleanup.Worker` every hour. It runs jobs only where the endpoint serves,
-  so `bin/setup-code` and `bin/grant-admin` schedule nothing. Add `{:oban, "~> 2.24"}`, the
-  migration `*_add_oban.exs`, the `Oban` block in `config/config.exs`, `testing: :manual` in
-  `config/test.exs`, `lib/my_app/jobs.ex`, `lib/my_app/auth_cleanup/worker.ex`, their test, and
-  `MyApp.Jobs` before the endpoint in `lib/my_app/application.ex`. Drop an external schedule for
-  the cleanup.
+- Oban runs `MyApp.AuthCleanup.Worker` every hour. Jobs run only where the endpoint serves, so
+  `bin/setup-code` and `bin/grant-admin` schedule nothing. Copy:
+  - `{:oban, "~> 2.24"}` in `mix.exs` and the migration `*_add_oban.exs`.
+  - The `Oban` block in `config/config.exs` and `config :my_app, Oban, testing: :manual` in
+    `config/test.exs`.
+  - `lib/my_app/jobs.ex`, `lib/my_app/auth_cleanup/worker.ex` and `test/my_app/jobs_test.exs`.
+  - `MyApp.Jobs` in `lib/my_app/application.ex`, after `Ecto.Migrator` and before the endpoint.
+  - The moduledocs of `lib/my_app/auth_cleanup.ex` and `lib/mix/tasks/auth.cleanup.ex`.
+
+  Drop an external schedule for the cleanup.
 - A `Dockerfile` and `.dockerignore` build the release into a Debian image with a `/data`
-  volume. `docs/operations.md` separates configuration from deployment. An existing
-  application may copy both files from a fresh one and set the `ARG` versions to its own
-  `mise.toml`.
+  volume. Copy both and set the `ARG` versions to your `mise.toml`.
 - A release that migrates on start refuses to start when its accounts contradict
-  `ACCOUNT_IDENTITY`. `MyApp.IdentityCheck` runs after `Ecto.Migrator` and is skipped with it.
-  Copy `lib/my_app/identity_check.ex`, its test, and the child after `Ecto.Migrator` in
-  `lib/my_app/application.ex`.
+  `ACCOUNT_IDENTITY`. Copy `lib/my_app/identity_check.ex`, its test, and the
+  `MyApp.IdentityCheck` child after `Ecto.Migrator` in `lib/my_app/application.ex`.
 - `LOG_FILE` writes the JSON log lines to a file instead of stdout. The file rotates at 10 MB
-  and keeps five compressed predecessors. Copy `MyApp.Logging.handler_config/1` into
-  `lib/my_app/logging.ex`, its tests, and the `config:` line of the logging block in
-  `config/runtime.exs`.
-- `MyAppWeb.CoreComponents.copy_field/1` shows a value with a copy button and its own status
-  line. The invitations page uses it, below the info box. Copy the component, its tests and
-  the three gettext entries, then replace the copy markup in `invitations_live.ex`.
-- `docs/interface.md` lists the colour roles and type tokens of `assets/css/app.css`. An
-  existing application may take the two sections as they are.
+  and keeps five compressed predecessors. A path that cannot be written stops the boot. Copy
+  `MyApp.Logging.handler_config/1`, its tests, and the `config:` line of the logging block in
+  `config/runtime.exs`. The `precommit` alias in `mix.exs` runs `sobelow --exit --skip`, which
+  honours the `sobelow_skip` comment in `logging.ex`.
+- `MyAppWeb.CoreComponents.copy_field/1` shows a value with a copy button and a status line.
+  The invitations page uses it below the info box. Copy the component, its tests and the
+  three gettext entries, then replace the copy markup in `invitations_live.ex`.
 
 ### Changed
 
-- `MyAppWeb.ClientIp` believes `X-Forwarded-For` from a private address for one hop, without
+- `MyAppWeb.ClientIp` believes `X-Forwarded-For` from private addresses without
   `TRUSTED_PROXIES`. A proxy on the Docker host or in a shared network needs no configuration.
-  `TRUSTED_PROXIES` remains for chains and public proxies. Copy `lib/my_app_web/client_ip.ex`
-  and its test, and drop entries for single private proxies.
+  Copy `lib/my_app_web/client_ip.ex`, its test and the comment of the `TRUSTED_PROXIES` block
+  in `config/runtime.exs`. Drop entries for private proxies.
 - The generated `AGENTS.md`, `CONTRIBUTING.md` and guides under `docs/` are rewritten short.
-  An existing application may take them as they are.
-- The starter targets the `phx_new` 1.8.16 and `igniter_new` 0.5.35 archives. `mix ithibati.new`
-  names them when one is missing. A Phoenix 1.8.16 scaffold requires `{:phoenix, "~> 1.8.16"}`
-  and Tailwind 4.3.3; the installer's changes are the same.
+  `docs/operations.md` separates configuration from deployment. `docs/interface.md` lists the
+  colour roles and type tokens. An existing application may take them as they are.
+- The starter targets the `phx_new` 1.8.16 and `igniter_new` 0.5.35 archives.
+  `mix ithibati.new` names them when one is missing. The generated changes are the same on
+  Phoenix 1.8.16. An existing application may raise `{:phoenix, "~> 1.8.16"}` and Tailwind to
+  4.3.3.
 
 ### Removed
 

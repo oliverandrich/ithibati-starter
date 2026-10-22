@@ -4,6 +4,10 @@ The [README](../README.md) shows how to create an application. This page covers 
 options and what the generated application contains. Examples use an application
 named `my_app`, module `MyApp`.
 
+Links to Authentication, Operations and Interface lead to the generated application's guides.
+They appear under "Generated application" on HexDocs. In the repository they are templates
+under `priv/templates/*/docs/`.
+
 ## Options
 
 ```sh
@@ -31,8 +35,8 @@ mix ithibati.new my_app --starter ithibati_starter@path:/absolute/path/to/ithiba
 ```
 
 A local checkout needs the archive from the same checkout: run `mix archive.build` and
-`mix archive.install` in its `installer/` directory. Versions before 0.9.0 are only on GitHub. The generated `mix.lock` records the starter
-version.
+`mix archive.install` in its `installer/` directory. Versions before 0.10.0 are only on
+GitHub. The generated `mix.lock` records the starter version.
 
 The archive wraps Igniter. This command is equivalent:
 

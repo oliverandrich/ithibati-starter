@@ -212,22 +212,20 @@ for profile in "${profiles[@]}"; do
         echo "Release did not migrate its SQLite database on start" >&2
         exit 1
       fi
-      start_server
-      check_jobs
-      "$release/bin/migrate"
-      stop_server
-
       # LOG_FILE moves the lines off stdout; the handler creates the missing directory.
       export LOG_FILE="$sqlite_dir/log/$app.log"
       start_server
+      check_jobs
+      "$release/bin/migrate"
       stop_server
       if ! grep -qF '"severity":' "$LOG_FILE" || grep -qF '"severity":' "$target/release.log"; then
         echo "LOG_FILE did not move the log lines into $LOG_FILE" >&2
         exit 1
       fi
     )
-    # The image build takes minutes, so CI runs it before a release and on request only.
-    if [[ "${INTEGRATION_IMAGE:-false}" == true ]]; then
+    # The image build takes minutes, so CI runs it before a release and on request only. The
+    # profiles differ only in their license, so one image covers both.
+    if [[ "${INTEGRATION_IMAGE:-false}" == true && "$profile" == "${profiles[${#profiles[@]} - 1]}" ]]; then
       image="$app:integration-$$"
       container="${app}_$$"
       image_port=$((PORT + 1))

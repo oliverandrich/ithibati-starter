@@ -558,6 +558,28 @@ defmodule IthibatiStarterTest do
     assert after_jobs =~ "SampleWeb.Endpoint"
   end
 
+  # A renamed heading leaves its links pointing nowhere, and nothing else notices.
+  test "every link to a heading in a generated guide finds that heading" do
+    files = installed_files()
+
+    for {path, text} <- files,
+        String.ends_with?(path, ".md"),
+        [_, target, anchor] <- Regex.scan(~r/\]\(((?:docs\/)?[a-z_]+\.md)#([a-z0-9-]+)\)/, text) do
+      guide = Path.join(Path.dirname(path), target) |> Path.relative_to(".")
+      headings = Regex.scan(~r/^#+ (.+)$/m, files[guide] || "", capture: :all_but_first)
+
+      slugs =
+        for [heading] <- headings,
+            do:
+              heading
+              |> String.downcase()
+              |> String.replace(~r/[^a-z0-9 -]/, "")
+              |> String.replace(" ", "-")
+
+      assert anchor in slugs, "#{path} links #{target}##{anchor}, which has no such heading"
+    end
+  end
+
   test "every application ships the mailer, and the Phoenix one is adopted rather than replaced" do
     original = project()
     result = install(original)

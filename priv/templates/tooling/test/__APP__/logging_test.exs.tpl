@@ -68,15 +68,28 @@ defmodule __MODULE__.LoggingTest do
     assert RuntimeConfig.read(:prod, %{})[:logger][:default_handler][:config] == []
   end
 
-  test "LOG_FILE moves the lines into a file that rotates" do
-    config = RuntimeConfig.read(:prod, %{"LOG_FILE" => "/var/log/app/app.log"})
+  @tag :tmp_dir
+  test "LOG_FILE moves the lines into a file that rotates", %{tmp_dir: dir} do
+    path = Path.join([dir, "log", "app.log"])
+    config = RuntimeConfig.read(:prod, %{"LOG_FILE" => path})
 
     assert config[:logger][:default_handler][:config] == [
-             file: ~c"/var/log/app/app.log",
+             file: String.to_charlist(path),
              max_no_bytes: 10_000_000,
              max_no_files: 5,
              compress_on_rotate: true
            ]
+  end
+
+  # Logger only warns on stderr when it cannot open the file, and the release then logs nothing.
+  @tag :tmp_dir
+  test "a LOG_FILE that cannot be written stops the boot", %{tmp_dir: dir} do
+    blocker = Path.join(dir, "not-a-directory")
+    File.write!(blocker, "")
+
+    assert_raise ArgumentError, ~r/LOG_FILE cannot be written/, fn ->
+      Logging.handler_config(Path.join(blocker, "app.log"))
+    end
   end
 
   # A relative path would depend on the directory the release starts in.

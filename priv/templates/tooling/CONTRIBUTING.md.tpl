@@ -69,4 +69,4 @@ Use Lucide components, for example
 - [Operations](docs/operations.md): configuration, releases, migrations.
 - [Authentication](docs/authentication.md): accounts, invitations, limits.
 - [Localization](docs/localization.md): languages and [translations](docs/localization.md#translations).
-- [Interface](docs/interface.md): layouts and navigation.
+- [Interface](docs/interface.md): layouts, navigation, colours and type.

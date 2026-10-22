@@ -13,13 +13,15 @@ defmodule __MODULE__Web.ClientIp do
 
   So it is believed on one condition, which is the connection it arrived on. The loopback is
   trusted because that is where a proxy on the same host speaks from. `:trusted_proxies` names
-  any others, as addresses `config/runtime.exs` has already parsed and checked. From these the
-  header is walked from the right past every one of them.
+  any others, as addresses `config/runtime.exs` has already parsed and checked. A peer in a
+  private range is believed without being named: a proxy on the host reaches a container from
+  the bridge gateway, and one in a container from a shared network.
 
-  A peer in a private range is believed for one hop without being named: a proxy on the host
-  reaches a container from the bridge gateway, and one in a container from a shared network.
-  Only the entry that proxy appended counts. Walking further would pass a visitor with a private
-  address of their own and land on whatever they wrote before it.
+  From any of these the header is walked from the right past the loopback and the named
+  proxies, never past a private address. A visitor on a private network stays who they are, and
+  an entry they wrote further left is never reached. A private peer that only forwards TCP is
+  the exception: it appends nothing, so its clients write the entry themselves. See
+  docs/operations.md.
 
   The header is read here rather than by a library. The one for this reads three further headers
   by default, which a proxy does not write and a visitor therefore can; and its notion of a
@@ -52,11 +54,9 @@ defmodule __MODULE__Web.ClientIp do
     peer = unmapped(conn.remote_ip)
 
     visitor =
-      cond do
-        trusted?(peer, proxies) -> walked(conn, proxies) || peer
-        private?(peer) -> conn |> entries() |> List.last() || peer
-        true -> peer
-      end
+      if trusted?(peer, proxies) or private?(peer),
+        do: forwarded(conn, proxies) || peer,
+        else: peer
 
     # The socket is kept as well. `remote_ip` answers who the request is from, which behind a
     # proxy is the visitor, and that is what a log line and every budget should name. Which
@@ -76,19 +76,13 @@ defmodule __MODULE__Web.ClientIp do
   def bucket({_, _, _, _} = address), do: address
   def bucket({a, b, c, d, _, _, _, _}), do: {a, b, c, d, 0, 0, 0, 0}
 
-  defp walked(conn, proxies) do
-    conn
-    |> entries()
-    |> Enum.reverse()
-    |> Enum.find(&(&1 && not trusted?(&1, proxies)))
-  end
-
-  # Every entry in order, `nil` for one that is not an address.
-  defp entries(conn) do
+  defp forwarded(conn, proxies) do
     conn
     |> Plug.Conn.get_req_header(@header)
     |> Enum.flat_map(&String.split(&1, ","))
     |> Enum.map(&address/1)
+    |> Enum.reverse()
+    |> Enum.find(&(&1 && not trusted?(&1, proxies)))
   end
 
   # Bytes rather than `to_charlist/1`, which raises on a header that is not valid UTF-8. A

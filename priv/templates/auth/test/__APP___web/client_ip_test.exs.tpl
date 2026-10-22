@@ -38,7 +38,7 @@ defmodule __MODULE__Web.ClientIpTest do
     assert asked({64_768, 0, 0, 0, 1, 2, 3, 4}, @forwarded) == {203, 0, 113, 7}
   end
 
-  # Public addresses, because a private peer is believed for one hop without being named.
+  # Public addresses, because a private peer is believed without being named.
   test "an address outside every trusted range is not believed" do
     trusting([{{198, 51, 100, 0}, 24}, {{0x2001, 0xDB8, 1, 0, 0, 0, 0, 0}, 48}])
 
@@ -58,16 +58,25 @@ defmodule __MODULE__Web.ClientIpTest do
     assert asked({0, 0, 0, 0, 0, 65_535, 44_049, 1}, @forwarded) == {203, 0, 113, 7}
   end
 
-  # One hop: the entry the proxy appended. Walking further would pass a private visitor and
-  # land on whatever the visitor wrote before it.
-  test "behind a private proxy only the entry it appended counts" do
+  # The walk stops at a private address. Passing it would land on whatever the visitor wrote
+  # before it.
+  test "behind a private proxy a private visitor stays the visitor" do
     forged = [{"x-forwarded-for", "198.51.100.4, 192.168.1.50"}]
 
     assert asked({172, 17, 0, 1}, forged) == {192, 168, 1, 50}
   end
 
+  # Cloudflare in front of a proxy on the Docker host: the host proxy arrives from the bridge
+  # gateway, and the rightmost entry is the Cloudflare edge it was given.
+  test "behind a private proxy, configured proxies in the chain are walked past" do
+    trusting([{{104, 16, 0, 0}, 13}])
+    chain = [{"x-forwarded-for", "203.0.113.7, 104.16.0.5"}]
+
+    assert asked({172, 17, 0, 1}, chain) == {203, 0, 113, 7}
+  end
+
   test "a private proxy with a header nobody can read leaves the address alone" do
-    assert asked({172, 17, 0, 1}, [{"x-forwarded-for", "198.51.100.4, not-an-address"}]) == {172, 17, 0, 1}
+    assert asked({172, 17, 0, 1}, [{"x-forwarded-for", "not-an-address"}]) == {172, 17, 0, 1}
     assert asked({172, 17, 0, 1}, []) == {172, 17, 0, 1}
   end
 
