@@ -1,7 +1,7 @@
 defmodule IthibatiNewTest do
   use ExUnit.Case, async: true
 
-  @pinned_starter "ithibati_starter@0.9.0"
+  @pinned_starter "ithibati_starter@0.10.0"
 
   test "default command supplies Phoenix, the starter and dev-only installation" do
     assert IthibatiNew.arguments(["my_app"]) == [
@@ -17,7 +17,7 @@ defmodule IthibatiNewTest do
   end
 
   test "archive version identifies the pinned default" do
-    assert IthibatiNew.MixProject.project()[:version] == "0.9.0"
+    assert IthibatiNew.MixProject.project()[:version] == "0.10.0"
   end
 
   # Hex refuses a package without these fields.

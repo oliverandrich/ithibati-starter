@@ -30,7 +30,7 @@ application. PostgreSQL 18 is needed for `mise run check`.
 ```sh
 mix archive.install hex phx_new 1.8.16
 mix archive.install hex igniter_new 0.5.35
-mix archive.install hex ithibati_new 0.9.0
+mix archive.install hex ithibati_new 0.10.0
 
 mix ithibati.new my_app
 cd my_app

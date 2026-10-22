@@ -21,7 +21,7 @@ mix ithibati.new PATH [--brand COLOUR] [--license mit|agpl] [--copyright NAME] \
 | `--license` | `mit` (default) or `agpl`, meaning `AGPL-3.0-or-later`. Writes `LICENSE` and the README's license section. |
 | `--source-url` | Required with `agpl`. Every layout links to it, as AGPL §13 requires. |
 | `--copyright` | Copyright holder. Defaults to git's `user.name`. |
-| `--starter` | Starter source for Igniter, `ithibati_starter@0.9.0` by default. |
+| `--starter` | Starter source for Igniter, `ithibati_starter@0.10.0` by default. |
 | `--no-yes` | Ask before each installation step. |
 
 Every source file gets an `SPDX-License-Identifier` line, and a generated test checks new
@@ -41,7 +41,7 @@ GitHub. The generated `mix.lock` records the starter version.
 The archive wraps Igniter. This command is equivalent:
 
 ```sh
-mix igniter.new my_app --with phx.new --install ithibati_starter@0.9.0 --only dev
+mix igniter.new my_app --with phx.new --install ithibati_starter@0.10.0 --only dev
 ```
 
 ## Accounts

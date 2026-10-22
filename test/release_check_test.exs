@@ -3,7 +3,7 @@ defmodule ReleaseCheckTest do
 
   @script Path.expand("../scripts/release-check.sh", __DIR__)
   @notes Path.expand("../scripts/release-notes.sh", __DIR__)
-  @version "0.9.0"
+  @version "0.10.0"
   @tag_name "v#{@version}"
 
   # A repository with the files the check reads, committed, tagged and pushed to a bare origin.

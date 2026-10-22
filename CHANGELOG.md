@@ -10,6 +10,11 @@ a version to an existing application.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-22
+
+The first version on Hex. Requires Ithibati 0.11.0. Ithibati's schema version stays at 5. One
+application migration adds Oban's tables.
+
 ### Added
 
 - Oban runs `MyApp.AuthCleanup.Worker` every hour. Jobs run only where the endpoint serves, so
@@ -59,7 +64,9 @@ a version to an existing application.
 - `NOTICE` and `THIRD_PARTY_LICENSES.md`. The repository's Phoenix fixtures are unmodified
   `phx.new` output, and the vendored topbar keeps its own license header.
 
-## [0.9.0] - 2026-10-20
+## [0.9.0] - 2026-10-20 [YANKED]
+
+Withdrawn from Hex. Use 0.10.0.
 
 Requires Ithibati 0.11.0. Ithibati's schema version stays at 5. One application migration
 adds the administrator flag.
@@ -405,7 +412,8 @@ First tagged release.
 - Generation accepts Igniter's prompts by default.
 - DaisyUI and Heroicons are unlocked from `mix.lock` after their removal.
 
-[Unreleased]: https://github.com/oliverandrich/ithibati-starter/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/oliverandrich/ithibati-starter/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/oliverandrich/ithibati-starter/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/oliverandrich/ithibati-starter/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/oliverandrich/ithibati-starter/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/oliverandrich/ithibati-starter/compare/v0.7.0...v0.8.0

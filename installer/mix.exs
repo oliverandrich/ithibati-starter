@@ -4,7 +4,7 @@ defmodule IthibatiNew.MixProject do
   def project do
     [
       app: :ithibati_new,
-      version: "0.9.0",
+      version: "0.10.0",
       elixir: "~> 1.20",
       deps: [],
       description: "Mix archive that creates a Phoenix application with Ithibati Starter",

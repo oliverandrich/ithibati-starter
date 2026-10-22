@@ -9,7 +9,7 @@ The [changelog](../CHANGELOG.md) lists what each version changes.
 `.ithibati-starter` records it:
 
 ```text
-0.9.0
+0.10.0
 auth=true
 brand=violet
 license=mit
