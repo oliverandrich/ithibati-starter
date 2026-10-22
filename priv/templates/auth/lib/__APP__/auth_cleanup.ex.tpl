@@ -1,5 +1,5 @@
 defmodule __MODULE__.AuthCleanup do
-  @moduledoc "Explicit auth maintenance. The application chooses when to schedule it."
+  @moduledoc "Deletes expired auth records. `__MODULE__.AuthCleanup.Worker` runs it hourly."
   alias Ithibati.Identity.Challenges
   alias Ithibati.Identity.Invitations
   alias Ithibati.Web.Gate

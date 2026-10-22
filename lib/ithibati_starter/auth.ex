@@ -21,6 +21,7 @@ defmodule IthibatiStarter.Auth do
     )
     |> Deps.add_dep({:swoosh, "~> 1.28"}, yes?: true)
     |> Deps.add_dep({:gen_smtp, "~> 1.3"}, yes?: true)
+    |> Deps.add_dep({:oban, "~> 2.24"}, yes?: true)
     |> Files.copy_tree("auth", b)
     |> Files.replace("lib/#{b.app}/application.ex", "    children = [", """
         # Before anything binds a port. An instance whose claim is not protected must not
@@ -39,6 +40,18 @@ defmodule IthibatiStarter.Auth do
             {#{b.module}.IdentityCheck, skip: !Application.get_env(:#{b.app}, :migrate_on_start, false)},
       """
     )
+    # After the migrator, which creates Oban's tables, and before the endpoint.
+    |> Files.replace(
+      "lib/#{b.app}/application.ex",
+      "      # Start to serve requests, typically the last entry\n",
+      "      #{b.module}.Jobs,\n      # Start to serve requests, typically the last entry\n"
+    )
+    |> Files.replace(
+      "config/config.exs",
+      "# Import environment specific config.",
+      Files.template("fragments/oban_config", b) <> "# Import environment specific config."
+    )
+    |> Config.configure("test.exs", app, [Oban, :testing], :manual)
     |> Config.configure("config.exs", :phoenix, [:filter_parameters], [
       "password",
       "secret",

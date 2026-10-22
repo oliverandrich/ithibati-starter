@@ -12,6 +12,12 @@ a version to an existing application.
 
 ### Added
 
+- Oban runs `MyApp.AuthCleanup.Worker` every hour. It runs jobs only where the endpoint serves,
+  so `bin/setup-code` and `bin/grant-admin` schedule nothing. Add `{:oban, "~> 2.24"}`, the
+  migration `*_add_oban.exs`, the `Oban` block in `config/config.exs`, `testing: :manual` in
+  `config/test.exs`, `lib/my_app/jobs.ex`, `lib/my_app/auth_cleanup/worker.ex`, their test, and
+  `MyApp.Jobs` before the endpoint in `lib/my_app/application.ex`. Drop an external schedule for
+  the cleanup.
 - A `Dockerfile` and `.dockerignore` build the release into a Debian image with a `/data`
   volume. `docs/operations.md` separates configuration from deployment. An existing
   application may copy both files from a fresh one and set the `ARG` versions to its own

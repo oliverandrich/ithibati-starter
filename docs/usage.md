@@ -123,4 +123,4 @@ delegates to `MyApp.Repo.SQLite` or `MyApp.Repo.Postgres`. Migrations must work 
 - The browser's `Accept-Language` picks English or German. There is no language switch.
 - Rate limits live in memory, per node.
 - `/health` does not check the database.
-- Auth cleanup does not run on its own. [Operations](operations.md) has the command.
+- Oban runs the auth cleanup every hour, on the application's database.

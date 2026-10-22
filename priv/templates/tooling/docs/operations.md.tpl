@@ -149,16 +149,23 @@ bin/grant-admin USERNAME
 
 In email mode, pass the address. The command exits with 1 when no account matches.
 
-## Auth cleanup
+## Background jobs
 
-Run this daily against the running release:
+Oban runs jobs on the application's database, in the tables of its own migration. The
+`maintenance` queue runs `__MODULE__.AuthCleanup.Worker` at the start of every hour. It removes
+expired sessions, abandoned challenges and expired invitations. Completed jobs are pruned
+after a day.
+
+Jobs run only where the endpoint serves: in `bin/server` and `mix phx.server`. Commands that
+start the application without it, such as `bin/setup-code` and `bin/grant-admin`, start Oban
+without queues and plugins. With several nodes on PostgreSQL, one of them schedules.
+
+Run the cleanup by hand against the running release, or with `mix auth.cleanup` in
+development. Both print the counts:
 
 ```sh
-bin/__APP__ rpc '__MODULE__.AuthCleanup.run()'
+bin/__APP__ rpc 'IO.inspect(__MODULE__.AuthCleanup.run())'
 ```
-
-It removes expired sessions, abandoned challenges and expired invitations, and reports the
-counts. In development, run `mix auth.cleanup`. Nothing schedules it.
 
 Rate limits live in memory, per node, and reset on restart. [Authentication](authentication.md)
 lists them.

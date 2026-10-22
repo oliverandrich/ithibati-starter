@@ -537,6 +537,27 @@ defmodule IthibatiStarterTest do
     assert Map.has_key?(files, "test/sample/identity_check_test.exs")
   end
 
+  # Expired sessions, challenges and invitations pile up unless something deletes them.
+  test "Oban runs the auth cleanup every hour, after the migrator and before the endpoint" do
+    files = installed_files()
+
+    assert files["mix.exs"] =~ ~s({:oban, "~> 2.24"})
+    assert files["config/config.exs"] =~ ~s({"0 * * * *", Sample.AuthCleanup.Worker})
+    assert files["config/test.exs"] =~ "testing: :manual"
+    assert files["lib/sample/jobs.ex"] =~ "Phoenix.Endpoint.server?(:sample, SampleWeb.Endpoint)"
+    assert files["lib/sample/auth_cleanup/worker.ex"] =~ "use Oban.Worker"
+    assert Map.has_key?(files, "test/sample/jobs_test.exs")
+
+    assert [migration] =
+             Enum.filter(Map.keys(files), &(&1 =~ ~r{priv/repo/migrations/\d+_add_oban\.exs}))
+
+    assert files[migration] =~ "Oban.Migration.up(version: 14)"
+
+    [_, after_check] = String.split(files["lib/sample/application.ex"], "{Sample.IdentityCheck,")
+    [_, after_jobs] = String.split(after_check, "Sample.Jobs,")
+    assert after_jobs =~ "SampleWeb.Endpoint"
+  end
+
   test "every application ships the mailer, and the Phoenix one is adopted rather than replaced" do
     original = project()
     result = install(original)

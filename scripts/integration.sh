@@ -127,6 +127,17 @@ for profile in "${profiles[@]}"; do
           exit 1
         fi
       }
+      # The server schedules the cleanup. A command that starts the application without the
+      # endpoint, such as bin/setup-code, runs neither queues nor a second scheduler.
+      check_jobs() {
+        served=$("$release/bin/$app" rpc 'IO.puts(Enum.any?(Oban.config().plugins, &match?({Oban.Cron, _}, &1)))' | tail -1)
+        idle=$(env -u PHX_SERVER "$release/bin/$app" eval \
+          "{:ok, _} = Application.ensure_all_started(:$app); IO.puts(Oban.config().plugins == [] and Oban.config().queues == [])" | tail -1)
+        if [[ "$served" != true || "$idle" != true ]]; then
+          echo "Oban scheduled on the server: $served; idle in an eval: $idle" >&2
+          exit 1
+        fi
+      }
       migrated() {
         [[ "$(psql -tAc "select to_regclass('public.schema_migrations') is not null")" == t ]]
       }
@@ -162,6 +173,7 @@ for profile in "${profiles[@]}"; do
         exit 1
       fi
       start_server
+      check_jobs
       # An AGPL application links its source from the sign-in page; an MIT one names none.
       login=$(curl --fail --silent --show-error --location -H 'x-forwarded-proto: https' "http://localhost:$PORT/login")
       if [[ "$profile" == agpl ]] && ! grep -qF "href=\"$source_url\"" <<<"$login"; then
@@ -201,6 +213,7 @@ for profile in "${profiles[@]}"; do
         exit 1
       fi
       start_server
+      check_jobs
       "$release/bin/migrate"
       stop_server
 

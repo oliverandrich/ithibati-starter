@@ -19,7 +19,7 @@ The generated code is yours; the starter is not a runtime dependency.
 | Mail | Swoosh with a development mailbox and SMTP. |
 | Checks | `mise run check`: format, Credo, Sobelow, gitleaks, tests on both databases, Playwright browser tests. |
 | CI | GitHub Actions, Dependabot, a dependency audit. |
-| Operations | Releases that migrate on start, a `Dockerfile`, `/health`, JSON logs, auth cleanup. |
+| Operations | Releases that migrate on start, a `Dockerfile`, `/health`, JSON logs, hourly auth cleanup with Oban. |
 | License | `--license mit` or `agpl`. |
 
 ## Get started

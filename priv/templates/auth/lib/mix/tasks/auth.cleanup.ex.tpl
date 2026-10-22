@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Auth.Cleanup do
-  @moduledoc "Run explicitly or from an application-owned scheduler; reports deletion counts."
-  @shortdoc "Deletes expired auth records; starts no scheduler"
+  @moduledoc "Runs the auth cleanup once and reports the counts. Oban also runs it hourly."
+  @shortdoc "Deletes expired auth records once"
   use Mix.Task
 
   @impl true

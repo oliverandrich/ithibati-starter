@@ -40,7 +40,8 @@ Keep each fact in one place and link to it.
 - Runtime settings go in `config/runtime.exs` and environment variables. Data lives
   outside the release, at configurable absolute paths.
 - Hosting is the operator's. The `Dockerfile` builds an image; no Compose stacks,
-  deployment scripts, registries, backups or schedulers unless asked.
+  deployment scripts, registries, backups or host schedulers unless asked. Recurring work in
+  the application runs in Oban.
 - Keep the mise tasks `setup`, `dev`, `debugserver`, `reset`, `migrate`, `setup-code` and
   `release`.
 

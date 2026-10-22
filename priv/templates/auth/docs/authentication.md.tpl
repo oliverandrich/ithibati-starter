@@ -68,4 +68,4 @@ A refusal answers HTTP 429 with `Retry-After`. An invitation attempt costs one e
 form is invalid. One IPv6 `/64` counts as one visitor. The counters live in memory on each
 node, hold up to 10,000 keys and reset on restart. A cluster needs a shared limiter.
 
-[Operations](operations.md) covers the proxy setup, auth cleanup and `TRUSTED_PROXIES`.
+[Operations](operations.md) covers the proxy setup, the hourly auth cleanup and `TRUSTED_PROXIES`.
