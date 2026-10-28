@@ -77,7 +77,7 @@ defmodule IthibatiStarter.MixProject do
       {:ex_doc, "~> 0.40", only: :dev, runtime: false},
       {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
       {:ex_slop, "~> 0.4.4", only: [:dev, :test], runtime: false},
-      {:jump_credo_checks, "~> 0.5.0", only: [:dev, :test], runtime: false},
+      {:jump_credo_checks, "~> 0.6.0", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1.5", only: [:dev, :test], runtime: false}
     ]
   end
